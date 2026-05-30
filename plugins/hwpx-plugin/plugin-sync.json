@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "hwpx.plugin-sync.v1",
+  "plugin": "hwpx-plugin",
+  "sourceRoot": ".",
+  "files": [
+    {
+      "source": "SKILL.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/SKILL.md",
+      "sha256": "5fdfb4ec588f6e87306c4e63ce23fc2622654c92617289e3aec96cd5f43393f4"
+    },
+    {
+      "source": "README.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/README.md",
+      "sha256": "528c275fb5abf11ddb7778ae12778b370456f60dd3294496fe0f6de11aca1b48"
+    },
+    {
+      "source": "references/api.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/references/api.md",
+      "sha256": "5ea98cdfe53302684e36cb269e5d99eb6f3db6c604fbf676027da51b80c52b2f"
+    },
+    {
+      "source": "examples/01_create_and_save.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/01_create_and_save.py",
+      "sha256": "09dde8afcdaa4b794097fe7996e30b4e4cf81bae1131b89df4640b438f620b58"
+    },
+    {
+      "source": "examples/02_extract_and_inspect.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/02_extract_and_inspect.py",
+      "sha256": "fce6c0cd8b0ee786ac7f0c489758cf9df9f857420107f34598614d8b43a3d118"
+    },
+    {
+      "source": "examples/03_template_replace.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/03_template_replace.py",
+      "sha256": "41a76a3ac503e275b6022bd4981f44aec526d4265a1ee6caa5606ccbbcf59678"
+    },
+    {
+      "source": "examples/04_create_proposal.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/04_create_proposal.py",
+      "sha256": "1b587ed15cce2a2a17ee484bc92fdd90d4d421d9837fa4ee4180d81ffa794935"
+    },
+    {
+      "source": "examples/05_mcp_quality_pipeline.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/05_mcp_quality_pipeline.md",
+      "sha256": "b381118a01a21157fe3fae9c7cea0cdd1c04cc762ca5fff2971efe3378916f0b"
+    },
+    {
+      "source": "examples/06_create_from_document_plan.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/06_create_from_document_plan.py",
+      "sha256": "6d18a862c74b32f23c1b800b8d4f4b34b2d061a75a9f61cf3fbf1fa91c8e6a4e"
+    },
+    {
+      "source": "examples/06_mcp_document_plan.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/06_mcp_document_plan.md",
+      "sha256": "d743ce385a208e0debc9cbd6cd54f34dc4198e289841cc4182764f5b56938a7e"
+    },
+    {
+      "source": "examples/07_create_operating_plan.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/07_create_operating_plan.py",
+      "sha256": "483d72f93821e31ab7227cdb9f9ab722ad97f704526a9afc3c947b66ecb06e4d"
+    },
+    {
+      "source": "examples/07_mcp_operating_plan.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/07_mcp_operating_plan.md",
+      "sha256": "6af8869d8478b7079051cd22bb54038b747518736a209d826ec2dc3e7cb045d3"
+    },
+    {
+      "source": "examples/08_template_formfit.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/08_template_formfit.py",
+      "sha256": "8156b4ed67ce4f147b1c95ec6eca667320af561602d14dd158c1de3f824f9ca7"
+    },
+    {
+      "source": "examples/08_mcp_template_formfit.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/08_mcp_template_formfit.md",
+      "sha256": "71ff33bdb7b8b8a6c2c0fb4070be6c2994897929c6b081f99722db1b09c460a8"
+    },
+    {
+      "source": "examples/09_visual_review_loop.md",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/examples/09_visual_review_loop.md",
+      "sha256": "0e71b265c72756607aec0b8063bc737c9f5bbe821e4ff54c36007d6932d6b324"
+    },
+    {
+      "source": "scripts/fix_namespaces.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
+      "sha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e"
+    },
+    {
+      "source": "scripts/quickcheck.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
+      "sha256": "0bf4a5727eac575ab997e4e1d0e720f98d572a522f70fd8f19a537e2be45378d"
+    },
+    {
+      "source": "scripts/text_extract.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/scripts/text_extract.py",
+      "sha256": "950f05cace6a854990e928b174dfc375a6e272eacb50e03bb14f3a1924232ca8"
+    },
+    {
+      "source": "scripts/visual_review.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/scripts/visual_review.py",
+      "sha256": "2fa1fc11442100058c1603843af7a11c4102f4dbdf6636306f94d44e0da9ef3b"
+    },
+    {
+      "source": "scripts/zip_replace_all.py",
+      "destination": "plugins/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
+      "sha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784"
+    }
+  ]
+}

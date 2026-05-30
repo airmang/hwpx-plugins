@@ -11,12 +11,12 @@
     {
       "source": "README.md",
       "destination": "plugins/hwpx-plugin/skills/hwpx/README.md",
-      "sha256": "528c275fb5abf11ddb7778ae12778b370456f60dd3294496fe0f6de11aca1b48"
+      "sha256": "4f64a789f239a44335324a433976c339832efc0fdf1ce010d84b0ec5876fb9c3"
     },
     {
       "source": "references/api.md",
       "destination": "plugins/hwpx-plugin/skills/hwpx/references/api.md",
-      "sha256": "5ea98cdfe53302684e36cb269e5d99eb6f3db6c604fbf676027da51b80c52b2f"
+      "sha256": "4ac1dd892a991b73ae1b3da680e2e24c785654a47389a309cda33b2e7a4a7057"
     },
     {
       "source": "examples/01_create_and_save.py",

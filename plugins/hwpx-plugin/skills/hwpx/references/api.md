@@ -569,6 +569,19 @@ Evidence schema:
 }
 ```
 
+## Codex plugin bundle
+
+`plugins/hwpx-plugin` is the single-plugin distribution surface for this skill stack.
+It contains the `hwpx` skill assets and an MCP config for `hwpx-mcp-server`.
+
+For development checkouts, the launcher resolves:
+
+1. `HWPX_MCP_SERVER_REPO` or `../hwpx-mcp-server`
+2. `PYTHON_HWPX_REPO` or `../python-hwpx`
+3. `uvx --from hwpx-mcp-server==2.2.6 hwpx-mcp-server` fallback
+
+Run `python3 scripts/sync_hwpx_plugin.py` before plugin validation whenever `SKILL.md`, `references`, `examples`, or skill scripts change.
+
 ## Proposal preset
 
 `python-hwpx`의 proposal preset은 agent-first 제안서/기획안 생성을 위한 고수준 API다.

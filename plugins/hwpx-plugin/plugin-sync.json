@@ -11,7 +11,7 @@
     {
       "source": "README.md",
       "destination": "plugins/hwpx-plugin/skills/hwpx/README.md",
-      "sha256": "4f64a789f239a44335324a433976c339832efc0fdf1ce010d84b0ec5876fb9c3"
+      "sha256": "fd85ae6b19710be756bc146dfa3382f2b3088196f27ec9798ecc31d4e59080ec"
     },
     {
       "source": "references/api.md",

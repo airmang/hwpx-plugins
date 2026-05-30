@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SKILL_REPO="$(cd "$PLUGIN_DIR/../.." && pwd)"
+DEFAULT_STACK_ROOT="$(cd "$SKILL_REPO/.." && pwd)"
+
+MCP_REPO="${HWPX_MCP_SERVER_REPO:-$DEFAULT_STACK_ROOT/hwpx-mcp-server}"
+PYTHON_HWPX_REPO="${PYTHON_HWPX_REPO:-$DEFAULT_STACK_ROOT/python-hwpx}"
+
+if command -v uv >/dev/null 2>&1 && [ -f "$MCP_REPO/pyproject.toml" ] && [ -f "$PYTHON_HWPX_REPO/pyproject.toml" ]; then
+  exec uv run --project "$MCP_REPO" --with-editable "$PYTHON_HWPX_REPO" --with-editable "$MCP_REPO" hwpx-mcp-server
+fi
+
+if command -v uvx >/dev/null 2>&1; then
+  exec uvx --from "hwpx-mcp-server==2.2.6" hwpx-mcp-server
+fi
+
+echo "hwpx-plugin requires uv or uvx. Install uv, or set HWPX_MCP_SERVER_REPO and PYTHON_HWPX_REPO to local checkouts." >&2
+exit 127

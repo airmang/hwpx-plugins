@@ -4,10 +4,7 @@
       "command": "./scripts/hwpx-mcp-server",
       "args": [],
       "cwd": ".",
-      "env": {
-        "HWPX_MCP_ADVANCED": "0",
-        "HWPX_MCP_AUTOBACKUP": "1"
-      }
+      "env": { "HWPX_MCP_ADVANCED": "0", "HWPX_MCP_AUTOBACKUP": "1" }
     }
   }
 }

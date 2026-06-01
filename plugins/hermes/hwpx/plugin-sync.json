@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "hwpx.plugin-sync.v2",
+  "plugin": "hwpx-plugin",
+  "host": "hermes",
+  "files": [
+    {
+      "source": "SKILL.md",
+      "sourceSha256": "5fdfb4ec588f6e87306c4e63ce23fc2622654c92617289e3aec96cd5f43393f4",
+      "dest": "plugins/hermes/hwpx/SKILL.md",
+      "destSha256": "cde6fc88aa2fda3ca731f4d2279341ca09d3ac233d8e017fb7dbf2fd2bd2499e",
+      "transformed": true
+    },
+    {
+      "source": "README.md",
+      "sourceSha256": "fd85ae6b19710be756bc146dfa3382f2b3088196f27ec9798ecc31d4e59080ec",
+      "dest": "plugins/hermes/hwpx/README.md",
+      "destSha256": "fd85ae6b19710be756bc146dfa3382f2b3088196f27ec9798ecc31d4e59080ec",
+      "transformed": false
+    },
+    {
+      "source": "references/api.md",
+      "sourceSha256": "4ac1dd892a991b73ae1b3da680e2e24c785654a47389a309cda33b2e7a4a7057",
+      "dest": "plugins/hermes/hwpx/references/api.md",
+      "destSha256": "4ac1dd892a991b73ae1b3da680e2e24c785654a47389a309cda33b2e7a4a7057",
+      "transformed": false
+    },
+    {
+      "source": "examples/01_create_and_save.py",
+      "sourceSha256": "09dde8afcdaa4b794097fe7996e30b4e4cf81bae1131b89df4640b438f620b58",
+      "dest": "plugins/hermes/hwpx/examples/01_create_and_save.py",
+      "destSha256": "09dde8afcdaa4b794097fe7996e30b4e4cf81bae1131b89df4640b438f620b58",
+      "transformed": false
+    },
+    {
+      "source": "examples/02_extract_and_inspect.py",
+      "sourceSha256": "fce6c0cd8b0ee786ac7f0c489758cf9df9f857420107f34598614d8b43a3d118",
+      "dest": "plugins/hermes/hwpx/examples/02_extract_and_inspect.py",
+      "destSha256": "fce6c0cd8b0ee786ac7f0c489758cf9df9f857420107f34598614d8b43a3d118",
+      "transformed": false
+    },
+    {
+      "source": "examples/03_template_replace.py",
+      "sourceSha256": "41a76a3ac503e275b6022bd4981f44aec526d4265a1ee6caa5606ccbbcf59678",
+      "dest": "plugins/hermes/hwpx/examples/03_template_replace.py",
+      "destSha256": "41a76a3ac503e275b6022bd4981f44aec526d4265a1ee6caa5606ccbbcf59678",
+      "transformed": false
+    },
+    {
+      "source": "examples/04_create_proposal.py",
+      "sourceSha256": "1b587ed15cce2a2a17ee484bc92fdd90d4d421d9837fa4ee4180d81ffa794935",
+      "dest": "plugins/hermes/hwpx/examples/04_create_proposal.py",
+      "destSha256": "1b587ed15cce2a2a17ee484bc92fdd90d4d421d9837fa4ee4180d81ffa794935",
+      "transformed": false
+    },
+    {
+      "source": "examples/05_mcp_quality_pipeline.md",
+      "sourceSha256": "b381118a01a21157fe3fae9c7cea0cdd1c04cc762ca5fff2971efe3378916f0b",
+      "dest": "plugins/hermes/hwpx/examples/05_mcp_quality_pipeline.md",
+      "destSha256": "b381118a01a21157fe3fae9c7cea0cdd1c04cc762ca5fff2971efe3378916f0b",
+      "transformed": false
+    },
+    {
+      "source": "examples/06_create_from_document_plan.py",
+      "sourceSha256": "6d18a862c74b32f23c1b800b8d4f4b34b2d061a75a9f61cf3fbf1fa91c8e6a4e",
+      "dest": "plugins/hermes/hwpx/examples/06_create_from_document_plan.py",
+      "destSha256": "6d18a862c74b32f23c1b800b8d4f4b34b2d061a75a9f61cf3fbf1fa91c8e6a4e",
+      "transformed": false
+    },
+    {
+      "source": "examples/06_mcp_document_plan.md",
+      "sourceSha256": "d743ce385a208e0debc9cbd6cd54f34dc4198e289841cc4182764f5b56938a7e",
+      "dest": "plugins/hermes/hwpx/examples/06_mcp_document_plan.md",
+      "destSha256": "d743ce385a208e0debc9cbd6cd54f34dc4198e289841cc4182764f5b56938a7e",
+      "transformed": false
+    },
+    {
+      "source": "examples/07_create_operating_plan.py",
+      "sourceSha256": "483d72f93821e31ab7227cdb9f9ab722ad97f704526a9afc3c947b66ecb06e4d",
+      "dest": "plugins/hermes/hwpx/examples/07_create_operating_plan.py",
+      "destSha256": "483d72f93821e31ab7227cdb9f9ab722ad97f704526a9afc3c947b66ecb06e4d",
+      "transformed": false
+    },
+    {
+      "source": "examples/07_mcp_operating_plan.md",
+      "sourceSha256": "6af8869d8478b7079051cd22bb54038b747518736a209d826ec2dc3e7cb045d3",
+      "dest": "plugins/hermes/hwpx/examples/07_mcp_operating_plan.md",
+      "destSha256": "6af8869d8478b7079051cd22bb54038b747518736a209d826ec2dc3e7cb045d3",
+      "transformed": false
+    },
+    {
+      "source": "examples/08_template_formfit.py",
+      "sourceSha256": "8156b4ed67ce4f147b1c95ec6eca667320af561602d14dd158c1de3f824f9ca7",
+      "dest": "plugins/hermes/hwpx/examples/08_template_formfit.py",
+      "destSha256": "8156b4ed67ce4f147b1c95ec6eca667320af561602d14dd158c1de3f824f9ca7",
+      "transformed": false
+    },
+    {
+      "source": "examples/08_mcp_template_formfit.md",
+      "sourceSha256": "71ff33bdb7b8b8a6c2c0fb4070be6c2994897929c6b081f99722db1b09c460a8",
+      "dest": "plugins/hermes/hwpx/examples/08_mcp_template_formfit.md",
+      "destSha256": "71ff33bdb7b8b8a6c2c0fb4070be6c2994897929c6b081f99722db1b09c460a8",
+      "transformed": false
+    },
+    {
+      "source": "examples/09_visual_review_loop.md",
+      "sourceSha256": "0e71b265c72756607aec0b8063bc737c9f5bbe821e4ff54c36007d6932d6b324",
+      "dest": "plugins/hermes/hwpx/examples/09_visual_review_loop.md",
+      "destSha256": "0e71b265c72756607aec0b8063bc737c9f5bbe821e4ff54c36007d6932d6b324",
+      "transformed": false
+    },
+    {
+      "source": "scripts/fix_namespaces.py",
+      "sourceSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
+      "dest": "plugins/hermes/hwpx/scripts/fix_namespaces.py",
+      "destSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
+      "transformed": false
+    },
+    {
+      "source": "scripts/quickcheck.py",
+      "sourceSha256": "0bf4a5727eac575ab997e4e1d0e720f98d572a522f70fd8f19a537e2be45378d",
+      "dest": "plugins/hermes/hwpx/scripts/quickcheck.py",
+      "destSha256": "0bf4a5727eac575ab997e4e1d0e720f98d572a522f70fd8f19a537e2be45378d",
+      "transformed": false
+    },
+    {
+      "source": "scripts/text_extract.py",
+      "sourceSha256": "950f05cace6a854990e928b174dfc375a6e272eacb50e03bb14f3a1924232ca8",
+      "dest": "plugins/hermes/hwpx/scripts/text_extract.py",
+      "destSha256": "950f05cace6a854990e928b174dfc375a6e272eacb50e03bb14f3a1924232ca8",
+      "transformed": false
+    },
+    {
+      "source": "scripts/visual_review.py",
+      "sourceSha256": "2fa1fc11442100058c1603843af7a11c4102f4dbdf6636306f94d44e0da9ef3b",
+      "dest": "plugins/hermes/hwpx/scripts/visual_review.py",
+      "destSha256": "2fa1fc11442100058c1603843af7a11c4102f4dbdf6636306f94d44e0da9ef3b",
+      "transformed": false
+    },
+    {
+      "source": "scripts/zip_replace_all.py",
+      "sourceSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "dest": "plugins/hermes/hwpx/scripts/zip_replace_all.py",
+      "destSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "transformed": false
+    },
+    {
+      "source": "packaging/templates/hermes.mcp-install.md",
+      "sourceSha256": "6e8ad7e85837c221b3df243f0c56dffa024e575915b53c1678d537b14f6f4f23",
+      "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
+      "destSha256": "6e8ad7e85837c221b3df243f0c56dffa024e575915b53c1678d537b14f6f4f23",
+      "transformed": false
+    }
+  ]
+}

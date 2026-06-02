@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "1d3fc31ae0778288355eca451904d633bf84be5bafc9a358594151f47fa90ebe",
+      "sourceSha256": "62ff6c8844bc982eeeb4b6820f7f551b6bdbd901e3fe8a1d062619e200b7042a",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "1d3fc31ae0778288355eca451904d633bf84be5bafc9a358594151f47fa90ebe",
+      "destSha256": "62ff6c8844bc982eeeb4b6820f7f551b6bdbd901e3fe8a1d062619e200b7042a",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "8b0fbcd7377614027a54d497888bbbc7f3a7df69e8fc033b655f3f935be9fbd2",
+      "sourceSha256": "ec81ee6347c81d830a5ac014db8442b2ca3c73a1602c25933499791408f0b608",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "8b0fbcd7377614027a54d497888bbbc7f3a7df69e8fc033b655f3f935be9fbd2",
+      "destSha256": "ec81ee6347c81d830a5ac014db8442b2ca3c73a1602c25933499791408f0b608",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "23d173c0333c88c339a1cb0cb7a0fbb2af4b600095041345b28fd745ff440ebe",
+      "sourceSha256": "a26f524a3b89c8ae7f1734bb4779f1790e5a3230c247e68c937665edc49c8cc9",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "23d173c0333c88c339a1cb0cb7a0fbb2af4b600095041345b28fd745ff440ebe",
+      "destSha256": "a26f524a3b89c8ae7f1734bb4779f1790e5a3230c247e68c937665edc49c8cc9",
       "transformed": false
     },
     {
@@ -109,6 +109,13 @@
       "transformed": false
     },
     {
+      "source": "examples/10_create_with_builder.py",
+      "sourceSha256": "d6c469518c0129debdb21ab663b3e8d9912b79207045a0bf3788da718f501a07",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/10_create_with_builder.py",
+      "destSha256": "d6c469518c0129debdb21ab663b3e8d9912b79207045a0bf3788da718f501a07",
+      "transformed": false
+    },
+    {
       "source": "scripts/fix_namespaces.py",
       "sourceSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
@@ -117,9 +124,9 @@
     },
     {
       "source": "scripts/quickcheck.py",
-      "sourceSha256": "f3f8a6d61a87248de39d16e62edcc5fe56c83d830bdaea92f17a569245236a4e",
+      "sourceSha256": "f29412b2ee76b6e227ca6455a73d1cf3a680e8f272c6859415baad19af6c1955",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
-      "destSha256": "f3f8a6d61a87248de39d16e62edcc5fe56c83d830bdaea92f17a569245236a4e",
+      "destSha256": "f29412b2ee76b6e227ca6455a73d1cf3a680e8f272c6859415baad19af6c1955",
       "transformed": false
     },
     {
@@ -131,9 +138,9 @@
     },
     {
       "source": "scripts/visual_review.py",
-      "sourceSha256": "2fa1fc11442100058c1603843af7a11c4102f4dbdf6636306f94d44e0da9ef3b",
+      "sourceSha256": "c4a40d79b663a3617558aef3fd662b5961d7ac1951aabb8aa96284d2eab80bbe",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/visual_review.py",
-      "destSha256": "2fa1fc11442100058c1603843af7a11c4102f4dbdf6636306f94d44e0da9ef3b",
+      "destSha256": "c4a40d79b663a3617558aef3fd662b5961d7ac1951aabb8aa96284d2eab80bbe",
       "transformed": false
     },
     {

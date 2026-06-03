@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "62ff6c8844bc982eeeb4b6820f7f551b6bdbd901e3fe8a1d062619e200b7042a",
+      "sourceSha256": "83da5c4c518ad9bd76043164efdfe0af223a0b81dd6333cf305c20f898088bc8",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "62ff6c8844bc982eeeb4b6820f7f551b6bdbd901e3fe8a1d062619e200b7042a",
+      "destSha256": "83da5c4c518ad9bd76043164efdfe0af223a0b81dd6333cf305c20f898088bc8",
       "transformed": true
     },
     {
@@ -116,6 +116,20 @@
       "transformed": false
     },
     {
+      "source": "examples/10_create_government_report.py",
+      "sourceSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/10_create_government_report.py",
+      "destSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
+      "transformed": false
+    },
+    {
+      "source": "examples/10_mcp_government_report.md",
+      "sourceSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/10_mcp_government_report.md",
+      "destSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
+      "transformed": false
+    },
+    {
       "source": "scripts/fix_namespaces.py",
       "sourceSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
@@ -124,9 +138,9 @@
     },
     {
       "source": "scripts/quickcheck.py",
-      "sourceSha256": "f29412b2ee76b6e227ca6455a73d1cf3a680e8f272c6859415baad19af6c1955",
+      "sourceSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
-      "destSha256": "f29412b2ee76b6e227ca6455a73d1cf3a680e8f272c6859415baad19af6c1955",
+      "destSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
       "transformed": false
     },
     {

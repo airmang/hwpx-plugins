@@ -7,21 +7,21 @@
       "source": "SKILL.md",
       "sourceSha256": "83da5c4c518ad9bd76043164efdfe0af223a0b81dd6333cf305c20f898088bc8",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "8c9a15a2d847cbb11fac95254cb10ba8c5288fd00011d369e2c1dfab429a73da",
+      "destSha256": "3bdc4c5e59eef67bd481fbb4c19d224bbfbc9434c9ce4be8a084ccd80ffd3d45",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "cb1363835c1c0970011c745163497c3ce8a9ecef47fb3632e3ce616f38ff2ab7",
+      "sourceSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "cb1363835c1c0970011c745163497c3ce8a9ecef47fb3632e3ce616f38ff2ab7",
+      "destSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "303a995c28c40be5b48375a135510991357ebad1c6db459d93d102404f2273e9",
+      "sourceSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "303a995c28c40be5b48375a135510991357ebad1c6db459d93d102404f2273e9",
+      "destSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
       "transformed": false
     },
     {
@@ -116,20 +116,6 @@
       "transformed": false
     },
     {
-      "source": "examples/10_create_government_report.py",
-      "sourceSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
-      "dest": "plugins/hermes/hwpx/examples/10_create_government_report.py",
-      "destSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
-      "transformed": false
-    },
-    {
-      "source": "examples/10_mcp_government_report.md",
-      "sourceSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
-      "dest": "plugins/hermes/hwpx/examples/10_mcp_government_report.md",
-      "destSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
-      "transformed": false
-    },
-    {
       "source": "scripts/fix_namespaces.py",
       "sourceSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
       "dest": "plugins/hermes/hwpx/scripts/fix_namespaces.py",
@@ -138,9 +124,9 @@
     },
     {
       "source": "scripts/quickcheck.py",
-      "sourceSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
+      "sourceSha256": "9a081d907b22a854ebe5da1cb99dec2d60dff5d3d77f5ca22273661ff68677ea",
       "dest": "plugins/hermes/hwpx/scripts/quickcheck.py",
-      "destSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
+      "destSha256": "9a081d907b22a854ebe5da1cb99dec2d60dff5d3d77f5ca22273661ff68677ea",
       "transformed": false
     },
     {
@@ -159,16 +145,16 @@
     },
     {
       "source": "scripts/zip_replace_all.py",
-      "sourceSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "sourceSha256": "2eb0b2100072b4f3cd7b16b1b639f3302468a314b61f5c1b519d50f9a494265d",
       "dest": "plugins/hermes/hwpx/scripts/zip_replace_all.py",
-      "destSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "destSha256": "2eb0b2100072b4f3cd7b16b1b639f3302468a314b61f5c1b519d50f9a494265d",
       "transformed": false
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "7658f8419a5cfea7765e17460a878f1ba27e4c7b9d6b273270e5a5cec38e5168",
+      "sourceSha256": "c207e61f6beef757389bb4597f652f97d632ca605aea971bd68d941a283da517",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "7658f8419a5cfea7765e17460a878f1ba27e4c7b9d6b273270e5a5cec38e5168",
+      "destSha256": "c207e61f6beef757389bb4597f652f97d632ca605aea971bd68d941a283da517",
       "transformed": false
     }
   ]

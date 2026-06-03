@@ -12,16 +12,16 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "cb1363835c1c0970011c745163497c3ce8a9ecef47fb3632e3ce616f38ff2ab7",
+      "sourceSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "cb1363835c1c0970011c745163497c3ce8a9ecef47fb3632e3ce616f38ff2ab7",
+      "destSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "303a995c28c40be5b48375a135510991357ebad1c6db459d93d102404f2273e9",
+      "sourceSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "303a995c28c40be5b48375a135510991357ebad1c6db459d93d102404f2273e9",
+      "destSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
       "transformed": false
     },
     {
@@ -116,20 +116,6 @@
       "transformed": false
     },
     {
-      "source": "examples/10_create_government_report.py",
-      "sourceSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
-      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/10_create_government_report.py",
-      "destSha256": "e32668899ba40fd9eef1dc354f9b6720fef7acc4df218eb402dbf3bce1aaffa7",
-      "transformed": false
-    },
-    {
-      "source": "examples/10_mcp_government_report.md",
-      "sourceSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
-      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/10_mcp_government_report.md",
-      "destSha256": "3ac7e04db25d67f8294fedfe9537674aa5b277c9d35077da26cbdc5f539938da",
-      "transformed": false
-    },
-    {
       "source": "scripts/fix_namespaces.py",
       "sourceSha256": "a90f51c6a4fa1e59bbc81ea7457c2adcf0db15e5c4418adf53212ff7b0d2b04e",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
@@ -138,9 +124,9 @@
     },
     {
       "source": "scripts/quickcheck.py",
-      "sourceSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
+      "sourceSha256": "9a081d907b22a854ebe5da1cb99dec2d60dff5d3d77f5ca22273661ff68677ea",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
-      "destSha256": "fa9699ed8d1a2c6bd04af5cfca7b6f7da08350dc4705e3cb35dd59182255ee05",
+      "destSha256": "9a081d907b22a854ebe5da1cb99dec2d60dff5d3d77f5ca22273661ff68677ea",
       "transformed": false
     },
     {
@@ -159,16 +145,16 @@
     },
     {
       "source": "scripts/zip_replace_all.py",
-      "sourceSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "sourceSha256": "2eb0b2100072b4f3cd7b16b1b639f3302468a314b61f5c1b519d50f9a494265d",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
-      "destSha256": "d36e7ac7032d17905b9860656fd29460f8b0d9abce7526f2bec79eb31007c784",
+      "destSha256": "2eb0b2100072b4f3cd7b16b1b639f3302468a314b61f5c1b519d50f9a494265d",
       "transformed": false
     },
     {
       "source": "packaging/templates/codex.plugin.json",
-      "sourceSha256": "411e1f0e89ae6b51b6eebaefda64eb8228a800b958fe9b8485ac066f787a2f20",
+      "sourceSha256": "2656f5b0092beffafdc7b9a56d0417fd4ec67331ce2beed8a2be9be0b2690fe6",
       "dest": "plugins/codex/hwpx-plugin/.codex-plugin/plugin.json",
-      "destSha256": "411e1f0e89ae6b51b6eebaefda64eb8228a800b958fe9b8485ac066f787a2f20",
+      "destSha256": "2656f5b0092beffafdc7b9a56d0417fd4ec67331ce2beed8a2be9be0b2690fe6",
       "transformed": false
     },
     {
@@ -180,9 +166,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "e16ed4bf951c8b5d10fe887be2600e7da94b8faed76faf9e19b35e4eeffff70d",
+      "sourceSha256": "c1f5309af71593ced1618eac733fa04655c705987bed8833359f4fd886858b6d",
       "dest": "plugins/codex/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "e16ed4bf951c8b5d10fe887be2600e7da94b8faed76faf9e19b35e4eeffff70d",
+      "destSha256": "c1f5309af71593ced1618eac733fa04655c705987bed8833359f4fd886858b6d",
       "transformed": false
     }
   ]

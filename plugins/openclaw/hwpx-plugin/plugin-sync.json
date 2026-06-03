@@ -12,16 +12,16 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
+      "sourceSha256": "0a0a40b717f170b15163a8405c8462e5c3325448a7d9f4187b30edd05668b923",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "43e86d063a1225a89c55fd9c2a59957060fc90a68416fdd84b5b165481092b10",
+      "destSha256": "0a0a40b717f170b15163a8405c8462e5c3325448a7d9f4187b30edd05668b923",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
+      "sourceSha256": "8ca4c45b0ad59012989d3bbc1ae2d1fa5054439632e59454aae6e789c18ba1a7",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "e9386990b3b76000dc7d961c2a25dff10e59a4713d7cef06766cb48a8fcae477",
+      "destSha256": "8ca4c45b0ad59012989d3bbc1ae2d1fa5054439632e59454aae6e789c18ba1a7",
       "transformed": false
     },
     {
@@ -152,16 +152,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "88605fc0b6ebf62301958a1d95846920ef6c31ab720a7780fce7a20b15a1068c",
+      "sourceSha256": "a06e8e9e5acb089c126f24bf0b79504597a86343dd79bdb774f6ba1b933bc28d",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "88605fc0b6ebf62301958a1d95846920ef6c31ab720a7780fce7a20b15a1068c",
+      "destSha256": "a06e8e9e5acb089c126f24bf0b79504597a86343dd79bdb774f6ba1b933bc28d",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "46e7a79cc30b288efd2d0d3f2de90dbbfa1b7a7da7f1fc9200d0b3164380aec4",
+      "sourceSha256": "ee6ae9a75e2bf36f7381c219c027f811e9faa64f3ad44d5dd7c2e3be3bcccf08",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "46e7a79cc30b288efd2d0d3f2de90dbbfa1b7a7da7f1fc9200d0b3164380aec4",
+      "destSha256": "ee6ae9a75e2bf36f7381c219c027f811e9faa64f3ad44d5dd7c2e3be3bcccf08",
       "transformed": false
     }
   ]

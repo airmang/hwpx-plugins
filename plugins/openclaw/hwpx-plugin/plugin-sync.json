@@ -12,16 +12,16 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "fe6b649af3f7bdc9f665c7e4f56a9286f24c6145396b34da35609dcdcd4b54aa",
+      "sourceSha256": "ec34627beca3cec3d85c3d4721a073db9cbd7af382f5f506f447edf00dd0fba4",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "fe6b649af3f7bdc9f665c7e4f56a9286f24c6145396b34da35609dcdcd4b54aa",
+      "destSha256": "ec34627beca3cec3d85c3d4721a073db9cbd7af382f5f506f447edf00dd0fba4",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "9f1e19f7006c01af8c3196a4374a4e752b6b738a0323fbd42e312543d99554a4",
+      "sourceSha256": "8388781deb6870c3751d0f4fec3e6b5e8e718bb05d74bab824053549b734cb0a",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "9f1e19f7006c01af8c3196a4374a4e752b6b738a0323fbd42e312543d99554a4",
+      "destSha256": "8388781deb6870c3751d0f4fec3e6b5e8e718bb05d74bab824053549b734cb0a",
       "transformed": false
     },
     {
@@ -152,16 +152,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "9e25f0350ae04b8fc7b735d3e35be1d7461aa05f1a272aa4308dfee4a96634e0",
+      "sourceSha256": "b8f40f09cb1a32058d296f03fb607d88e1fa39f97d1c08f6c194e3887d06cba1",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "9e25f0350ae04b8fc7b735d3e35be1d7461aa05f1a272aa4308dfee4a96634e0",
+      "destSha256": "b8f40f09cb1a32058d296f03fb607d88e1fa39f97d1c08f6c194e3887d06cba1",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "f33db281552555abf4324f0ebfe32c4f09e8c040729698fd3b5ad6fef2a1320c",
+      "sourceSha256": "cf8646b32e3675bed769413f30595bec921bf5cfaf4847f040ae29d6010f5b31",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "f33db281552555abf4324f0ebfe32c4f09e8c040729698fd3b5ad6fef2a1320c",
+      "destSha256": "cf8646b32e3675bed769413f30595bec921bf5cfaf4847f040ae29d6010f5b31",
       "transformed": false
     }
   ]

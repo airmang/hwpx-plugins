@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요."
-version: 0.1.4
+version: 0.1.5
 author: Kohkyuhyun
 license: Apache-2.0
 metadata:

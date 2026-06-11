@@ -137,6 +137,13 @@
       "transformed": false
     },
     {
+      "source": "examples/13_advanced_generators.py",
+      "sourceSha256": "6aa79fc4c1236d19e47a4556d7ccdaa90b96e6cb2c4544e28014901261fc7aa1",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/13_advanced_generators.py",
+      "destSha256": "6aa79fc4c1236d19e47a4556d7ccdaa90b96e6cb2c4544e28014901261fc7aa1",
+      "transformed": false
+    },
+    {
       "source": "examples/eval_tasks/tasks.json",
       "sourceSha256": "58e8b48cb38b3a7281331c3ba7b22839441ee46d8428db66bf6e541acabeda1a",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/tasks.json",

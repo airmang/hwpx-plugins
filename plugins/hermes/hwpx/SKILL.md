@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요."
-version: 0.1.6
+version: 0.1.7
 author: Kohkyuhyun
 license: Apache-2.0
 metadata:
@@ -15,10 +15,10 @@ metadata:
 `.hwpx`는 ZIP 기반 OWPML 문서다. 기본 생성·편집은 `python-hwpx`로 처리하고, 표를 포함한 전역 치환이나 ZIP 레벨 후처리는 번들 스크립트로 처리한다.
 
 - 기준 라이브러리: `python-hwpx` (import: `hwpx`)
-- 기본 편집 최소 호환 기준: `python-hwpx >= 2.10.3`
-- document-plan 생성 권장 기준: `python-hwpx >= 2.10.3` 로컬 스택
+- 기본 편집 최소 호환 기준: `python-hwpx >= 2.11.0`
+- document-plan 생성 권장 기준: `python-hwpx >= 2.11.0` 로컬 스택
 - builder 생성 권장 기준: `python-hwpx` S-013 builder core 포함 버전 또는 로컬 checkout
-- 최근 로컬 검증 버전: `python-hwpx 2.10.3 + editor-open safety guard`
+- 최근 로컬 검증 버전: `python-hwpx 2.11.0 + editor-open safety guard`
 - 상세 시그니처와 옵션은 [`references/api.md`](references/api.md)에서 확인한다.
 
 ## 시작

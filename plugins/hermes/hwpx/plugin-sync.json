@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "7ba8425bf7f996b44950f8e7d235762a800b8f40f3088ba84f8acfc2fb7e4a89",
+      "sourceSha256": "e71b734838e0e0797348909dd7f49d8cf6507357154d80159c3d21b4a6963bcb",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "bd53f33716ef5e1c4b32fcf99719a691c12cc0f316b6530cf6ef7f3338f4118c",
+      "destSha256": "c8ac1c30aa50f21f848870a0f730aa60913137201315aa5bb20d466a29399682",
       "transformed": true
     },
     {
@@ -19,9 +19,16 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "3f76d43018039fa2058aec80c28ef91772b63c143dbb6a7b620ae44819ab1c7d",
+      "sourceSha256": "99861165d3ba2a1124ca9f8148f1f454e95eb8e77da8aa1986391794a96768ee",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "3f76d43018039fa2058aec80c28ef91772b63c143dbb6a7b620ae44819ab1c7d",
+      "destSha256": "99861165d3ba2a1124ca9f8148f1f454e95eb8e77da8aa1986391794a96768ee",
+      "transformed": false
+    },
+    {
+      "source": "references/official-document-rules.md",
+      "sourceSha256": "59cfd03fc0ebe66869e981040ca4bdc8000716c1172d6d06e1b333968f091a97",
+      "dest": "plugins/hermes/hwpx/references/official-document-rules.md",
+      "destSha256": "59cfd03fc0ebe66869e981040ca4bdc8000716c1172d6d06e1b333968f091a97",
       "transformed": false
     },
     {
@@ -113,6 +120,13 @@
       "sourceSha256": "d6c469518c0129debdb21ab663b3e8d9912b79207045a0bf3788da718f501a07",
       "dest": "plugins/hermes/hwpx/examples/10_create_with_builder.py",
       "destSha256": "d6c469518c0129debdb21ab663b3e8d9912b79207045a0bf3788da718f501a07",
+      "transformed": false
+    },
+    {
+      "source": "examples/11_official_document_recipes.py",
+      "sourceSha256": "ca5f53ffdb843a1c645f1a58805ba76eef8722d56788dcb04811e083cd911a88",
+      "dest": "plugins/hermes/hwpx/examples/11_official_document_recipes.py",
+      "destSha256": "ca5f53ffdb843a1c645f1a58805ba76eef8722d56788dcb04811e083cd911a88",
       "transformed": false
     },
     {

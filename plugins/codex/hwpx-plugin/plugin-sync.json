@@ -116,6 +116,34 @@
       "transformed": false
     },
     {
+      "source": "examples/12_task_eval_replay.md",
+      "sourceSha256": "aeadf41d3bf74f97429111740e182e5a4750e34d99455bbdd5176c11ebb6f410",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/12_task_eval_replay.md",
+      "destSha256": "aeadf41d3bf74f97429111740e182e5a4750e34d99455bbdd5176c11ebb6f410",
+      "transformed": false
+    },
+    {
+      "source": "examples/eval_tasks/tasks.json",
+      "sourceSha256": "58e8b48cb38b3a7281331c3ba7b22839441ee46d8428db66bf6e541acabeda1a",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/eval_tasks/tasks.json",
+      "destSha256": "58e8b48cb38b3a7281331c3ba7b22839441ee46d8428db66bf6e541acabeda1a",
+      "transformed": false
+    },
+    {
+      "source": "examples/eval_tasks/profiles/current-0.1.6.json",
+      "sourceSha256": "c4160dfce45ee84e42351d485d5a380933f43f1573443f5a6381bd74e9441b27",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.1.6.json",
+      "destSha256": "c4160dfce45ee84e42351d485d5a380933f43f1573443f5a6381bd74e9441b27",
+      "transformed": false
+    },
+    {
+      "source": "examples/eval_tasks/profiles/baseline-0.1.5.json",
+      "sourceSha256": "33bc96471608b83687849ad5ae8962426dfa0b8c483ba00f6dbc1c36aed3aed7",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/baseline-0.1.5.json",
+      "destSha256": "33bc96471608b83687849ad5ae8962426dfa0b8c483ba00f6dbc1c36aed3aed7",
+      "transformed": false
+    },
+    {
       "source": "scripts/fix_namespaces.py",
       "sourceSha256": "1ef41e721fa203722cb7e943d9570640ff0b5452b06c464831fd040fe6656505",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
@@ -127,6 +155,13 @@
       "sourceSha256": "b7b658da7ea7e382b7109ffaca896ff437715dc887f08a9a20c1b576575aec2d",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
       "destSha256": "b7b658da7ea7e382b7109ffaca896ff437715dc887f08a9a20c1b576575aec2d",
+      "transformed": false
+    },
+    {
+      "source": "scripts/task_eval_harness.py",
+      "sourceSha256": "35e2d2a21674e6a9470645330b549ddf7f31defc28930b440daff8338893c537",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/scripts/task_eval_harness.py",
+      "destSha256": "35e2d2a21674e6a9470645330b549ddf7f31defc28930b440daff8338893c537",
       "transformed": false
     },
     {

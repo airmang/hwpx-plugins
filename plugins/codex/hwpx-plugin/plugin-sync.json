@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "4f38035338fff8e7fc162d57bc1c80276bd2ccad60837521598d4e40fd8a6af2",
+      "sourceSha256": "4f577e1e56389d334184aa84d638a0fa2258770464fa6624207711639c3003d0",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "4f38035338fff8e7fc162d57bc1c80276bd2ccad60837521598d4e40fd8a6af2",
+      "destSha256": "4f577e1e56389d334184aa84d638a0fa2258770464fa6624207711639c3003d0",
       "transformed": true
     },
     {
@@ -166,9 +166,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "9cbffa0e250721416fcc989828f8eede5bd660737b2625899abae6b2449d18d0",
+      "sourceSha256": "ba2d847bc9abe53c6d8d10e032da30761bd1ee513307ba9f1f874308af91f020",
       "dest": "plugins/codex/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "9cbffa0e250721416fcc989828f8eede5bd660737b2625899abae6b2449d18d0",
+      "destSha256": "ba2d847bc9abe53c6d8d10e032da30761bd1ee513307ba9f1f874308af91f020",
       "transformed": false
     }
   ]

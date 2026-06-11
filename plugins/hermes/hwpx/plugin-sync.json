@@ -7,7 +7,7 @@
       "source": "SKILL.md",
       "sourceSha256": "78decec5cb6b2473dd41467a524a4d3c1d20d57906e08ca249bb4e5ff86c2905",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "97f60b309b354f61bbc53a6db5bb53005aa39d4937f5e024fab18d62efceb04e",
+      "destSha256": "37bf177690d2e0567ba3a624b3bb63355d1bc89178249703d9163b0bbf39b873",
       "transformed": true
     },
     {
@@ -173,9 +173,9 @@
     },
     {
       "source": "examples/12_task_eval_replay.md",
-      "sourceSha256": "758df2afa92dd2f4e03d5cea3f046e86377b39646537f1669baffa6a7a15c333",
+      "sourceSha256": "cc0e3bd5019ff4b47cbae7de37331241f73b1a1316c075d46da00aefec0f477e",
       "dest": "plugins/hermes/hwpx/examples/12_task_eval_replay.md",
-      "destSha256": "758df2afa92dd2f4e03d5cea3f046e86377b39646537f1669baffa6a7a15c333",
+      "destSha256": "cc0e3bd5019ff4b47cbae7de37331241f73b1a1316c075d46da00aefec0f477e",
       "transformed": false
     },
     {
@@ -200,10 +200,10 @@
       "transformed": false
     },
     {
-      "source": "examples/eval_tasks/profiles/current-0.1.8-dev.json",
-      "sourceSha256": "3d20375f199df260590461d23d5bf98ea21f842365894657c8f93e1213341a0b",
-      "dest": "plugins/hermes/hwpx/examples/eval_tasks/profiles/current-0.1.8-dev.json",
-      "destSha256": "3d20375f199df260590461d23d5bf98ea21f842365894657c8f93e1213341a0b",
+      "source": "examples/eval_tasks/profiles/current-0.1.8.json",
+      "sourceSha256": "e4de8fb725b215b75aab81a585e0e8f60ea4f00ec2c032e6b023b4b14bfd8e13",
+      "dest": "plugins/hermes/hwpx/examples/eval_tasks/profiles/current-0.1.8.json",
+      "destSha256": "e4de8fb725b215b75aab81a585e0e8f60ea4f00ec2c032e6b023b4b14bfd8e13",
       "transformed": false
     },
     {
@@ -236,9 +236,9 @@
     },
     {
       "source": "scripts/task_eval_harness.py",
-      "sourceSha256": "61fc94726eccb9577577c0e77dc2bfca1e2180aeb3924bfe39eec3256ac5d9fb",
+      "sourceSha256": "b9ec8fce51f2e566bc5124813e9f0632d0ffc8a3a1efa10c5cf3aa197022e281",
       "dest": "plugins/hermes/hwpx/scripts/task_eval_harness.py",
-      "destSha256": "61fc94726eccb9577577c0e77dc2bfca1e2180aeb3924bfe39eec3256ac5d9fb",
+      "destSha256": "b9ec8fce51f2e566bc5124813e9f0632d0ffc8a3a1efa10c5cf3aa197022e281",
       "transformed": false
     },
     {

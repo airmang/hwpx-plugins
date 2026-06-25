@@ -7,7 +7,7 @@
       "source": "SKILL.md",
       "sourceSha256": "59452d5e251b0d897b4f5e874e9501bc6ce332a2783b2c0ae33ed1018178b386",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "c35280edead33f870e5e0abb36def298b5095da76a6f9b9485fe3fb298c86ea4",
+      "destSha256": "99522f6f450f650e4c11ed175e7b0675c8676a2c0c736c0151dcc066b9f5df23",
       "transformed": true
     },
     {
@@ -271,9 +271,9 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "15365e27401e08206f299d73adc6544a37d45e2907e245f27122e8ee8241b2e5",
+      "sourceSha256": "167238c42e015edb0d966a1542cf5bdba8df00fae3a21eb92fe081c194d617c4",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "15365e27401e08206f299d73adc6544a37d45e2907e245f27122e8ee8241b2e5",
+      "destSha256": "167238c42e015edb0d966a1542cf5bdba8df00fae3a21eb92fe081c194d617c4",
       "transformed": false
     }
   ]

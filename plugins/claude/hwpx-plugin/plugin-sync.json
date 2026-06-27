@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "59452d5e251b0d897b4f5e874e9501bc6ce332a2783b2c0ae33ed1018178b386",
+      "sourceSha256": "e71729264408294c5f148fafdd2e04063dbc9d32406f5f0580667a36b343a728",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "59452d5e251b0d897b4f5e874e9501bc6ce332a2783b2c0ae33ed1018178b386",
+      "destSha256": "e71729264408294c5f148fafdd2e04063dbc9d32406f5f0580667a36b343a728",
       "transformed": true
     },
     {
@@ -64,6 +64,13 @@
       "sourceSha256": "3d13cd79c4a445d0583f13f31b64b519fce80ca7383d7ed7abb6db7c7e146e79",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-editing.md",
       "destSha256": "3d13cd79c4a445d0583f13f31b64b519fce80ca7383d7ed7abb6db7c7e146e79",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-exam.md",
+      "sourceSha256": "9c82e0ad90f15dc09960acf7c6c81c28763cc838484aaaffbcdc2bbb3c913fc8",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-exam.md",
+      "destSha256": "9c82e0ad90f15dc09960acf7c6c81c28763cc838484aaaffbcdc2bbb3c913fc8",
       "transformed": false
     },
     {

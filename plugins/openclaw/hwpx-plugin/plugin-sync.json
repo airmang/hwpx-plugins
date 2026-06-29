@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "e71729264408294c5f148fafdd2e04063dbc9d32406f5f0580667a36b343a728",
+      "sourceSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "e71729264408294c5f148fafdd2e04063dbc9d32406f5f0580667a36b343a728",
+      "destSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
       "transformed": true
     },
     {
@@ -43,6 +43,13 @@
       "sourceSha256": "59cfd03fc0ebe66869e981040ca4bdc8000716c1172d6d06e1b333968f091a97",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/official-document-rules.md",
       "destSha256": "59cfd03fc0ebe66869e981040ca4bdc8000716c1172d6d06e1b333968f091a97",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-authoring.md",
+      "sourceSha256": "7996d5c2c5cd8ceeea490789846fe52c9cd3813bec4e4c88677a338996ec343d",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-authoring.md",
+      "destSha256": "7996d5c2c5cd8ceeea490789846fe52c9cd3813bec4e4c88677a338996ec343d",
       "transformed": false
     },
     {

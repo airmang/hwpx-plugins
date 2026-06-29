@@ -285,9 +285,9 @@
     },
     {
       "source": "packaging/templates/claude.plugin.json",
-      "sourceSha256": "c63b3f32f1a758cd87042077d9a77a2fdfab976e1390d04c3799d3832f64a5f8",
+      "sourceSha256": "47ce10824c84f1ce9b63630650ca435dc130d2dc220c55f8a6fc3b4674d2e06e",
       "dest": "plugins/claude/hwpx-plugin/.claude-plugin/plugin.json",
-      "destSha256": "c63b3f32f1a758cd87042077d9a77a2fdfab976e1390d04c3799d3832f64a5f8",
+      "destSha256": "47ce10824c84f1ce9b63630650ca435dc130d2dc220c55f8a6fc3b4674d2e06e",
       "transformed": false
     },
     {
@@ -299,9 +299,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "67c66c2846645f1b75d91b5cd147e9070b492ead1ac44b7c83231e78e70529bc",
+      "sourceSha256": "67904b466f43e609434e2b6744622bb436d316d4cce98d15f1af08bd5869f4ff",
       "dest": "plugins/claude/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "67c66c2846645f1b75d91b5cd147e9070b492ead1ac44b7c83231e78e70529bc",
+      "destSha256": "67904b466f43e609434e2b6744622bb436d316d4cce98d15f1af08bd5869f4ff",
       "transformed": false
     }
   ]

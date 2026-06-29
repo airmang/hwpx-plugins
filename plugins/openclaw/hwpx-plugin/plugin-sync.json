@@ -285,16 +285,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "6363295b27bb296003b9a43124fdb09600e18b4faa2020faf61a7bccb6d301ed",
+      "sourceSha256": "03c0962f0cfa1e236b0d76a229cb2b238fbe59c96d491dc0bc9ad19601fa44b3",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "6363295b27bb296003b9a43124fdb09600e18b4faa2020faf61a7bccb6d301ed",
+      "destSha256": "03c0962f0cfa1e236b0d76a229cb2b238fbe59c96d491dc0bc9ad19601fa44b3",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "c6834546feaed630389644f635a48c81b24a570e7b4bab405d0689a18709db27",
+      "sourceSha256": "6ba44bb01e55a3f0204cebbb170573319c91053a85dbfcda0ebeb5b5c2c17822",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "c6834546feaed630389644f635a48c81b24a570e7b4bab405d0689a18709db27",
+      "destSha256": "6ba44bb01e55a3f0204cebbb170573319c91053a85dbfcda0ebeb5b5c2c17822",
       "transformed": false
     }
   ]

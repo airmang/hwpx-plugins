@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
+      "sourceSha256": "674f9543fc87f5ca1530665c70f9a54786df589dff0f20bb1c0adb3658389a14",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
+      "destSha256": "674f9543fc87f5ca1530665c70f9a54786df589dff0f20bb1c0adb3658389a14",
       "transformed": true
     },
     {
@@ -71,6 +71,13 @@
       "sourceSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-redline.md",
       "destSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-pii.md",
+      "sourceSha256": "5bcfe6a9b3f211526ca014501c5fe2ed9f4695f9ceb8bab1a4dadc27dcdd32e9",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-pii.md",
+      "destSha256": "5bcfe6a9b3f211526ca014501c5fe2ed9f4695f9ceb8bab1a4dadc27dcdd32e9",
       "transformed": false
     },
     {
@@ -292,9 +299,9 @@
     },
     {
       "source": "packaging/templates/claude.plugin.json",
-      "sourceSha256": "9580a690744d99726ba2c236ab4b3f4a10e8c184ddfc3a8d95ee7791de33c898",
+      "sourceSha256": "f786427b6ce234db9e20b24c210341e5dcff67cf7589c8796d86968d1c258ab5",
       "dest": "plugins/claude/hwpx-plugin/.claude-plugin/plugin.json",
-      "destSha256": "9580a690744d99726ba2c236ab4b3f4a10e8c184ddfc3a8d95ee7791de33c898",
+      "destSha256": "f786427b6ce234db9e20b24c210341e5dcff67cf7589c8796d86968d1c258ab5",
       "transformed": false
     },
     {
@@ -306,9 +313,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "24b00f44a112b38d543acdd6f61aafa70a9f95a35d984632e192f1862eafcbab",
+      "sourceSha256": "ecf7f4065c3c1f60c063909263ce9dcbb39a1e144ee614fd1d973f0c48ff077d",
       "dest": "plugins/claude/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "24b00f44a112b38d543acdd6f61aafa70a9f95a35d984632e192f1862eafcbab",
+      "destSha256": "ecf7f4065c3c1f60c063909263ce9dcbb39a1e144ee614fd1d973f0c48ff077d",
       "transformed": false
     }
   ]

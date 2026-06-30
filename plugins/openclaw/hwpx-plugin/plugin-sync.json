@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
+      "sourceSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
+      "destSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
       "transformed": true
     },
     {
@@ -64,6 +64,13 @@
       "sourceSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-creation.md",
       "destSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-redline.md",
+      "sourceSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-redline.md",
+      "destSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
       "transformed": false
     },
     {
@@ -285,16 +292,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "03c0962f0cfa1e236b0d76a229cb2b238fbe59c96d491dc0bc9ad19601fa44b3",
+      "sourceSha256": "06b2663372024e480e31f62d58e26bb3b3b53d1e0be31c4cc8490529fdc648c2",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "03c0962f0cfa1e236b0d76a229cb2b238fbe59c96d491dc0bc9ad19601fa44b3",
+      "destSha256": "06b2663372024e480e31f62d58e26bb3b3b53d1e0be31c4cc8490529fdc648c2",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "6ba44bb01e55a3f0204cebbb170573319c91053a85dbfcda0ebeb5b5c2c17822",
+      "sourceSha256": "41099f1db680f6305252a25f8276db218803ea91928e765ef474cad2808a0a8f",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "6ba44bb01e55a3f0204cebbb170573319c91053a85dbfcda0ebeb5b5c2c17822",
+      "destSha256": "41099f1db680f6305252a25f8276db218803ea91928e765ef474cad2808a0a8f",
       "transformed": false
     }
   ]

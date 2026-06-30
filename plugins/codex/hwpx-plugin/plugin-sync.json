@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
+      "sourceSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
+      "destSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
       "transformed": true
     },
     {
@@ -64,6 +64,13 @@
       "sourceSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-creation.md",
       "destSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-redline.md",
+      "sourceSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-redline.md",
+      "destSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
       "transformed": false
     },
     {
@@ -285,9 +292,9 @@
     },
     {
       "source": "packaging/templates/codex.plugin.json",
-      "sourceSha256": "9416097bae001105fe527694049a7f3468be908214fb5c0168e04b7ac12fcc1a",
+      "sourceSha256": "8b493d85af5e02b465dcaa29c27780a6f6938f2d98f529f17ffe0e0f7cf2231a",
       "dest": "plugins/codex/hwpx-plugin/.codex-plugin/plugin.json",
-      "destSha256": "9416097bae001105fe527694049a7f3468be908214fb5c0168e04b7ac12fcc1a",
+      "destSha256": "8b493d85af5e02b465dcaa29c27780a6f6938f2d98f529f17ffe0e0f7cf2231a",
       "transformed": false
     },
     {
@@ -299,9 +306,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "67904b466f43e609434e2b6744622bb436d316d4cce98d15f1af08bd5869f4ff",
+      "sourceSha256": "24b00f44a112b38d543acdd6f61aafa70a9f95a35d984632e192f1862eafcbab",
       "dest": "plugins/codex/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "67904b466f43e609434e2b6744622bb436d316d4cce98d15f1af08bd5869f4ff",
+      "destSha256": "24b00f44a112b38d543acdd6f61aafa70a9f95a35d984632e192f1862eafcbab",
       "transformed": false
     }
   ]

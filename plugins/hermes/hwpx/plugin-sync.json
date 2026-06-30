@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "bde0b783fca6a4193e02bf3a093fa78ca331e65b88b05c014509a5ee03bb20e5",
+      "sourceSha256": "e7b61a7b3626ab2caf9a7ae7d2d7dcef603b9975196e289d4f26e6c6d86ffa59",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "f373495e34d964a3226d3fbfce80ff85391008563742acd5390a846d995d0775",
+      "destSha256": "a7a8316800ab8eaee67a507267dd9da9ff84396fba84bab2664ee9e103a79ee2",
       "transformed": true
     },
     {
@@ -64,6 +64,13 @@
       "sourceSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
       "dest": "plugins/hermes/hwpx/references/workflows-creation.md",
       "destSha256": "799c5352a5634934bd5376ba981ea4f583acbe6f212917328cffa8930677d0cb",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-redline.md",
+      "sourceSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
+      "dest": "plugins/hermes/hwpx/references/workflows-redline.md",
+      "destSha256": "614622c661b2f178cf1f1f92d8a985aef364e7480e8e085129a21e25351be9bf",
       "transformed": false
     },
     {
@@ -285,9 +292,9 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "92bc67b307e24b14e29a1fc0497dd63070937e01cf4fbb7abdd3fedc2138422f",
+      "sourceSha256": "69681f0d7d746579e4cc8c98b837ed3f9e9c77cf6347fc3a6372937d5735a192",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "92bc67b307e24b14e29a1fc0497dd63070937e01cf4fbb7abdd3fedc2138422f",
+      "destSha256": "69681f0d7d746579e4cc8c98b837ed3f9e9c77cf6347fc3a6372937d5735a192",
       "transformed": false
     }
   ]

@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "4673d5151826873db23d40f75a58823f7ac8aa6a0be474c6a579e10980871a69",
+      "sourceSha256": "bb3d485e182760b3adcd6d81c4ca08b261c3bbc51b36f3d6290ea077915abb93",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "4673d5151826873db23d40f75a58823f7ac8aa6a0be474c6a579e10980871a69",
+      "destSha256": "bb3d485e182760b3adcd6d81c4ca08b261c3bbc51b36f3d6290ea077915abb93",
       "transformed": true
     },
     {

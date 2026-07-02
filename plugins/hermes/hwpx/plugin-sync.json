@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "4673d5151826873db23d40f75a58823f7ac8aa6a0be474c6a579e10980871a69",
+      "sourceSha256": "bb3d485e182760b3adcd6d81c4ca08b261c3bbc51b36f3d6290ea077915abb93",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "2d1b0be24ce3b8a1799528a673eec9f5c351e308ca1224d5c5f051737ad17dc5",
+      "destSha256": "9555dd1ec885c4dc9c8ec702e8a01ebd8b9f84320334cb448bc7c27b51dcf7e8",
       "transformed": true
     },
     {

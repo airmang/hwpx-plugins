@@ -7,14 +7,14 @@
       "source": "SKILL.md",
       "sourceSha256": "b78e210c402f38d322014f2829aa96a3a33157094ba650c445ef06323d5f9df4",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "a01ec5f58ee03c3ae6544a33d45e72d7e6b11eef19c5348f40d39c5c86dc9ed1",
+      "destSha256": "ebdec97eb4481fe242cdfe48a135bf89a67a8168cd9738b5b2a08ac028a66ad2",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "0bc0f25209f6ac862ef236461f0d21aff4cb893a3889e273ca59ab2b91eb6d9c",
+      "sourceSha256": "68687175e0e3848e63537e2a8d1c8685bd39d416dfc4ca8054d72617dd1bf1e1",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "0bc0f25209f6ac862ef236461f0d21aff4cb893a3889e273ca59ab2b91eb6d9c",
+      "destSha256": "68687175e0e3848e63537e2a8d1c8685bd39d416dfc4ca8054d72617dd1bf1e1",
       "transformed": false
     },
     {
@@ -96,9 +96,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "6b362c23c2411dd3af7487fc954c77f8b87452beffdd620fd8b975a56bb2f4cd",
+      "sourceSha256": "07ad4842511bcc1c879b6592b1f88b373e27c04902c5bd46d4910fd45cca07ea",
       "dest": "plugins/hermes/hwpx/references/workflows-forms.md",
-      "destSha256": "6b362c23c2411dd3af7487fc954c77f8b87452beffdd620fd8b975a56bb2f4cd",
+      "destSha256": "07ad4842511bcc1c879b6592b1f88b373e27c04902c5bd46d4910fd45cca07ea",
       "transformed": false
     },
     {
@@ -299,9 +299,9 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "c6f59c0f7d7ade8f69a8e6b6caa56af51fe4fdc898c3d209443f39df38930693",
+      "sourceSha256": "60f9c48ef67b80e960060a5912c21c389acecabe7e487d978ab6ae23ec0127ae",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "c6f59c0f7d7ade8f69a8e6b6caa56af51fe4fdc898c3d209443f39df38930693",
+      "destSha256": "60f9c48ef67b80e960060a5912c21c389acecabe7e487d978ab6ae23ec0127ae",
       "transformed": false
     }
   ]

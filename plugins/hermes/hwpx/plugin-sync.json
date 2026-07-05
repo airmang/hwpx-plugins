@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "96ad90e4705a71faa2c9faca89e05ec1708845504def114ece0b4805c9aa52b0",
+      "sourceSha256": "ba5da07c281124cafb2b363aa04bb6193916131525bc11ca13e62c2a12b10710",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "c5f0407644ff7380b8cc9fa0040bda29ff56cd623c670b7539c89d851bc8618e",
+      "destSha256": "ec607f6193843af5a3dbb6a0cf714662233db55c33c5dc04ce888834e001c266",
       "transformed": true
     },
     {
@@ -103,9 +103,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "07ad4842511bcc1c879b6592b1f88b373e27c04902c5bd46d4910fd45cca07ea",
+      "sourceSha256": "3b17c8ffb5a7e4489d98404d5cdddded9e5d0c4fd6e34b00fd71cce5e7a1fc27",
       "dest": "plugins/hermes/hwpx/references/workflows-forms.md",
-      "destSha256": "07ad4842511bcc1c879b6592b1f88b373e27c04902c5bd46d4910fd45cca07ea",
+      "destSha256": "3b17c8ffb5a7e4489d98404d5cdddded9e5d0c4fd6e34b00fd71cce5e7a1fc27",
       "transformed": false
     },
     {

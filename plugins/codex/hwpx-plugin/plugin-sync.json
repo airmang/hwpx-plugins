@@ -103,9 +103,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "d1e9d0f85b7094dedc696849112243b4a491376175abff7d4aab4d28bd9e5241",
+      "sourceSha256": "ad30d8f1383167a43141d99cf6a1791d20866407c83b35648a466248660c4cb4",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-forms.md",
-      "destSha256": "d1e9d0f85b7094dedc696849112243b4a491376175abff7d4aab4d28bd9e5241",
+      "destSha256": "ad30d8f1383167a43141d99cf6a1791d20866407c83b35648a466248660c4cb4",
       "transformed": false
     },
     {

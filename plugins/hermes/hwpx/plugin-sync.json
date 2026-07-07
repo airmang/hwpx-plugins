@@ -103,9 +103,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "ad30d8f1383167a43141d99cf6a1791d20866407c83b35648a466248660c4cb4",
+      "sourceSha256": "9f6e30dfce90ba5d37d8e35ad8e2f9e4e2aff090db9d7482b586b359ceb388e4",
       "dest": "plugins/hermes/hwpx/references/workflows-forms.md",
-      "destSha256": "ad30d8f1383167a43141d99cf6a1791d20866407c83b35648a466248660c4cb4",
+      "destSha256": "9f6e30dfce90ba5d37d8e35ad8e2f9e4e2aff090db9d7482b586b359ceb388e4",
       "transformed": false
     },
     {

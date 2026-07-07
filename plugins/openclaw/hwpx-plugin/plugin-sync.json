@@ -103,9 +103,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "1097d45b5eec439141e44a3c8e842b84ee5d82d8b64b36d6f8a67c2634d47849",
+      "sourceSha256": "43467993ed76a94f7906614dd9c2d7430f6dd582dbfcd96170862ae2378313e4",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-forms.md",
-      "destSha256": "1097d45b5eec439141e44a3c8e842b84ee5d82d8b64b36d6f8a67c2634d47849",
+      "destSha256": "43467993ed76a94f7906614dd9c2d7430f6dd582dbfcd96170862ae2378313e4",
       "transformed": false
     },
     {

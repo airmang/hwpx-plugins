@@ -306,9 +306,9 @@
     },
     {
       "source": "packaging/templates/codex.plugin.json",
-      "sourceSha256": "bb8f9f9a24339779ad98f133a0c05f5ddda2b21d839b65aa770ed2817a153cd1",
+      "sourceSha256": "c3395ef74165fafbdaded171c12130be157fba68701a414cff5fd6783a0db7cb",
       "dest": "plugins/codex/hwpx-plugin/.codex-plugin/plugin.json",
-      "destSha256": "bb8f9f9a24339779ad98f133a0c05f5ddda2b21d839b65aa770ed2817a153cd1",
+      "destSha256": "c3395ef74165fafbdaded171c12130be157fba68701a414cff5fd6783a0db7cb",
       "transformed": false
     },
     {
@@ -320,9 +320,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "0ad7be340411463ad9965906d5dc1e946d2c3bc1af140e99f61bc377ab7ff450",
+      "sourceSha256": "326aafbf6bc5f898a4651ac1f454973e71aaa7ef3aad8c258683d2cac41ffeb9",
       "dest": "plugins/codex/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "0ad7be340411463ad9965906d5dc1e946d2c3bc1af140e99f61bc377ab7ff450",
+      "destSha256": "326aafbf6bc5f898a4651ac1f454973e71aaa7ef3aad8c258683d2cac41ffeb9",
       "transformed": false
     }
   ]

@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "ba5da07c281124cafb2b363aa04bb6193916131525bc11ca13e62c2a12b10710",
+      "sourceSha256": "572ed58fee98a9ed99e7bfe9b5d01e3ea867a5e8d5e494f78d069d175e96f405",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "ba5da07c281124cafb2b363aa04bb6193916131525bc11ca13e62c2a12b10710",
+      "destSha256": "572ed58fee98a9ed99e7bfe9b5d01e3ea867a5e8d5e494f78d069d175e96f405",
       "transformed": true
     },
     {
@@ -103,9 +103,9 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "b837c1743121b4bbec8b8e461e44ac2388a4178702418148557ab537a3cdc71c",
+      "sourceSha256": "09ec1384a7fceca7bcd9327ccfb0fc610b5d5a3280e44158896a7d007373e7ec",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-forms.md",
-      "destSha256": "b837c1743121b4bbec8b8e461e44ac2388a4178702418148557ab537a3cdc71c",
+      "destSha256": "09ec1384a7fceca7bcd9327ccfb0fc610b5d5a3280e44158896a7d007373e7ec",
       "transformed": false
     },
     {
@@ -306,9 +306,9 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "7124dbe98a8b68ee33a1bf021f6b34afb683944290f1fb7d1944f49ddc4238c3",
+      "sourceSha256": "08a035376c32ea53a3315b39ca72331c44897e2928d88b5f6e19fee37ed847fc",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "7124dbe98a8b68ee33a1bf021f6b34afb683944290f1fb7d1944f49ddc4238c3",
+      "destSha256": "08a035376c32ea53a3315b39ca72331c44897e2928d88b5f6e19fee37ed847fc",
       "transformed": false
     },
     {

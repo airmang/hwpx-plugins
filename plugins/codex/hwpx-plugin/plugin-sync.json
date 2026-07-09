@@ -306,9 +306,9 @@
     },
     {
       "source": "packaging/templates/codex.plugin.json",
-      "sourceSha256": "a35ee3e8088a2de8a8ad11615597fb90d29369a912ea82c49047e038f18abe77",
+      "sourceSha256": "13d17811ad55346bb233d2bf1246f2bcfe7bab25973236875eaf8116b0a6318e",
       "dest": "plugins/codex/hwpx-plugin/.codex-plugin/plugin.json",
-      "destSha256": "a35ee3e8088a2de8a8ad11615597fb90d29369a912ea82c49047e038f18abe77",
+      "destSha256": "13d17811ad55346bb233d2bf1246f2bcfe7bab25973236875eaf8116b0a6318e",
       "transformed": false
     },
     {

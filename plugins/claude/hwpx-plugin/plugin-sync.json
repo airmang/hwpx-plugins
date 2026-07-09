@@ -306,9 +306,9 @@
     },
     {
       "source": "packaging/templates/claude.plugin.json",
-      "sourceSha256": "693fe5b6009965d4b63968b8350b73d277bb10cc7f7b142c742ca5662e72c7b2",
+      "sourceSha256": "1c6f7d9e057ad30cb8300c3489361578c3734feea0d16a2b5f9ae5ed5a0cc9fa",
       "dest": "plugins/claude/hwpx-plugin/.claude-plugin/plugin.json",
-      "destSha256": "693fe5b6009965d4b63968b8350b73d277bb10cc7f7b142c742ca5662e72c7b2",
+      "destSha256": "1c6f7d9e057ad30cb8300c3489361578c3734feea0d16a2b5f9ae5ed5a0cc9fa",
       "transformed": false
     },
     {

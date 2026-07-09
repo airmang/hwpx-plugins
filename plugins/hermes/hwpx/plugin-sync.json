@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "68687175e0e3848e63537e2a8d1c8685bd39d416dfc4ca8054d72617dd1bf1e1",
+      "sourceSha256": "2e19d964614e03eaa7f08c2c77435ea6cf0f3ebfaf1e7ab29bbd3e31c353d05c",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "68687175e0e3848e63537e2a8d1c8685bd39d416dfc4ca8054d72617dd1bf1e1",
+      "destSha256": "2e19d964614e03eaa7f08c2c77435ea6cf0f3ebfaf1e7ab29bbd3e31c353d05c",
       "transformed": false
     },
     {

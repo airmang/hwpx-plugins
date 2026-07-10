@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요. 줄간격·여백·쪽번호·머리글 등 서식 변경, 그림 삽입/교체, 문서 비교·신구대조표, 메일머지 대량생산(상장·수료증·가정통신문), 사진대지·회의명패·조직도 생성, 표 합계/소계 계산 요청도 모두 이 스킬의 대상입니다."
-version: 0.1.24
+version: 0.1.25
 author: Kohkyuhyun
 license: Apache-2.0
 metadata:
@@ -112,7 +112,7 @@ MCP 서버가 연결되어 있으면 작업 전에 `mcp_server_health()`를 호�
 - [`references/workflows-pii.md`](references/workflows-pii.md) — 개인정보(PII) 탐지·마스킹(양식채움·메일머지·추출 기본 마스킹) + 가명/비식별. `scan_personal_info` · `mask` param. `hwpx-mcp-server>=2.10.0`.
 - [`references/workflows-reading.md`](references/workflows-reading.md) — 런서식(굵게·색·크기·글꼴)+각주/미주 본문 충실 읽기. `hwpx_extract_json`(`format_detail`·`doc.notes[]`)·`hwpx_to_markdown` 각주 부록, `document_to_markdown` 로컬 ingest.
 - [`references/workflows-toc.md`](references/workflows-toc.md) — 네이티브 자동 차례·상호참조(재페이지네이션 시 한컴이 재번호). `add_toc`·`add_cross_reference`·`verify_toc`. `hwpx-mcp-server>=2.12.0`.
-- **처음 이 스킬로 HWPX 작업 시작 시**: `describe_capabilities`(작업군별 능력 지도)를 먼저 부르면 ~150개 도구가 무엇을 하는지 한눈에 파악된다.
+- **처음 이 스킬로 HWPX 작업 시작 시**: `describe_capabilities`로 실제 FastMCP 작업군을 확인한다. 정확한 default/advanced/필수 도구 계약은 자동 생성된 [`tool-contract.generated.md`](references/tool-contract.generated.md)가 정본이다.
 - [`references/workflows-forms.md`](references/workflows-forms.md) — 양식 4경로 결정표 + **⓪ 처음 보는 양식 정찰·상의(동적 form-fill)**. `scan_form_guidance`·`apply_body_ops`·`apply_table_ops`(split_cell_vertical·clone_table 등)·`inspect_fill_residue`·`verify_form_fill`. `hwpx-mcp-server>=2.17.0`.
 - [`references/workflows-exam.md`](references/workflows-exam.md) — 시험지 조판: 출제 md→학교 양식 재조판, 문항 keep-together, 커브-export 정직 게이트(시각 증거). `hwpx-mcp-server>=2.7.0`.
 - [`references/workflows-bulk-compare.md`](references/workflows-bulk-compare.md) — 메일머지, 표 계산, 신구대조, 생성기 3종, 스타일 프로파일/템플릿.

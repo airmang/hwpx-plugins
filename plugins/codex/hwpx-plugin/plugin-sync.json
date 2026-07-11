@@ -348,9 +348,9 @@
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "8ba9e9b866f35c6d2b6f0f453e42a4cde9e835369f7458a568e599a06d084f8d",
+      "sourceSha256": "ac9b5f01ce3c4e3543d91267f384477bd88901c21f0db0f19e44d7cd67faa79d",
       "dest": "plugins/codex/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "8ba9e9b866f35c6d2b6f0f453e42a4cde9e835369f7458a568e599a06d084f8d",
+      "destSha256": "ac9b5f01ce3c4e3543d91267f384477bd88901c21f0db0f19e44d7cd67faa79d",
       "transformed": false
     }
   ]

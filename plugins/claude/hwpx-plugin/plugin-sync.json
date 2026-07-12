@@ -313,44 +313,58 @@
     },
     {
       "source": "examples/s070_fixture_benchmark/judge-templates/judge-a.json",
-      "sourceSha256": "66defc93c40a8660e56f3fb795b53a022f8af85df067f60a6c0b8a7f37f73221",
+      "sourceSha256": "b55b9d6ed636922baaa9a59b03b23acbee542175ec93de28bddc1374f451b578",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/judge-templates/judge-a.json",
-      "destSha256": "66defc93c40a8660e56f3fb795b53a022f8af85df067f60a6c0b8a7f37f73221",
+      "destSha256": "b55b9d6ed636922baaa9a59b03b23acbee542175ec93de28bddc1374f451b578",
       "transformed": false
     },
     {
       "source": "examples/s070_fixture_benchmark/judge-templates/judge-b.json",
-      "sourceSha256": "03f979ec51308d3f9de1fc41f7c3f8a2d1c61b1192ffeec06b447e13988d527d",
+      "sourceSha256": "64cc6d4eff53863ab284b619df7366aa4f4667be7cb639cd48db08928b0b321d",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/judge-templates/judge-b.json",
-      "destSha256": "03f979ec51308d3f9de1fc41f7c3f8a2d1c61b1192ffeec06b447e13988d527d",
+      "destSha256": "64cc6d4eff53863ab284b619df7366aa4f4667be7cb639cd48db08928b0b321d",
       "transformed": false
     },
     {
       "source": "examples/s070_fixture_benchmark/result-manifest.json",
-      "sourceSha256": "c3aae9b02498000eb213f7db6e816b6762e6114fa17caf445048351b3ed4928a",
+      "sourceSha256": "a37572352d127c47d750db01c3a07f3449b405a5cb7344a2128bb8dc2ddd81f2",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/result-manifest.json",
-      "destSha256": "c3aae9b02498000eb213f7db6e816b6762e6114fa17caf445048351b3ed4928a",
+      "destSha256": "a37572352d127c47d750db01c3a07f3449b405a5cb7344a2128bb8dc2ddd81f2",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/final-manifest.json",
+      "sourceSha256": "02b0e2ba60159662fd3dbb6de2a329c18d26e783186ead6eb10608a7e68ac0b2",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/final-manifest.json",
+      "destSha256": "02b0e2ba60159662fd3dbb6de2a329c18d26e783186ead6eb10608a7e68ac0b2",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/adjudication.json",
+      "sourceSha256": "8096e6fbd2069126b130720adff03995c3efd8423b4108a4c60cf32d0db9f009",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/adjudication.json",
+      "destSha256": "8096e6fbd2069126b130720adff03995c3efd8423b4108a4c60cf32d0db9f009",
       "transformed": false
     },
     {
       "source": "examples/s070_fixture_benchmark/public/fixture-report.md",
-      "sourceSha256": "1bbe4ff126ece367cacaabe0525a3df3f640d6da7914065030710919003504e6",
+      "sourceSha256": "f49cab9e95a4002701b7cfc81095c493682c7c94ff4d5abe1a63011de63d62b6",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-report.md",
-      "destSha256": "1bbe4ff126ece367cacaabe0525a3df3f640d6da7914065030710919003504e6",
+      "destSha256": "f49cab9e95a4002701b7cfc81095c493682c7c94ff4d5abe1a63011de63d62b6",
       "transformed": false
     },
     {
       "source": "examples/s070_fixture_benchmark/public/fixture-gallery.json",
-      "sourceSha256": "4ea68466d21090c8d98505b88519e39312ac7a70db3b61e9b7a862c1b206c1ee",
+      "sourceSha256": "748df3e8ce6a2db417f6e501ed329bcdf15b84df7adfbc0b25679693fe1ece04",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-gallery.json",
-      "destSha256": "4ea68466d21090c8d98505b88519e39312ac7a70db3b61e9b7a862c1b206c1ee",
+      "destSha256": "748df3e8ce6a2db417f6e501ed329bcdf15b84df7adfbc0b25679693fe1ece04",
       "transformed": false
     },
     {
       "source": "examples/s070_fixture_benchmark/public/fixture-scorecard.json",
-      "sourceSha256": "fcbb0c8c67dd6d12c127b7375c6a4ebc387583af7cfbb273c423b4c808787a0e",
+      "sourceSha256": "b0b89bd18d42b3479d0443ebf2eb5d27f9c44658b993015c8172f9c31cddcfb5",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-scorecard.json",
-      "destSha256": "fcbb0c8c67dd6d12c127b7375c6a4ebc387583af7cfbb273c423b4c808787a0e",
+      "destSha256": "b0b89bd18d42b3479d0443ebf2eb5d27f9c44658b993015c8172f9c31cddcfb5",
       "transformed": false
     },
     {
@@ -418,16 +432,16 @@
     },
     {
       "source": "scripts/fixture_benchmark.py",
-      "sourceSha256": "e286fcf93d7d0df8aaac35b0cba8ee64ef76f260e45126d16aded009ecd2dc66",
+      "sourceSha256": "37b61ca1d6e991fbaf799148f275996805e69ddba438bb6ed39eecbb7cc46a84",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/fixture_benchmark.py",
-      "destSha256": "e286fcf93d7d0df8aaac35b0cba8ee64ef76f260e45126d16aded009ecd2dc66",
+      "destSha256": "37b61ca1d6e991fbaf799148f275996805e69ddba438bb6ed39eecbb7cc46a84",
       "transformed": false
     },
     {
       "source": "scripts/plugin_fixture_benchmark_e2e.py",
-      "sourceSha256": "aad5a67a0f4d0381cf60f3e94904427c44170638aca5c0ccbca4ac3577ba0588",
+      "sourceSha256": "7170e0633a1eae38b8728871b5132e23363b00269f39f6c137725ed3a8f85214",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/plugin_fixture_benchmark_e2e.py",
-      "destSha256": "aad5a67a0f4d0381cf60f3e94904427c44170638aca5c0ccbca4ac3577ba0588",
+      "destSha256": "7170e0633a1eae38b8728871b5132e23363b00269f39f6c137725ed3a8f85214",
       "transformed": false
     },
     {

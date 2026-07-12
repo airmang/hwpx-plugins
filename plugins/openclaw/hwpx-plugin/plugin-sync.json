@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "b4f2082254a27c0450040f71488c98377fe17f96c8ae7df701f6da40f11ec734",
+      "sourceSha256": "591b2abefd7f06200f3afc5b3a1d9dbf3f4f1c524d53ff4c044e4336c35e0db5",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "b4f2082254a27c0450040f71488c98377fe17f96c8ae7df701f6da40f11ec734",
+      "destSha256": "591b2abefd7f06200f3afc5b3a1d9dbf3f4f1c524d53ff4c044e4336c35e0db5",
       "transformed": true
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "references/evidence-contract.md",
-      "sourceSha256": "99829b7191dd09f65c4e4bb3adc8d665206f48d75af483774b4bbe63e887cbf8",
+      "sourceSha256": "70eafc310443ba8ca7ed5a04a1de2e71538c243b3595ddcfa90793a6f9ddcc40",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/evidence-contract.md",
-      "destSha256": "99829b7191dd09f65c4e4bb3adc8d665206f48d75af483774b4bbe63e887cbf8",
+      "destSha256": "70eafc310443ba8ca7ed5a04a1de2e71538c243b3595ddcfa90793a6f9ddcc40",
       "transformed": false
     },
     {
@@ -71,6 +71,13 @@
       "sourceSha256": "c25c452eb42ac6bb4fcb4d919835c2430a9619925cc542deb88220df49cb2392",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-real-hancom-render.md",
       "destSha256": "c25c452eb42ac6bb4fcb4d919835c2430a9619925cc542deb88220df49cb2392",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-visual-fixture-qa.md",
+      "sourceSha256": "e13bad2fd11ba631b4a58316d2ee340c548c9cb17e3eb62241ef56744690f621",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-visual-fixture-qa.md",
+      "destSha256": "e13bad2fd11ba631b4a58316d2ee340c548c9cb17e3eb62241ef56744690f621",
       "transformed": false
     },
     {
@@ -309,6 +316,13 @@
       "sourceSha256": "45f801d524ce7d6b610c02fbe9a6d943f1326924bec84b01234f84cfd531caa7",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/task_eval_harness.py",
       "destSha256": "45f801d524ce7d6b610c02fbe9a6d943f1326924bec84b01234f84cfd531caa7",
+      "transformed": false
+    },
+    {
+      "source": "scripts/plugin_fixture_qa_e2e.py",
+      "sourceSha256": "2b4264043843fcfcc2edf4a0ae13c41218f413559f35bbc86509081f6e7e70ff",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/plugin_fixture_qa_e2e.py",
+      "destSha256": "2b4264043843fcfcc2edf4a0ae13c41218f413559f35bbc86509081f6e7e70ff",
       "transformed": false
     },
     {

@@ -320,9 +320,9 @@
     },
     {
       "source": "scripts/plugin_fixture_qa_e2e.py",
-      "sourceSha256": "2b4264043843fcfcc2edf4a0ae13c41218f413559f35bbc86509081f6e7e70ff",
+      "sourceSha256": "e10c58e52a78df2338a3832389b89d400707ef8ab5518dda3fda2ec2be65c8ba",
       "dest": "plugins/hermes/hwpx/scripts/plugin_fixture_qa_e2e.py",
-      "destSha256": "2b4264043843fcfcc2edf4a0ae13c41218f413559f35bbc86509081f6e7e70ff",
+      "destSha256": "e10c58e52a78df2338a3832389b89d400707ef8ab5518dda3fda2ec2be65c8ba",
       "transformed": false
     },
     {

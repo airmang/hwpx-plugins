@@ -5,16 +5,16 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "dcc67d83325069508e0ef28005cf8acd04c78a0f5599b31075f29ab09ef3e7df",
+      "sourceSha256": "8c46e22a64e4c8214458993ec106850c0bd875ddd154b0aeccfbd594b8ce506c",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "dcc67d83325069508e0ef28005cf8acd04c78a0f5599b31075f29ab09ef3e7df",
+      "destSha256": "8c46e22a64e4c8214458993ec106850c0bd875ddd154b0aeccfbd594b8ce506c",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "05b62598db3dfed684dbacd4fb3987607c04afba0882d9d9742f8dde52cb2113",
+      "sourceSha256": "2ed5a4e601b3444f6dd3b705c6371a66a7077a183ab327330d0e2fbd057672b3",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "05b62598db3dfed684dbacd4fb3987607c04afba0882d9d9742f8dde52cb2113",
+      "destSha256": "2ed5a4e601b3444f6dd3b705c6371a66a7077a183ab327330d0e2fbd057672b3",
       "transformed": false
     },
     {
@@ -47,16 +47,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "fda0384376d32115cbcf9859f9a0d741d9b263c2c656866918f108fb970f420c",
+      "sourceSha256": "5265643f3c14c3c8065daea1ebbe8dc3562b888fce9652af0b0a1c8c55b5a1c8",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "fda0384376d32115cbcf9859f9a0d741d9b263c2c656866918f108fb970f420c",
+      "destSha256": "5265643f3c14c3c8065daea1ebbe8dc3562b888fce9652af0b0a1c8c55b5a1c8",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "d02009cf44fc27b34911a0aba0117f2ff7dec8f43a3c9ef9a270f59b81523228",
+      "sourceSha256": "3d56eff43dc4a34be4d5aeaf71658bb2ffcb9e6543d969540f57d86b432e8e4f",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "d02009cf44fc27b34911a0aba0117f2ff7dec8f43a3c9ef9a270f59b81523228",
+      "destSha256": "3d56eff43dc4a34be4d5aeaf71658bb2ffcb9e6543d969540f57d86b432e8e4f",
       "transformed": false
     },
     {
@@ -78,6 +78,13 @@
       "sourceSha256": "e13bad2fd11ba631b4a58316d2ee340c548c9cb17e3eb62241ef56744690f621",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-visual-fixture-qa.md",
       "destSha256": "e13bad2fd11ba631b4a58316d2ee340c548c9cb17e3eb62241ef56744690f621",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-fixture-benchmark.md",
+      "sourceSha256": "6746fffc0ccc8aba5a6ba1a69d49663d8357ddb0bfdceb74d13e0f402b7e1877",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-fixture-benchmark.md",
+      "destSha256": "6746fffc0ccc8aba5a6ba1a69d49663d8357ddb0bfdceb74d13e0f402b7e1877",
       "transformed": false
     },
     {
@@ -263,6 +270,90 @@
       "transformed": false
     },
     {
+      "source": "examples/s070_fixture_benchmark/manifest.json",
+      "sourceSha256": "ddf5d7920c3da5017533b48a874ca726a8c0fa635f2991165e716fb5d16056e2",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/manifest.json",
+      "destSha256": "ddf5d7920c3da5017533b48a874ca726a8c0fa635f2991165e716fb5d16056e2",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/work-orders.json",
+      "sourceSha256": "207c24d57936a4cb11471e7bcff8880cb7017fcf3ea67c15a8547e62dbd8111e",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/work-orders.json",
+      "destSha256": "207c24d57936a4cb11471e7bcff8880cb7017fcf3ea67c15a8547e62dbd8111e",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/rubric-v1.json",
+      "sourceSha256": "037f68f95e94f4472ff244c5b26bd1b18d1b86591ad45d42273ef4bcf9dcbc06",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/rubric-v1.json",
+      "destSha256": "037f68f95e94f4472ff244c5b26bd1b18d1b86591ad45d42273ef4bcf9dcbc06",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/profiles/fixture-client-cautious-1.0.0.json",
+      "sourceSha256": "307d0a27954f6cd2adc8987dfcff64a3a9051c763f9470930e491daba71a99c5",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/profiles/fixture-client-cautious-1.0.0.json",
+      "destSha256": "307d0a27954f6cd2adc8987dfcff64a3a9051c763f9470930e491daba71a99c5",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/profiles/fixture-client-direct-1.0.0.json",
+      "sourceSha256": "9fdb32910ee9ce2f370d36a373ac1a3f2aaa395560085810dc6eedf5f953331c",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/profiles/fixture-client-direct-1.0.0.json",
+      "destSha256": "9fdb32910ee9ce2f370d36a373ac1a3f2aaa395560085810dc6eedf5f953331c",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/profiles/fixture-client-resume-1.0.0.json",
+      "sourceSha256": "9c385fd6932ee58b986789b42083ed8d78216c7e615269b6dd0dbaa901917b43",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/profiles/fixture-client-resume-1.0.0.json",
+      "destSha256": "9c385fd6932ee58b986789b42083ed8d78216c7e615269b6dd0dbaa901917b43",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/judge-templates/judge-a.json",
+      "sourceSha256": "66defc93c40a8660e56f3fb795b53a022f8af85df067f60a6c0b8a7f37f73221",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/judge-templates/judge-a.json",
+      "destSha256": "66defc93c40a8660e56f3fb795b53a022f8af85df067f60a6c0b8a7f37f73221",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/judge-templates/judge-b.json",
+      "sourceSha256": "03f979ec51308d3f9de1fc41f7c3f8a2d1c61b1192ffeec06b447e13988d527d",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/judge-templates/judge-b.json",
+      "destSha256": "03f979ec51308d3f9de1fc41f7c3f8a2d1c61b1192ffeec06b447e13988d527d",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/result-manifest.json",
+      "sourceSha256": "c3aae9b02498000eb213f7db6e816b6762e6114fa17caf445048351b3ed4928a",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/result-manifest.json",
+      "destSha256": "c3aae9b02498000eb213f7db6e816b6762e6114fa17caf445048351b3ed4928a",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/public/fixture-report.md",
+      "sourceSha256": "1bbe4ff126ece367cacaabe0525a3df3f640d6da7914065030710919003504e6",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-report.md",
+      "destSha256": "1bbe4ff126ece367cacaabe0525a3df3f640d6da7914065030710919003504e6",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/public/fixture-gallery.json",
+      "sourceSha256": "4ea68466d21090c8d98505b88519e39312ac7a70db3b61e9b7a862c1b206c1ee",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-gallery.json",
+      "destSha256": "4ea68466d21090c8d98505b88519e39312ac7a70db3b61e9b7a862c1b206c1ee",
+      "transformed": false
+    },
+    {
+      "source": "examples/s070_fixture_benchmark/public/fixture-scorecard.json",
+      "sourceSha256": "fcbb0c8c67dd6d12c127b7375c6a4ebc387583af7cfbb273c423b4c808787a0e",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/s070_fixture_benchmark/public/fixture-scorecard.json",
+      "destSha256": "fcbb0c8c67dd6d12c127b7375c6a4ebc387583af7cfbb273c423b4c808787a0e",
+      "transformed": false
+    },
+    {
       "source": "examples/eval_tasks/tasks.json",
       "sourceSha256": "da709e6809e7445a7d43231272061af9093755cba6ae6ddea292426661ab8be8",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/eval_tasks/tasks.json",
@@ -326,6 +417,20 @@
       "transformed": false
     },
     {
+      "source": "scripts/fixture_benchmark.py",
+      "sourceSha256": "e286fcf93d7d0df8aaac35b0cba8ee64ef76f260e45126d16aded009ecd2dc66",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/fixture_benchmark.py",
+      "destSha256": "e286fcf93d7d0df8aaac35b0cba8ee64ef76f260e45126d16aded009ecd2dc66",
+      "transformed": false
+    },
+    {
+      "source": "scripts/plugin_fixture_benchmark_e2e.py",
+      "sourceSha256": "aad5a67a0f4d0381cf60f3e94904427c44170638aca5c0ccbca4ac3577ba0588",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/plugin_fixture_benchmark_e2e.py",
+      "destSha256": "aad5a67a0f4d0381cf60f3e94904427c44170638aca5c0ccbca4ac3577ba0588",
+      "transformed": false
+    },
+    {
       "source": "scripts/text_extract.py",
       "sourceSha256": "950f05cace6a854990e928b174dfc375a6e272eacb50e03bb14f3a1924232ca8",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/text_extract.py",
@@ -348,16 +453,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "a6515adb4e3b90d6e28e1cbc3f65708faade42692bdd5b111c3a7bdd40e3c41a",
+      "sourceSha256": "0541768f663c0c465be9efa98e5d54c928cb5f60f28a3a1798d3f2dc7dfafe0d",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "a6515adb4e3b90d6e28e1cbc3f65708faade42692bdd5b111c3a7bdd40e3c41a",
+      "destSha256": "0541768f663c0c465be9efa98e5d54c928cb5f60f28a3a1798d3f2dc7dfafe0d",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "61db8b433f670c1d3edcb3b8459012192598e3202c6ac6e5ed7e88a87b7f368f",
+      "sourceSha256": "6be7f5bd13244d716170d5e9489d43c29290b05574767dcd20a7e00b67a85653",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "61db8b433f670c1d3edcb3b8459012192598e3202c6ac6e5ed7e88a87b7f368f",
+      "destSha256": "6be7f5bd13244d716170d5e9489d43c29290b05574767dcd20a7e00b67a85653",
       "transformed": false
     }
   ]

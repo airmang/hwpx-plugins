@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "11a0b3ee426d93dc17a8ad13ec3ea1578012af489d89099e30663bf31fc07e02",
+      "sourceSha256": "d1ae672b7b9686896adfced85c711eabd51f1d7ef77916b464e2d6dbb38e97c7",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "e49d09f14543420fb74c1ee9f8a7228dfefd573c75f0338be745c31e42fe3956",
+      "destSha256": "81ae817eceaaf57539978853d4e5b1905e318e83e784bb8ae8a2a7f60c695d97",
       "transformed": true
     },
     {
@@ -47,16 +47,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "5265643f3c14c3c8065daea1ebbe8dc3562b888fce9652af0b0a1c8c55b5a1c8",
+      "sourceSha256": "74d07f089132cb1adccbf5b0328d205b1d234e82293164c1b12f8c94ec93e0cb",
       "dest": "plugins/hermes/hwpx/references/tool-contract.generated.md",
-      "destSha256": "5265643f3c14c3c8065daea1ebbe8dc3562b888fce9652af0b0a1c8c55b5a1c8",
+      "destSha256": "74d07f089132cb1adccbf5b0328d205b1d234e82293164c1b12f8c94ec93e0cb",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "3d56eff43dc4a34be4d5aeaf71658bb2ffcb9e6543d969540f57d86b432e8e4f",
+      "sourceSha256": "8637c493b91314140f8eae414afd9f177069ddf2305862e424d1b3745c29035e",
       "dest": "plugins/hermes/hwpx/references/tool-contract.generated.json",
-      "destSha256": "3d56eff43dc4a34be4d5aeaf71658bb2ffcb9e6543d969540f57d86b432e8e4f",
+      "destSha256": "8637c493b91314140f8eae414afd9f177069ddf2305862e424d1b3745c29035e",
       "transformed": false
     },
     {
@@ -85,6 +85,13 @@
       "sourceSha256": "6746fffc0ccc8aba5a6ba1a69d49663d8357ddb0bfdceb74d13e0f402b7e1877",
       "dest": "plugins/hermes/hwpx/references/workflows-fixture-benchmark.md",
       "destSha256": "6746fffc0ccc8aba5a6ba1a69d49663d8357ddb0bfdceb74d13e0f402b7e1877",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-private-practice.md",
+      "sourceSha256": "76ed90351e2b60f008e90fdb9906e465a6b8f915e6633e9516883a7aa529eaa8",
+      "dest": "plugins/hermes/hwpx/references/workflows-private-practice.md",
+      "destSha256": "76ed90351e2b60f008e90fdb9906e465a6b8f915e6633e9516883a7aa529eaa8",
       "transformed": false
     },
     {

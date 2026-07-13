@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "8c46e22a64e4c8214458993ec106850c0bd875ddd154b0aeccfbd594b8ce506c",
+      "sourceSha256": "11a0b3ee426d93dc17a8ad13ec3ea1578012af489d89099e30663bf31fc07e02",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "fc6659756eb1ef4be0c61a9dd91ca099a8e483dc9c81ab4281c6f42115d520c8",
+      "destSha256": "e49d09f14543420fb74c1ee9f8a7228dfefd573c75f0338be745c31e42fe3956",
       "transformed": true
     },
     {
@@ -61,16 +61,16 @@
     },
     {
       "source": "references/workflows-autonomous.md",
-      "sourceSha256": "abcd91ea874219e29f5c33f5d2aa5db81dca6e940aa39f49be31f7f06238a0f1",
+      "sourceSha256": "019a96752c072dc81ff37ccede3ed9ac6d6f584f427aecc47a059803184a63a7",
       "dest": "plugins/hermes/hwpx/references/workflows-autonomous.md",
-      "destSha256": "abcd91ea874219e29f5c33f5d2aa5db81dca6e940aa39f49be31f7f06238a0f1",
+      "destSha256": "019a96752c072dc81ff37ccede3ed9ac6d6f584f427aecc47a059803184a63a7",
       "transformed": false
     },
     {
       "source": "references/workflows-real-hancom-render.md",
-      "sourceSha256": "c25c452eb42ac6bb4fcb4d919835c2430a9619925cc542deb88220df49cb2392",
+      "sourceSha256": "260e7c704a1b5540b27f71765e5ab62242797dfcbc0dbc78364d0440a1f5397e",
       "dest": "plugins/hermes/hwpx/references/workflows-real-hancom-render.md",
-      "destSha256": "c25c452eb42ac6bb4fcb4d919835c2430a9619925cc542deb88220df49cb2392",
+      "destSha256": "260e7c704a1b5540b27f71765e5ab62242797dfcbc0dbc78364d0440a1f5397e",
       "transformed": false
     },
     {

@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "074abeaf2466dc22d51956d737e2a26a896e281c835f394776bc23f101b8534c",
+      "sourceSha256": "67f1c7613c8ee1c868f17549c4d71bc0e62f0ea6c6f448658baaba07ebe118db",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "074abeaf2466dc22d51956d737e2a26a896e281c835f394776bc23f101b8534c",
+      "destSha256": "67f1c7613c8ee1c868f17549c4d71bc0e62f0ea6c6f448658baaba07ebe118db",
       "transformed": true
     },
     {
@@ -47,16 +47,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "f3c8131fa9d6fbb39f6ebcfa4dee42d903e090dd3dfbf349bbae3f3bc1ca2f7a",
+      "sourceSha256": "29d77456577a5db1bdb45f2268a4ab4c64274e018b3d4dab1d5985aefb393231",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "f3c8131fa9d6fbb39f6ebcfa4dee42d903e090dd3dfbf349bbae3f3bc1ca2f7a",
+      "destSha256": "29d77456577a5db1bdb45f2268a4ab4c64274e018b3d4dab1d5985aefb393231",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "a0cd8d3a583c78bfb2c403ddcc88e80e57f55065ecca7659806cc77ebe42acc8",
+      "sourceSha256": "b348d65ff9710b94cfcb9852f39f4b293a63f833b6df8ae9d85fcc6ab3f55f07",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "a0cd8d3a583c78bfb2c403ddcc88e80e57f55065ecca7659806cc77ebe42acc8",
+      "destSha256": "b348d65ff9710b94cfcb9852f39f4b293a63f833b6df8ae9d85fcc6ab3f55f07",
       "transformed": false
     },
     {
@@ -64,6 +64,13 @@
       "sourceSha256": "019a96752c072dc81ff37ccede3ed9ac6d6f584f427aecc47a059803184a63a7",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-autonomous.md",
       "destSha256": "019a96752c072dc81ff37ccede3ed9ac6d6f584f427aecc47a059803184a63a7",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-agent-document.md",
+      "sourceSha256": "eff5a26e4284be1dfd7d3fa3aceb45521289b78345386b631a18be3e4b29c44f",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-agent-document.md",
+      "destSha256": "eff5a26e4284be1dfd7d3fa3aceb45521289b78345386b631a18be3e4b29c44f",
       "transformed": false
     },
     {

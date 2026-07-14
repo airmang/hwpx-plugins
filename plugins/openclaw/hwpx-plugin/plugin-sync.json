@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "d1ae672b7b9686896adfced85c711eabd51f1d7ef77916b464e2d6dbb38e97c7",
+      "sourceSha256": "074abeaf2466dc22d51956d737e2a26a896e281c835f394776bc23f101b8534c",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "d1ae672b7b9686896adfced85c711eabd51f1d7ef77916b464e2d6dbb38e97c7",
+      "destSha256": "074abeaf2466dc22d51956d737e2a26a896e281c835f394776bc23f101b8534c",
       "transformed": true
     },
     {
@@ -47,16 +47,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "74d07f089132cb1adccbf5b0328d205b1d234e82293164c1b12f8c94ec93e0cb",
+      "sourceSha256": "f3c8131fa9d6fbb39f6ebcfa4dee42d903e090dd3dfbf349bbae3f3bc1ca2f7a",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "74d07f089132cb1adccbf5b0328d205b1d234e82293164c1b12f8c94ec93e0cb",
+      "destSha256": "f3c8131fa9d6fbb39f6ebcfa4dee42d903e090dd3dfbf349bbae3f3bc1ca2f7a",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "8637c493b91314140f8eae414afd9f177069ddf2305862e424d1b3745c29035e",
+      "sourceSha256": "a0cd8d3a583c78bfb2c403ddcc88e80e57f55065ecca7659806cc77ebe42acc8",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "8637c493b91314140f8eae414afd9f177069ddf2305862e424d1b3745c29035e",
+      "destSha256": "a0cd8d3a583c78bfb2c403ddcc88e80e57f55065ecca7659806cc77ebe42acc8",
       "transformed": false
     },
     {
@@ -89,9 +89,9 @@
     },
     {
       "source": "references/workflows-private-practice.md",
-      "sourceSha256": "76ed90351e2b60f008e90fdb9906e465a6b8f915e6633e9516883a7aa529eaa8",
+      "sourceSha256": "acffe9310cbaeacbbe4fe207bd8d5c93a3ff7be502811cd5378bc09723d42937",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-private-practice.md",
-      "destSha256": "76ed90351e2b60f008e90fdb9906e465a6b8f915e6633e9516883a7aa529eaa8",
+      "destSha256": "acffe9310cbaeacbbe4fe207bd8d5c93a3ff7be502811cd5378bc09723d42937",
       "transformed": false
     },
     {
@@ -481,9 +481,9 @@
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "6be7f5bd13244d716170d5e9489d43c29290b05574767dcd20a7e00b67a85653",
+      "sourceSha256": "11916c1e160d5016021009418cb741f5685a9c1b010949f775d61339ebd596bf",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "6be7f5bd13244d716170d5e9489d43c29290b05574767dcd20a7e00b67a85653",
+      "destSha256": "11916c1e160d5016021009418cb741f5685a9c1b010949f775d61339ebd596bf",
       "transformed": false
     }
   ]

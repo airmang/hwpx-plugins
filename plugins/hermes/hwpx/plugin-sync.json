@@ -5,16 +5,16 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "5aa59c4df8b281be4e57408df882d4fdeaae6be79d6724994daebba3ce4490eb",
+      "sourceSha256": "93483a2983c5417ff838d3a063f791796ba3f3369c6edc35dc95584e7b2348fc",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "3a91898f2588020d12d5a5845c32a91d06d453ac406d8ba70480a53cfbfbe9db",
+      "destSha256": "9e5ca43c6d16ae4c4d91106c8fe168251c567dcef15945514032ae80d063422c",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "e7ad8531d326a62f0a22413e9ddfae160f66d1e62c89a8d1ed10616c8e494c07",
+      "sourceSha256": "503f267c399f1e9dcd77d392c42bba318a3f91df4fc94e6dc96158d0ba61ee1c",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "e7ad8531d326a62f0a22413e9ddfae160f66d1e62c89a8d1ed10616c8e494c07",
+      "destSha256": "503f267c399f1e9dcd77d392c42bba318a3f91df4fc94e6dc96158d0ba61ee1c",
       "transformed": false
     },
     {
@@ -47,16 +47,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "f2a74fe47376bf014b0fb2a11c53e53cca11f03abec216b3980083f61a43070a",
+      "sourceSha256": "371f35e4f4a4111d5faab29b7281bf39ae7f01e52b6febcfe970d53fb28457df",
       "dest": "plugins/hermes/hwpx/references/tool-contract.generated.md",
-      "destSha256": "f2a74fe47376bf014b0fb2a11c53e53cca11f03abec216b3980083f61a43070a",
+      "destSha256": "371f35e4f4a4111d5faab29b7281bf39ae7f01e52b6febcfe970d53fb28457df",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "7226b01e5c96d373b5b9b31bb9de3736ebc59b9b69494f5ee2bf700d1b33ae7c",
+      "sourceSha256": "04d4cf321625c10c688db67e6e1b2d5226c3c12a929fd097d3924068a8000278",
       "dest": "plugins/hermes/hwpx/references/tool-contract.generated.json",
-      "destSha256": "7226b01e5c96d373b5b9b31bb9de3736ebc59b9b69494f5ee2bf700d1b33ae7c",
+      "destSha256": "04d4cf321625c10c688db67e6e1b2d5226c3c12a929fd097d3924068a8000278",
       "transformed": false
     },
     {

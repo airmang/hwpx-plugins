@@ -1,9 +1,12 @@
 {
   "schemaVersion": "hwpx.task-eval-profile.v1",
-  "id": "current-0.1.9",
-  "label": "Structured heading release bundle",
-  "pluginVersion": "0.1.9",
-  "availableTools": ["*"],
+  "id": "current-0.3.0",
+  "label": "S-079 deterministic direct-call replay profile",
+  "pluginVersion": "0.3.0",
+  "availableTools": {
+    "source": "generated-contract",
+    "profile": "default"
+  },
   "brokenTools": [],
   "guidanceTags": [
     "generation",

@@ -61,16 +61,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "c9e22d85bec364eb9a793fecbfbe2fc110f069d33aeed016e7b8ea3acca312bc",
+      "sourceSha256": "1a835ea1c9c85cf5aa81f2edcdc957b8791b975888d5f8442cf31a0bd2fbdd78",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "c9e22d85bec364eb9a793fecbfbe2fc110f069d33aeed016e7b8ea3acca312bc",
+      "destSha256": "1a835ea1c9c85cf5aa81f2edcdc957b8791b975888d5f8442cf31a0bd2fbdd78",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "cd7bb028619cf9030d3c5ed9f3bea7add0f14c137aebaacd79456b3c17012008",
+      "sourceSha256": "f11c44f81e4397dc14282e5640f11aef6fbc4758d150b8b0cb26e5e8eb6f98a0",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "cd7bb028619cf9030d3c5ed9f3bea7add0f14c137aebaacd79456b3c17012008",
+      "destSha256": "f11c44f81e4397dc14282e5640f11aef6fbc4758d150b8b0cb26e5e8eb6f98a0",
       "transformed": false
     },
     {

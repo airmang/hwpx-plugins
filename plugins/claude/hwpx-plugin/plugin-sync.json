@@ -5,37 +5,37 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "0fa8c393d4ae7da3fffe549f43fa783c9a98bcef6d0ffe54ef7f20a8b4155d47",
+      "sourceSha256": "ae4f4e3af007b47d07812048b139790676a732ec75623b12f8c1ddc871d48f3b",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "0fa8c393d4ae7da3fffe549f43fa783c9a98bcef6d0ffe54ef7f20a8b4155d47",
+      "destSha256": "ae4f4e3af007b47d07812048b139790676a732ec75623b12f8c1ddc871d48f3b",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "192a2560b3163cf095210fdece50156d16b8fd63ea7ec278d0b61924c4ef5f72",
+      "sourceSha256": "a7e894489cd745c8007ca2277f827482f620a0052417a305c1e34169a4fd2a5d",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "192a2560b3163cf095210fdece50156d16b8fd63ea7ec278d0b61924c4ef5f72",
+      "destSha256": "a7e894489cd745c8007ca2277f827482f620a0052417a305c1e34169a4fd2a5d",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "d08957d985d8cf4e1edbc61ca151224f60d862f594db5968055f35c874ac83fc",
+      "sourceSha256": "1f9806af72a64c112a2d316868bbf6e292710e3830d97906137707058cf576a1",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "d08957d985d8cf4e1edbc61ca151224f60d862f594db5968055f35c874ac83fc",
+      "destSha256": "1f9806af72a64c112a2d316868bbf6e292710e3830d97906137707058cf576a1",
       "transformed": false
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "1a19db6781c804d8d3ef80c5a3877e046689951444f1ebac6b363d81583ec2ff",
+      "sourceSha256": "9375b62078de195b330601dcff89085dca3c02f2df8c886ebe08ee8eb8a7cb7c",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "1a19db6781c804d8d3ef80c5a3877e046689951444f1ebac6b363d81583ec2ff",
+      "destSha256": "9375b62078de195b330601dcff89085dca3c02f2df8c886ebe08ee8eb8a7cb7c",
       "transformed": false
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "32e75cf4583ce6fd17843cf641b0b2f795a86aa700bc79e74037f21e8f3f80c6",
+      "sourceSha256": "37003a3a17859918d50aeaef43b513eb86ae06ac8367e8cb9b4bc5b38b45ef36",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "32e75cf4583ce6fd17843cf641b0b2f795a86aa700bc79e74037f21e8f3f80c6",
+      "destSha256": "37003a3a17859918d50aeaef43b513eb86ae06ac8367e8cb9b4bc5b38b45ef36",
       "transformed": false
     },
     {
@@ -61,16 +61,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "20aef370a96417310aeb37e8c899531030a1d2065e575ffdca827b0bb8747cb1",
+      "sourceSha256": "83c69be11ce2e993ccd56e00220e9aa2164a46044c3abafa9bc3bb5a5f4554ff",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "20aef370a96417310aeb37e8c899531030a1d2065e575ffdca827b0bb8747cb1",
+      "destSha256": "83c69be11ce2e993ccd56e00220e9aa2164a46044c3abafa9bc3bb5a5f4554ff",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "c3b6e9e38c4c022deecd45ef01b1de7973bac91751aebc9bf9f35ab0fc56b671",
+      "sourceSha256": "52a02f5e748b118d2581ca5fa6b63c71ef6cad83222247d680704172d877952f",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "c3b6e9e38c4c022deecd45ef01b1de7973bac91751aebc9bf9f35ab0fc56b671",
+      "destSha256": "52a02f5e748b118d2581ca5fa6b63c71ef6cad83222247d680704172d877952f",
       "transformed": false
     },
     {
@@ -89,9 +89,9 @@
     },
     {
       "source": "references/workflows-agent-document.md",
-      "sourceSha256": "f51795f5af3e28741d5348c71f6f2c30181cdca788767c088c204206ef5b384d",
+      "sourceSha256": "b2efcd7e2e2cdff6a00a69c37680bacd045a780e293a3f15c308e8d8ab998159",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-agent-document.md",
-      "destSha256": "f51795f5af3e28741d5348c71f6f2c30181cdca788767c088c204206ef5b384d",
+      "destSha256": "b2efcd7e2e2cdff6a00a69c37680bacd045a780e293a3f15c308e8d8ab998159",
       "transformed": false
     },
     {
@@ -152,9 +152,9 @@
     },
     {
       "source": "references/workflows-editing.md",
-      "sourceSha256": "64a14000cb830881a66af4ff05afc45630a24d69b3a5371134a2c5d4491e9ede",
+      "sourceSha256": "3a3a6725b4bac2b560f0e82d23cfeb208982c2cbf519d77f0537240214e7645f",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-editing.md",
-      "destSha256": "64a14000cb830881a66af4ff05afc45630a24d69b3a5371134a2c5d4491e9ede",
+      "destSha256": "3a3a6725b4bac2b560f0e82d23cfeb208982c2cbf519d77f0537240214e7645f",
       "transformed": false
     },
     {
@@ -271,9 +271,9 @@
     },
     {
       "source": "examples/12_task_eval_replay.md",
-      "sourceSha256": "0aae4dfd876bc37909a2f382b03babfab20c60cd5ed5fdcd85e122de634ca7f1",
+      "sourceSha256": "66986278793947de32e7423f1919e70b2c15d6502a1339b2c6a579b44852efe5",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/12_task_eval_replay.md",
-      "destSha256": "0aae4dfd876bc37909a2f382b03babfab20c60cd5ed5fdcd85e122de634ca7f1",
+      "destSha256": "66986278793947de32e7423f1919e70b2c15d6502a1339b2c6a579b44852efe5",
       "transformed": false
     },
     {
@@ -295,6 +295,13 @@
       "sourceSha256": "c817fc8b9b737b4e606b6559f623ead2c27ce0a043d5b3e1f710e63e202e667c",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/tasks.json",
       "destSha256": "c817fc8b9b737b4e606b6559f623ead2c27ce0a043d5b3e1f710e63e202e667c",
+      "transformed": false
+    },
+    {
+      "source": "examples/eval_tasks/profiles/current-0.4.0.json",
+      "sourceSha256": "c8c995b71fbc0cfc4f1befc77fe6dad09edfde4fa9ec62062ee1ed48671d7a0a",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.4.0.json",
+      "destSha256": "c8c995b71fbc0cfc4f1befc77fe6dad09edfde4fa9ec62062ee1ed48671d7a0a",
       "transformed": false
     },
     {
@@ -341,9 +348,9 @@
     },
     {
       "source": "scripts/task_eval_harness.py",
-      "sourceSha256": "7beb066dfcc5cab57216dc2a8a5da40e8776ee47c3db224eb16b69f857245f78",
+      "sourceSha256": "888a3d3cddc8e76905ec89dcd015fb11539e2ccf9b49c1e4d9f3233454efd12f",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/task_eval_harness.py",
-      "destSha256": "7beb066dfcc5cab57216dc2a8a5da40e8776ee47c3db224eb16b69f857245f78",
+      "destSha256": "888a3d3cddc8e76905ec89dcd015fb11539e2ccf9b49c1e4d9f3233454efd12f",
       "transformed": false
     },
     {
@@ -369,23 +376,23 @@
     },
     {
       "source": "packaging/templates/claude.plugin.json",
-      "sourceSha256": "c054a9fabdc17fb29452fa8916c168daca763e7d086ee4259dcfe1b6f55b9c2d",
+      "sourceSha256": "e1d2481f7129eeff17ca0ab9a0ce6a08b1e2ec9b59b3b8a5d662b7d081a3b4ae",
       "dest": "plugins/claude/hwpx-plugin/.claude-plugin/plugin.json",
-      "destSha256": "c054a9fabdc17fb29452fa8916c168daca763e7d086ee4259dcfe1b6f55b9c2d",
+      "destSha256": "e1d2481f7129eeff17ca0ab9a0ce6a08b1e2ec9b59b3b8a5d662b7d081a3b4ae",
       "transformed": false
     },
     {
       "source": "packaging/templates/claude.mcp.json",
-      "sourceSha256": "2a37c89018549cbb7b173b909552f7cab64e235d41d03b011f5dd3828543812d",
+      "sourceSha256": "a0a145243560d72e859259976bc9182fa9f350fb86a748319037a1ee40130cee",
       "dest": "plugins/claude/hwpx-plugin/.mcp.json",
-      "destSha256": "2a37c89018549cbb7b173b909552f7cab64e235d41d03b011f5dd3828543812d",
+      "destSha256": "a0a145243560d72e859259976bc9182fa9f350fb86a748319037a1ee40130cee",
       "transformed": false
     },
     {
       "source": "packaging/templates/hwpx-mcp-server",
-      "sourceSha256": "04fa9db52e8c4fc0a8c7e55b27d7b496e481c581f73bbc4db7b2a3dd357a9e41",
+      "sourceSha256": "96f683b23d39a9b2aa7b35bd0561d03a450e9cf271bca5d73ce9feaa923d7a66",
       "dest": "plugins/claude/hwpx-plugin/scripts/hwpx-mcp-server",
-      "destSha256": "04fa9db52e8c4fc0a8c7e55b27d7b496e481c581f73bbc4db7b2a3dd357a9e41",
+      "destSha256": "96f683b23d39a9b2aa7b35bd0561d03a450e9cf271bca5d73ce9feaa923d7a66",
       "transformed": false
     }
   ]

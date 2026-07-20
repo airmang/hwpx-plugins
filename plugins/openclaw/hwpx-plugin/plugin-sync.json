@@ -117,9 +117,9 @@
     },
     {
       "source": "references/workflows-bulk-compare.md",
-      "sourceSha256": "3efb3ca28dc37993af7faa52e53a22f65bb0da6b9cb55d996ab25335e5944772",
+      "sourceSha256": "53b394a93a81a6a03248b98d1a06e2c8de2a0318dfe46e08745e8ff17d40eb26",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-bulk-compare.md",
-      "destSha256": "3efb3ca28dc37993af7faa52e53a22f65bb0da6b9cb55d996ab25335e5944772",
+      "destSha256": "53b394a93a81a6a03248b98d1a06e2c8de2a0318dfe46e08745e8ff17d40eb26",
       "transformed": false
     },
     {

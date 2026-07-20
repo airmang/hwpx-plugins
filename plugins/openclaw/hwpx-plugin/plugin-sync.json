@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "39b7b41cc46c47bc62ccbf3170d22f0b2fd8efc9ca24b68a76c63f951e68445d",
+      "sourceSha256": "f1fa24761578618e53f06a163381b7f98732fae76a3f62a2a26b0cf174a0b7c3",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "39b7b41cc46c47bc62ccbf3170d22f0b2fd8efc9ca24b68a76c63f951e68445d",
+      "destSha256": "f1fa24761578618e53f06a163381b7f98732fae76a3f62a2a26b0cf174a0b7c3",
       "transformed": true
     },
     {
@@ -169,6 +169,13 @@
       "sourceSha256": "bff553051bee1459e2fe3f212137fd2c511f7d0b5078a22a59ff6878c3e2d0eb",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-forms.md",
       "destSha256": "bff553051bee1459e2fe3f212137fd2c511f7d0b5078a22a59ff6878c3e2d0eb",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-preview.md",
+      "sourceSha256": "bbe20615a5d65fce7b802059546dc99fd845ddd955c2e3627b472c8832758265",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-preview.md",
+      "destSha256": "bbe20615a5d65fce7b802059546dc99fd845ddd955c2e3627b472c8832758265",
       "transformed": false
     },
     {

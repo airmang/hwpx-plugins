@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "721bb3923309a3e0e490b5de42b5dc7e0a9ffb9f16eb32bbfa39ad42336dfc8a",
+      "sourceSha256": "68917ab0e473388e5d9a5928c8cba3746018cc4ec520d5b00dc9688d1b8441a7",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "b28b11d75454843bd88f1348fbc345a4671a42c7f9ba5c0c76a2d06a3fae0db4",
+      "destSha256": "0cfe5209585fe5f872dbb32cbd6f1f5ce8d95c97dfd34ada6dfd2b937a3e737e",
       "transformed": true
     },
     {
@@ -166,9 +166,16 @@
     },
     {
       "source": "references/workflows-forms.md",
-      "sourceSha256": "d2b9839cf54ec73c01fa51a137ebf0aa142cfbb76451ac4bc0730387f2de067d",
+      "sourceSha256": "890c263b8d8ef5bc22b8d738d28e86feaaada8f8245f1738f2948dc371084d78",
       "dest": "plugins/hermes/hwpx/references/workflows-forms.md",
-      "destSha256": "d2b9839cf54ec73c01fa51a137ebf0aa142cfbb76451ac4bc0730387f2de067d",
+      "destSha256": "890c263b8d8ef5bc22b8d738d28e86feaaada8f8245f1738f2948dc371084d78",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-evalplan.md",
+      "sourceSha256": "9247fc55b56ac7fdd2eb658a1f6e80a941b3cc2388eeefbbb805016bc5342d08",
+      "dest": "plugins/hermes/hwpx/references/workflows-evalplan.md",
+      "destSha256": "9247fc55b56ac7fdd2eb658a1f6e80a941b3cc2388eeefbbb805016bc5342d08",
       "transformed": false
     },
     {

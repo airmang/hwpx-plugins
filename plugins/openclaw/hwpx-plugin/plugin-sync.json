@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "e19ef7290572da09655713dce63a2da76aabdf2d48cc5cb1930cbb2cfd6dd722",
+      "sourceSha256": "bbb122c487d53edfdbdd36b1eddcf1c3163c21f3de192872fdfa6abcaf89bba1",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "e19ef7290572da09655713dce63a2da76aabdf2d48cc5cb1930cbb2cfd6dd722",
+      "destSha256": "bbb122c487d53edfdbdd36b1eddcf1c3163c21f3de192872fdfa6abcaf89bba1",
       "transformed": true
     },
     {
@@ -197,6 +197,13 @@
       "sourceSha256": "0379c56e44d056257ef86f48973eed7fb847afd2869c5644fe2f3ab58c1444d0",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/migration-5.0.md",
       "destSha256": "0379c56e44d056257ef86f48973eed7fb847afd2869c5644fe2f3ab58c1444d0",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-agent-runtime.md",
+      "sourceSha256": "ed488f0c2e343b1d4136e8ace6227727dd18c9d7e6a63c8e8c17ef135dad46c3",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/migration-agent-runtime.md",
+      "destSha256": "ed488f0c2e343b1d4136e8ace6227727dd18c9d7e6a63c8e8c17ef135dad46c3",
       "transformed": false
     },
     {

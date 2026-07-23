@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "68917ab0e473388e5d9a5928c8cba3746018cc4ec520d5b00dc9688d1b8441a7",
+      "sourceSha256": "e19ef7290572da09655713dce63a2da76aabdf2d48cc5cb1930cbb2cfd6dd722",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "68917ab0e473388e5d9a5928c8cba3746018cc4ec520d5b00dc9688d1b8441a7",
+      "destSha256": "e19ef7290572da09655713dce63a2da76aabdf2d48cc5cb1930cbb2cfd6dd722",
       "transformed": true
     },
     {
@@ -124,9 +124,16 @@
     },
     {
       "source": "references/workflows-creation.md",
-      "sourceSha256": "efee5d357f2cdd08a5a7fe1e67a0fb13d246d08f125cd97573c0266582922437",
+      "sourceSha256": "6f07bd6ec5b01e4b2900541d06d4d19d5131f6fdc648fd2ad855807ff180908a",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-creation.md",
-      "destSha256": "efee5d357f2cdd08a5a7fe1e67a0fb13d246d08f125cd97573c0266582922437",
+      "destSha256": "6f07bd6ec5b01e4b2900541d06d4d19d5131f6fdc648fd2ad855807ff180908a",
+      "transformed": false
+    },
+    {
+      "source": "references/workflows-house-style.md",
+      "sourceSha256": "f3da82230023059b0c3c4a75b6be60d35ca6bc5d3e8fa536a21edfaa25f521f6",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-house-style.md",
+      "destSha256": "f3da82230023059b0c3c4a75b6be60d35ca6bc5d3e8fa536a21edfaa25f521f6",
       "transformed": false
     },
     {

@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "bbb122c487d53edfdbdd36b1eddcf1c3163c21f3de192872fdfa6abcaf89bba1",
+      "sourceSha256": "708b0b30a9f6e8e000ff4359b9e3f76af0f6f3cb04501886af3d3b8185f155a5",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "bbb122c487d53edfdbdd36b1eddcf1c3163c21f3de192872fdfa6abcaf89bba1",
+      "destSha256": "708b0b30a9f6e8e000ff4359b9e3f76af0f6f3cb04501886af3d3b8185f155a5",
       "transformed": true
     },
     {
@@ -204,6 +204,13 @@
       "sourceSha256": "ed488f0c2e343b1d4136e8ace6227727dd18c9d7e6a63c8e8c17ef135dad46c3",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/migration-agent-runtime.md",
       "destSha256": "ed488f0c2e343b1d4136e8ace6227727dd18c9d7e6a63c8e8c17ef135dad46c3",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-authoring-runtime.md",
+      "sourceSha256": "89b9c06fe250d46edebb94a7a546b49643f6e3a9902cbc9ef6ecc0f28cc09a0c",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/migration-authoring-runtime.md",
+      "destSha256": "89b9c06fe250d46edebb94a7a546b49643f6e3a9902cbc9ef6ecc0f28cc09a0c",
       "transformed": false
     },
     {

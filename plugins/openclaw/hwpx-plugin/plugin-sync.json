@@ -208,9 +208,16 @@
     },
     {
       "source": "references/migration-authoring-runtime.md",
-      "sourceSha256": "89b9c06fe250d46edebb94a7a546b49643f6e3a9902cbc9ef6ecc0f28cc09a0c",
+      "sourceSha256": "cb2626ff86be70f461293182ccb0fc49fd6e43393ee10b6e236d5e7a93ed2f8f",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/migration-authoring-runtime.md",
-      "destSha256": "89b9c06fe250d46edebb94a7a546b49643f6e3a9902cbc9ef6ecc0f28cc09a0c",
+      "destSha256": "cb2626ff86be70f461293182ccb0fc49fd6e43393ee10b6e236d5e7a93ed2f8f",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-compliance-quality-utilities.md",
+      "sourceSha256": "7dc2a1647c70171047897483cb76bcd5482525660d63859e89ef92cc8736c060",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/migration-compliance-quality-utilities.md",
+      "destSha256": "7dc2a1647c70171047897483cb76bcd5482525660d63859e89ef92cc8736c060",
       "transformed": false
     },
     {

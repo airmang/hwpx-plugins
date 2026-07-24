@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "f969807b3f161d58439c02ddacaf1da933d547efbf862082e9e623190eaafbe9",
+      "sourceSha256": "18a6449c8ea555c3a921b27eb959ab94764f86cb0b9868beaaf73454332d1eb9",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "f969807b3f161d58439c02ddacaf1da933d547efbf862082e9e623190eaafbe9",
+      "destSha256": "18a6449c8ea555c3a921b27eb959ab94764f86cb0b9868beaaf73454332d1eb9",
       "transformed": true
     },
     {
@@ -19,9 +19,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "74c7e4b2c370f083fc34ade8e994b223dc5a80fa25d16935913d2a9f81d57b56",
+      "sourceSha256": "89fe2c5bdae114c48c388a2046bea64401a70859a270d7d192eeaf7167601756",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "74c7e4b2c370f083fc34ade8e994b223dc5a80fa25d16935913d2a9f81d57b56",
+      "destSha256": "89fe2c5bdae114c48c388a2046bea64401a70859a270d7d192eeaf7167601756",
       "transformed": false
     },
     {
@@ -239,6 +239,13 @@
       "sourceSha256": "7dc2a1647c70171047897483cb76bcd5482525660d63859e89ef92cc8736c060",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/migration-compliance-quality-utilities.md",
       "destSha256": "7dc2a1647c70171047897483cb76bcd5482525660d63859e89ef92cc8736c060",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-compatibility-observation.md",
+      "sourceSha256": "7b29c8afbf46dfc1e24baa632608ae1283f0daf6421a2af7ec64cb4636e2001b",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/migration-compatibility-observation.md",
+      "destSha256": "7b29c8afbf46dfc1e24baa632608ae1283f0daf6421a2af7ec64cb4636e2001b",
       "transformed": false
     },
     {

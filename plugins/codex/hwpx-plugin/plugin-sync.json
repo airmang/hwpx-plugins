@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "dc118d7e21fadb43c6f2d287b1e4bb8717bf36b0a144c2105df98ec5bcf9f00c",
+      "sourceSha256": "94f59f27219c8a8de3157955521efaf33b3a4346beb2d6a9588e86af20648783",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "dc118d7e21fadb43c6f2d287b1e4bb8717bf36b0a144c2105df98ec5bcf9f00c",
+      "destSha256": "94f59f27219c8a8de3157955521efaf33b3a4346beb2d6a9588e86af20648783",
       "transformed": true
     },
     {
@@ -215,9 +215,16 @@
     },
     {
       "source": "references/migration-form-fill-runtime.md",
-      "sourceSha256": "25e5d030da8556965d10e0ed5f9c4c884abfb30c3149b8dc3ef7edda01509f78",
+      "sourceSha256": "462fbe32183aca42c04ada679236fafa43d59a5d67b41122c773f11f99e281e9",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/migration-form-fill-runtime.md",
-      "destSha256": "25e5d030da8556965d10e0ed5f9c4c884abfb30c3149b8dc3ef7edda01509f78",
+      "destSha256": "462fbe32183aca42c04ada679236fafa43d59a5d67b41122c773f11f99e281e9",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-evalplan-runtime.md",
+      "sourceSha256": "b276d1cff5c1e83b3c43bbfdefb539c1cbeb2be8299848e052fefb9cd687d991",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/migration-evalplan-runtime.md",
+      "destSha256": "b276d1cff5c1e83b3c43bbfdefb539c1cbeb2be8299848e052fefb9cd687d991",
       "transformed": false
     },
     {

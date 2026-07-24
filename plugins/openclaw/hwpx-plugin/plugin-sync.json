@@ -166,9 +166,9 @@
     },
     {
       "source": "references/workflows-exam.md",
-      "sourceSha256": "624914d72885e1d22eb072cb456e960a5fe55722d38fedb6b70b6518c81e5294",
+      "sourceSha256": "800f4cf390516e454492223eb8a51cee9b8da16d4b64f74d7181d88cd763ef47",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-exam.md",
-      "destSha256": "624914d72885e1d22eb072cb456e960a5fe55722d38fedb6b70b6518c81e5294",
+      "destSha256": "800f4cf390516e454492223eb8a51cee9b8da16d4b64f74d7181d88cd763ef47",
       "transformed": false
     },
     {

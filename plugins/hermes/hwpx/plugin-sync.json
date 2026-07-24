@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "708b0b30a9f6e8e000ff4359b9e3f76af0f6f3cb04501886af3d3b8185f155a5",
+      "sourceSha256": "dc118d7e21fadb43c6f2d287b1e4bb8717bf36b0a144c2105df98ec5bcf9f00c",
       "dest": "plugins/hermes/hwpx/SKILL.md",
-      "destSha256": "af7c8d01a3be9f444cb9d330d10d1d0b921a6ef974ef8eb813474e4cd4c1da36",
+      "destSha256": "df73cf36101a9ea6ebe6f454a53af80478152cba7e5489b7b1547ca58145de13",
       "transformed": true
     },
     {
@@ -211,6 +211,13 @@
       "sourceSha256": "cb2626ff86be70f461293182ccb0fc49fd6e43393ee10b6e236d5e7a93ed2f8f",
       "dest": "plugins/hermes/hwpx/references/migration-authoring-runtime.md",
       "destSha256": "cb2626ff86be70f461293182ccb0fc49fd6e43393ee10b6e236d5e7a93ed2f8f",
+      "transformed": false
+    },
+    {
+      "source": "references/migration-form-fill-runtime.md",
+      "sourceSha256": "25e5d030da8556965d10e0ed5f9c4c884abfb30c3149b8dc3ef7edda01509f78",
+      "dest": "plugins/hermes/hwpx/references/migration-form-fill-runtime.md",
+      "destSha256": "25e5d030da8556965d10e0ed5f9c4c884abfb30c3149b8dc3ef7edda01509f78",
       "transformed": false
     },
     {

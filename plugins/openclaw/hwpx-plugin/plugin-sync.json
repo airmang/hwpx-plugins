@@ -243,9 +243,9 @@
     },
     {
       "source": "examples/06_create_from_document_plan.py",
-      "sourceSha256": "6d18a862c74b32f23c1b800b8d4f4b34b2d061a75a9f61cf3fbf1fa91c8e6a4e",
+      "sourceSha256": "ab51f27d04daa45ea98f69a2da0d2478aa0c83b22ae754a49697a28200329386",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/06_create_from_document_plan.py",
-      "destSha256": "6d18a862c74b32f23c1b800b8d4f4b34b2d061a75a9f61cf3fbf1fa91c8e6a4e",
+      "destSha256": "ab51f27d04daa45ea98f69a2da0d2478aa0c83b22ae754a49697a28200329386",
       "transformed": false
     },
     {
@@ -257,9 +257,9 @@
     },
     {
       "source": "examples/07_create_operating_plan.py",
-      "sourceSha256": "d2e4f74b7d525ef2459ac217b6928dee3d897a65eb5f3ce57ae9777775179619",
+      "sourceSha256": "2d09f68c13bc56915951f5a28dd40a41525545c776b21c7b9db4a9fe8b2cb626",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/07_create_operating_plan.py",
-      "destSha256": "d2e4f74b7d525ef2459ac217b6928dee3d897a65eb5f3ce57ae9777775179619",
+      "destSha256": "2d09f68c13bc56915951f5a28dd40a41525545c776b21c7b9db4a9fe8b2cb626",
       "transformed": false
     },
     {
@@ -271,9 +271,9 @@
     },
     {
       "source": "examples/08_template_formfit.py",
-      "sourceSha256": "12ab6c7a325e47712957b9864ec5383675960bae382ccac2e545d32a0276f0cb",
+      "sourceSha256": "f9f00a52783322ff27649292a87cf725ca1e2c1ed2085c20218b646a0c05e448",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/08_template_formfit.py",
-      "destSha256": "12ab6c7a325e47712957b9864ec5383675960bae382ccac2e545d32a0276f0cb",
+      "destSha256": "f9f00a52783322ff27649292a87cf725ca1e2c1ed2085c20218b646a0c05e448",
       "transformed": false
     },
     {
@@ -299,9 +299,9 @@
     },
     {
       "source": "examples/11_official_document_recipes.py",
-      "sourceSha256": "ca5f53ffdb843a1c645f1a58805ba76eef8722d56788dcb04811e083cd911a88",
+      "sourceSha256": "f0af70221afced5bef29bb3b732ed92e8fc475c41b03c81d38f6eff2a2dcfadf",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/11_official_document_recipes.py",
-      "destSha256": "ca5f53ffdb843a1c645f1a58805ba76eef8722d56788dcb04811e083cd911a88",
+      "destSha256": "f0af70221afced5bef29bb3b732ed92e8fc475c41b03c81d38f6eff2a2dcfadf",
       "transformed": false
     },
     {
@@ -313,16 +313,16 @@
     },
     {
       "source": "examples/13_advanced_generators.py",
-      "sourceSha256": "6aa79fc4c1236d19e47a4556d7ccdaa90b96e6cb2c4544e28014901261fc7aa1",
+      "sourceSha256": "f21a518770a4a9f198794d7240c65f33517d1d35c8f000c8020c75166e1cbd12",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/13_advanced_generators.py",
-      "destSha256": "6aa79fc4c1236d19e47a4556d7ccdaa90b96e6cb2c4544e28014901261fc7aa1",
+      "destSha256": "f21a518770a4a9f198794d7240c65f33517d1d35c8f000c8020c75166e1cbd12",
       "transformed": false
     },
     {
       "source": "examples/14_mail_merge_table_compute.py",
-      "sourceSha256": "5642d37fb77359b921c460c3ddd2dbfebf89691731c6eac1f75fddccfa40d873",
+      "sourceSha256": "4eca20e36978e46e8e19b836548fda14b438d44caf6535a6636d7e97cd4e748b",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/examples/14_mail_merge_table_compute.py",
-      "destSha256": "5642d37fb77359b921c460c3ddd2dbfebf89691731c6eac1f75fddccfa40d873",
+      "destSha256": "4eca20e36978e46e8e19b836548fda14b438d44caf6535a6636d7e97cd4e748b",
       "transformed": false
     },
     {
@@ -390,9 +390,9 @@
     },
     {
       "source": "scripts/task_eval_harness.py",
-      "sourceSha256": "8b0733c1b96b863680e717829d912a3b13cf7208df49ee84dc6485dafa05cf82",
+      "sourceSha256": "856ce3f7c2c411aaa1f128cccbdb461f14437d84802bec0005fc7d696d481d47",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/task_eval_harness.py",
-      "destSha256": "8b0733c1b96b863680e717829d912a3b13cf7208df49ee84dc6485dafa05cf82",
+      "destSha256": "856ce3f7c2c411aaa1f128cccbdb461f14437d84802bec0005fc7d696d481d47",
       "transformed": false
     },
     {
@@ -404,9 +404,9 @@
     },
     {
       "source": "scripts/visual_review.py",
-      "sourceSha256": "c4a40d79b663a3617558aef3fd662b5961d7ac1951aabb8aa96284d2eab80bbe",
+      "sourceSha256": "c306e64f12e142578d45efd79f6cec401ec6225caa645a400eb04bca28da9f7a",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/scripts/visual_review.py",
-      "destSha256": "c4a40d79b663a3617558aef3fd662b5961d7ac1951aabb8aa96284d2eab80bbe",
+      "destSha256": "c306e64f12e142578d45efd79f6cec401ec6225caa645a400eb04bca28da9f7a",
       "transformed": false
     },
     {

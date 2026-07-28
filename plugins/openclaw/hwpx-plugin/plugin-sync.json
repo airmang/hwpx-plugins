@@ -467,9 +467,9 @@
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "ef59a65a013e961c2cbef0e1eab0257e97356e37d1ca510f8a58d32208b17c4c",
+      "sourceSha256": "92600dc673c54d4d8b933f7c8c93079d370add8304e2e60b218d2428ab732c3b",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "ef59a65a013e961c2cbef0e1eab0257e97356e37d1ca510f8a58d32208b17c4c",
+      "destSha256": "92600dc673c54d4d8b933f7c8c93079d370add8304e2e60b218d2428ab732c3b",
       "transformed": false
     }
   ]

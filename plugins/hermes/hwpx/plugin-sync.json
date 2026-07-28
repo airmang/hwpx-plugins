@@ -460,9 +460,9 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "601a958e35b3d8d5972474ad121cd6c83499244a8406e489acc92cff671f9ef7",
+      "sourceSha256": "f757f6685292fbfaa9736c516e4fef5e0691b00b1e98f6f9410eee0596af9f51",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "601a958e35b3d8d5972474ad121cd6c83499244a8406e489acc92cff671f9ef7",
+      "destSha256": "f757f6685292fbfaa9736c516e4fef5e0691b00b1e98f6f9410eee0596af9f51",
       "transformed": false
     }
   ]

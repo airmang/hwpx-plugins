@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "fed6b5f06d0589b8424a3b8022283c7bcdde8967faf7d8274fc65efae45c6292",
+      "sourceSha256": "18eca5391120639285d368787334f6e24b22f745a2aa00f75dc85d8cf42f0c2e",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "fed6b5f06d0589b8424a3b8022283c7bcdde8967faf7d8274fc65efae45c6292",
+      "destSha256": "18eca5391120639285d368787334f6e24b22f745a2aa00f75dc85d8cf42f0c2e",
       "transformed": false
     },
     {

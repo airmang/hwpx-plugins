@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "9d595e5b0e2a4f5fa765cf7eb21bebbb7226a690eec619d0bac8547c3640820c",
+      "sourceSha256": "0b803bf0b44e2e4d40d24fee1cdf23ddc69638b5198d78af54a21ece5402e860",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "9d595e5b0e2a4f5fa765cf7eb21bebbb7226a690eec619d0bac8547c3640820c",
+      "destSha256": "0b803bf0b44e2e4d40d24fee1cdf23ddc69638b5198d78af54a21ece5402e860",
       "transformed": false
     },
     {

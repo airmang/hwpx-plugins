@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "6462d3ab974172bc691a8f1ecf83695fc60f61a0b55ece683bf8e21b483283b9",
+      "sourceSha256": "827a5092d010330e12f62b9a8b76f309cb88ef13c118c33c43dd028e9692cb48",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "6462d3ab974172bc691a8f1ecf83695fc60f61a0b55ece683bf8e21b483283b9",
+      "destSha256": "827a5092d010330e12f62b9a8b76f309cb88ef13c118c33c43dd028e9692cb48",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "6f65bb40410762862101a527a9f1ddd62f81d4c3e16fee050cc1e6a7fbcbedd2",
+      "sourceSha256": "5f818a995c2754905d033dc27a32e51242b6a1c4eef178da579cf38a566897c5",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "6f65bb40410762862101a527a9f1ddd62f81d4c3e16fee050cc1e6a7fbcbedd2",
+      "destSha256": "5f818a995c2754905d033dc27a32e51242b6a1c4eef178da579cf38a566897c5",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "ac7b46fcb45aa98aa84d73d3205004d5bb216140b4f649e620e93d5f395dd0cd",
+      "sourceSha256": "615cb334e8701d1cde770e1d6e69a699e728cbdd3ec771165acb0899b4faf39c",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "ac7b46fcb45aa98aa84d73d3205004d5bb216140b4f649e620e93d5f395dd0cd",
+      "destSha256": "615cb334e8701d1cde770e1d6e69a699e728cbdd3ec771165acb0899b4faf39c",
       "transformed": false
     },
     {

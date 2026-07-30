@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "9e14704ebc09b0111f1d8ec8716b3c0319371e625034d996e64fbe08ab9a946a",
+      "sourceSha256": "9f2b830fd0ce19c9169bdfbfacc0a625af1f957c1c0969dfc9f84ee577b682e9",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "9e14704ebc09b0111f1d8ec8716b3c0319371e625034d996e64fbe08ab9a946a",
+      "destSha256": "9f2b830fd0ce19c9169bdfbfacc0a625af1f957c1c0969dfc9f84ee577b682e9",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "c1338c5ac5e79f0b06b6c97c6f73801c47e9c8da3855165a7a6dbb515238bdea",
+      "sourceSha256": "0ae5f004b8b2a37f549fca9d34433163e6390803349dd96ca70f23884e11dd07",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "c1338c5ac5e79f0b06b6c97c6f73801c47e9c8da3855165a7a6dbb515238bdea",
+      "destSha256": "0ae5f004b8b2a37f549fca9d34433163e6390803349dd96ca70f23884e11dd07",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "7254c98443354e71ce859d78cdbc3b4a68acf4e1a66492ab33545f734d272c2f",
+      "sourceSha256": "7c934ad9307d2138cde880010ae18f736c87d0fe5bdf95069e2df348762a9c88",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "7254c98443354e71ce859d78cdbc3b4a68acf4e1a66492ab33545f734d272c2f",
+      "destSha256": "7c934ad9307d2138cde880010ae18f736c87d0fe5bdf95069e2df348762a9c88",
       "transformed": false
     },
     {
@@ -474,9 +474,9 @@
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "25dd022c9a2def8fa5cf343cf63f390442777d4665d3e7ce232b8c99c446e5cd",
+      "sourceSha256": "98acaef2f0981fb7726dd09998c5cd3875ac808fcb8a75dc8aa66dd881e24520",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "25dd022c9a2def8fa5cf343cf63f390442777d4665d3e7ce232b8c99c446e5cd",
+      "destSha256": "98acaef2f0981fb7726dd09998c5cd3875ac808fcb8a75dc8aa66dd881e24520",
       "transformed": false
     }
   ]

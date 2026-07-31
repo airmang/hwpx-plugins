@@ -12,23 +12,23 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "12c6bb9d4c389d4286bac0f3b11388fda72f371d8ea86c2e61de66c04027eb00",
+      "sourceSha256": "ed6a6fb3cd883bc0278c27f497a59066a9006faa7640b563875c3be7a9c31e32",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "12c6bb9d4c389d4286bac0f3b11388fda72f371d8ea86c2e61de66c04027eb00",
+      "destSha256": "ed6a6fb3cd883bc0278c27f497a59066a9006faa7640b563875c3be7a9c31e32",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "c2b8f236dc121bf61fefa94d68402791aa065a11591dc070f35aaaf82f75a860",
+      "sourceSha256": "582707444d4dbc3927f7176b1f84e8b1cdccfb37312758ef0547d0a951156f57",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "c2b8f236dc121bf61fefa94d68402791aa065a11591dc070f35aaaf82f75a860",
+      "destSha256": "582707444d4dbc3927f7176b1f84e8b1cdccfb37312758ef0547d0a951156f57",
       "transformed": false
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "28e38f5ecab79add9485a47bc998b75dc8e12625e290012d712041978b9779fd",
+      "sourceSha256": "ea14f9b3afe1dd475e7b47d9690a3c8cb8871071c6fe105c93d64fac51122b96",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "28e38f5ecab79add9485a47bc998b75dc8e12625e290012d712041978b9779fd",
+      "destSha256": "ea14f9b3afe1dd475e7b47d9690a3c8cb8871071c6fe105c93d64fac51122b96",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "e43b9dbe32c9b34bf3e8bef2bbdf8ba1a102887f3098e9e285c554286ea93af5",
+      "sourceSha256": "531b79d4ec936a2d53259568f730f9ee36bbb05a7aaee211cc644ee4df4dd34b",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "e43b9dbe32c9b34bf3e8bef2bbdf8ba1a102887f3098e9e285c554286ea93af5",
+      "destSha256": "531b79d4ec936a2d53259568f730f9ee36bbb05a7aaee211cc644ee4df4dd34b",
       "transformed": false
     },
     {
@@ -481,9 +481,9 @@
     },
     {
       "source": "packaging/templates/hwpx-automation-mcp",
-      "sourceSha256": "dcccc2064f2892dc87421569a247a1fbdd4d742924844b5dd152645e6a630a9b",
+      "sourceSha256": "f6011e65eeb31edd9095d0c71711238f0c156b957dfd0ff1023d5a7fc7094cb2",
       "dest": "plugins/claude/hwpx-plugin/scripts/hwpx-automation-mcp",
-      "destSha256": "dcccc2064f2892dc87421569a247a1fbdd4d742924844b5dd152645e6a630a9b",
+      "destSha256": "f6011e65eeb31edd9095d0c71711238f0c156b957dfd0ff1023d5a7fc7094cb2",
       "transformed": false
     },
     {

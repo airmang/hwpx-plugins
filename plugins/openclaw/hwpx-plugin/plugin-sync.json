@@ -5,30 +5,30 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "dabec0be9f548545f8b060b6e8b8a56eee7b8e081eb8d885797dabb0dadc0978",
+      "sourceSha256": "aefee84d46800691820f2f5494694e44bec2c76b412da9bd25b220511095b47e",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "dabec0be9f548545f8b060b6e8b8a56eee7b8e081eb8d885797dabb0dadc0978",
+      "destSha256": "aefee84d46800691820f2f5494694e44bec2c76b412da9bd25b220511095b47e",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "ff702ebdc36f12572f929239027a3dae94d733a24f3c0f18ddf6f8995816307f",
+      "sourceSha256": "12c6bb9d4c389d4286bac0f3b11388fda72f371d8ea86c2e61de66c04027eb00",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "ff702ebdc36f12572f929239027a3dae94d733a24f3c0f18ddf6f8995816307f",
+      "destSha256": "12c6bb9d4c389d4286bac0f3b11388fda72f371d8ea86c2e61de66c04027eb00",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "bfc892709f14260ec0e08c46fe8f21c2d6367cc4795e64063d6cc489c431c3c8",
+      "sourceSha256": "c2b8f236dc121bf61fefa94d68402791aa065a11591dc070f35aaaf82f75a860",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "bfc892709f14260ec0e08c46fe8f21c2d6367cc4795e64063d6cc489c431c3c8",
+      "destSha256": "c2b8f236dc121bf61fefa94d68402791aa065a11591dc070f35aaaf82f75a860",
       "transformed": false
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "9055bd59059e48931885409427bc6f050a4c2997cd51918e9d7521b783c530c7",
+      "sourceSha256": "28e38f5ecab79add9485a47bc998b75dc8e12625e290012d712041978b9779fd",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "9055bd59059e48931885409427bc6f050a4c2997cd51918e9d7521b783c530c7",
+      "destSha256": "28e38f5ecab79add9485a47bc998b75dc8e12625e290012d712041978b9779fd",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "e88ad18eda0eed28ea92e9ffb4ad5c95875d2faa409d31d7fecc692db4af3dba",
+      "sourceSha256": "e43b9dbe32c9b34bf3e8bef2bbdf8ba1a102887f3098e9e285c554286ea93af5",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "e88ad18eda0eed28ea92e9ffb4ad5c95875d2faa409d31d7fecc692db4af3dba",
+      "destSha256": "e43b9dbe32c9b34bf3e8bef2bbdf8ba1a102887f3098e9e285c554286ea93af5",
       "transformed": false
     },
     {
@@ -68,16 +68,16 @@
     },
     {
       "source": "references/tool-contract.generated.md",
-      "sourceSha256": "6f989641868c9362d2df712d682377044e30bd58cdb7729e38c91630a116929d",
+      "sourceSha256": "dfbc586f514fa74d77ba266967875ba7db3b554d8040a9bafa7a0bd349d3a3bd",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
-      "destSha256": "6f989641868c9362d2df712d682377044e30bd58cdb7729e38c91630a116929d",
+      "destSha256": "dfbc586f514fa74d77ba266967875ba7db3b554d8040a9bafa7a0bd349d3a3bd",
       "transformed": false
     },
     {
       "source": "references/tool-contract.generated.json",
-      "sourceSha256": "bb44b37e31a20f1a5d4fce2ca89bceb4e1c7be372b3a742db57dd4213c9c395b",
+      "sourceSha256": "94ea69ec536381ece78923a6f8549f47e6ba967f3d45875a8a8919bfa6e54a56",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "bb44b37e31a20f1a5d4fce2ca89bceb4e1c7be372b3a742db57dd4213c9c395b",
+      "destSha256": "94ea69ec536381ece78923a6f8549f47e6ba967f3d45875a8a8919bfa6e54a56",
       "transformed": false
     },
     {
@@ -117,9 +117,9 @@
     },
     {
       "source": "references/workflows-authoring.md",
-      "sourceSha256": "53288a5aae78bd7ddc8b10e29087439b4e6ad7d7110a7910a60af9469fb7c597",
+      "sourceSha256": "857743f919e48ac91dc9166d9ce0ff767c3bd2eb72ca9336917238c67a657076",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/workflows-authoring.md",
-      "destSha256": "53288a5aae78bd7ddc8b10e29087439b4e6ad7d7110a7910a60af9469fb7c597",
+      "destSha256": "857743f919e48ac91dc9166d9ce0ff767c3bd2eb72ca9336917238c67a657076",
       "transformed": false
     },
     {
@@ -467,16 +467,16 @@
     },
     {
       "source": "packaging/templates/openclaw.plugin.json",
-      "sourceSha256": "a72c0d6d7ab622c7ec5ce7e0ef3558a1f1177088577ff943cdb91031f2aca0de",
+      "sourceSha256": "c8b91558d8faa5705c85f75aeb0452d96e79f06802c1a83a95761ea9448495bb",
       "dest": "plugins/openclaw/hwpx-plugin/openclaw.plugin.json",
-      "destSha256": "a72c0d6d7ab622c7ec5ce7e0ef3558a1f1177088577ff943cdb91031f2aca0de",
+      "destSha256": "c8b91558d8faa5705c85f75aeb0452d96e79f06802c1a83a95761ea9448495bb",
       "transformed": false
     },
     {
       "source": "packaging/templates/openclaw.mcp-install.md",
-      "sourceSha256": "0d7fc5914746ad0b65aa83eb7a28a780e111159912e8a247c51eb0615c05b597",
+      "sourceSha256": "fe73fe371724c4f7955bd64a978dadc944a41360e0e1dfa17364519108d602b3",
       "dest": "plugins/openclaw/hwpx-plugin/INSTALL-mcp.md",
-      "destSha256": "0d7fc5914746ad0b65aa83eb7a28a780e111159912e8a247c51eb0615c05b597",
+      "destSha256": "fe73fe371724c4f7955bd64a978dadc944a41360e0e1dfa17364519108d602b3",
       "transformed": false
     }
   ]

@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "b3246424c3adb5c69279c7720f713e8fbb6d9146235df8e58091c29194a7ce3b",
+      "sourceSha256": "061a9619a9b82da3980853ba353db22bdbe0f8df6184a58053bf2b796cff9bf0",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "b3246424c3adb5c69279c7720f713e8fbb6d9146235df8e58091c29194a7ce3b",
+      "destSha256": "061a9619a9b82da3980853ba353db22bdbe0f8df6184a58053bf2b796cff9bf0",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "9114aa453031a6cbc7c3bad3f2134999f01dc03e3aca3b932fce4e8643c2b3d3",
+      "sourceSha256": "b3c019d603ab54a5752f6290a1e21e6dcfaeafa9dc08b77a50c937b35700fa02",
       "dest": "plugins/hermes/hwpx/packaging/product-identity.json",
-      "destSha256": "9114aa453031a6cbc7c3bad3f2134999f01dc03e3aca3b932fce4e8643c2b3d3",
+      "destSha256": "b3c019d603ab54a5752f6290a1e21e6dcfaeafa9dc08b77a50c937b35700fa02",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "c802e5e342f696e0cc871313a1f2861043fd7d2bdcd12670eef2e69a9caed41c",
+      "sourceSha256": "a9a9262deecfa575f19484e792bbedd35e1a3383ca8d0abdfb78cd141d359319",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "c802e5e342f696e0cc871313a1f2861043fd7d2bdcd12670eef2e69a9caed41c",
+      "destSha256": "a9a9262deecfa575f19484e792bbedd35e1a3383ca8d0abdfb78cd141d359319",
       "transformed": false
     },
     {

@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요. 줄간격·여백·쪽번호·머리글 등 서식 변경, 그림 삽입/교체, 문서 비교·신구대조표, 메일머지 대량생산(상장·수료증·가정통신문), 사진대지·회의명패·조직도 생성, 표 합계/소계 계산 요청도 모두 이 스킬의 대상입니다."
-version: 1.5.0
+version: 1.6.0
 author: airmang
 license: Apache-2.0
 metadata:
@@ -17,7 +17,7 @@ metadata:
 host-local key `hwpx`, launcher `scripts/hwpx-automation-mcp`, 콘솔
 `hwpx-automation-mcp`를 사용한다. `hwpx-mcp-server` 이름과 launcher wrapper는
 6.x 호환 표면이며 host key는 MCP 프로토콜 식별자가 아니다.
-MCP가 없을 때의 local Python(`python-hwpx >= 5.5.0`) 대안과 번들 스크립트는 references 문서에만 있다.
+MCP가 없을 때의 local Python(`python-hwpx >= 5.6.0`) 대안과 번들 스크립트는 references 문서에만 있다.
 
 일반적인 읽기·편집·양식 채움·문서 생성처럼 여러 단계를 거치는 작업은 서버가 상태와 안전 정책을
 강제하는 `start_workflow`를 1차 경로로 쓴다. `get_workflow`·`continue_workflow`로 진행하고,
@@ -55,6 +55,7 @@ MCP 서버가 연결되어 있으면 작업 전에 `mcp_server_health()`를 호�
 | 런서식(굵게·색·크기·글꼴) + 각주/미주 본문까지 충실 읽기 | `hwpx_extract_json` (`format_detail`·`doc.notes[]`) · `hwpx_to_markdown` (각주 부록) | [workflows-reading](references/workflows-reading.md) |
 | 일반 텍스트 위치 찾기 | `find_text` | [workflows-editing](references/workflows-editing.md) |
 | 이미 canonical path가 확정된 본문·표 좌표와 기존 단순 머리글 story 편집 (2건 이상) | `apply_document_commands` (dry-run → commit) | [workflows-agent-document](references/workflows-agent-document.md) |
+| 바이트-스플라이스 다단 편집(표 구조+본문+셀 채움 혼합, 실패 시 부분 적용이 허용 안 되는 작업) | `run_edit_plan` (계획 1파일, `dry_run=true` → 실행 — all-or-nothing 원자, 개별 도구 연타 금지) | [workflows-editing](references/workflows-editing.md) |
 | 단건 치환·문단·표 셀 편집 | `search_and_replace` · `batch_replace` · `insert_paragraph` · `set_table_cell_text` | [workflows-editing](references/workflows-editing.md) |
 | 직전 편집 되돌리기 | `undo_last_edit` | [workflows-editing](references/workflows-editing.md) |
 | 줄간격·정렬·들여쓰기·문단 간격 변경 | `set_paragraph_format` | [workflows-editing](references/workflows-editing.md) |

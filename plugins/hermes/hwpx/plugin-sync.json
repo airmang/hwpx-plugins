@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "0b496a0fa624b804268b0c929282ebdb58c0ebd40cd562df065c9488f6abeca1",
+      "sourceSha256": "ec167e94d4bb672b5d9550b05c00c2522d43f2cb033410e24063082bfd83f92a",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "0b496a0fa624b804268b0c929282ebdb58c0ebd40cd562df065c9488f6abeca1",
+      "destSha256": "ec167e94d4bb672b5d9550b05c00c2522d43f2cb033410e24063082bfd83f92a",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "361c0c16b9de694f0f374d1dfe0451d2a3bdf0610fd3a58a71607f54cd5c8a59",
+      "sourceSha256": "0f6e6f5a7a94189099361bc557760f41b59ed384efa3a11bf77a391043204296",
       "dest": "plugins/hermes/hwpx/packaging/product-identity.json",
-      "destSha256": "361c0c16b9de694f0f374d1dfe0451d2a3bdf0610fd3a58a71607f54cd5c8a59",
+      "destSha256": "0f6e6f5a7a94189099361bc557760f41b59ed384efa3a11bf77a391043204296",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "4eac942bb2fdd7f3ef3f3a82d150038310bc86a0fcf9084c6b5df95a370dcf85",
+      "sourceSha256": "41fb142d6e99e97e7f0a644ba96210f2e8e88275a8233f941b5a37b80b53b4e4",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "4eac942bb2fdd7f3ef3f3a82d150038310bc86a0fcf9084c6b5df95a370dcf85",
+      "destSha256": "41fb142d6e99e97e7f0a644ba96210f2e8e88275a8233f941b5a37b80b53b4e4",
       "transformed": false
     },
     {

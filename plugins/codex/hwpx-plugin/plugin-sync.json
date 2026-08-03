@@ -5,9 +5,9 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "d7705c967060a58ed6ddcbef69743322cc501a1da0abf70a8b0fee74fd3de602",
+      "sourceSha256": "00e18ddd5055ecf973a94310d57a2e6575882a8fe027c4a455fa24c68f3dc3b7",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "d7705c967060a58ed6ddcbef69743322cc501a1da0abf70a8b0fee74fd3de602",
+      "destSha256": "00e18ddd5055ecf973a94310d57a2e6575882a8fe027c4a455fa24c68f3dc3b7",
       "transformed": true
     },
     {
@@ -117,9 +117,9 @@
     },
     {
       "source": "references/workflows-authoring.md",
-      "sourceSha256": "5810c1b29b9eefb2582f7f8147835259901c71134c06c2ede1773ae285e93c24",
+      "sourceSha256": "0574f600f15759b70b7ad3481b873d8ecdb81f75014ab6b3aaa98237f8ec6a86",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/workflows-authoring.md",
-      "destSha256": "5810c1b29b9eefb2582f7f8147835259901c71134c06c2ede1773ae285e93c24",
+      "destSha256": "0574f600f15759b70b7ad3481b873d8ecdb81f75014ab6b3aaa98237f8ec6a86",
       "transformed": false
     },
     {

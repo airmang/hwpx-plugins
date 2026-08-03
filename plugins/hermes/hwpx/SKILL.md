@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요. 줄간격·여백·쪽번호·머리글 등 서식 변경, 그림 삽입/교체, 문서 비교·신구대조표, 메일머지 대량생산(상장·수료증·가정통신문), 사진대지·회의명패·조직도 생성, 표 합계/소계 계산 요청도 모두 이 스킬의 대상입니다."
-version: 1.8.0
+version: 2.0.0
 author: airmang
 license: Apache-2.0
 metadata:
@@ -17,7 +17,7 @@ metadata:
 host-local key `hwpx`, launcher `scripts/hwpx-automation-mcp`, 콘솔
 `hwpx-automation-mcp`를 사용한다. `hwpx-mcp-server` 이름과 launcher wrapper는
 6.x 호환 표면이며 host key는 MCP 프로토콜 식별자가 아니다.
-MCP가 없을 때의 local Python(`python-hwpx >= 5.8.0`) 대안과 번들 스크립트는 references 문서에만 있다.
+MCP가 없을 때의 local Python(`python-hwpx >= 6.0.0`) 대안과 번들 스크립트는 references 문서에만 있다.
 
 일반적인 읽기·편집·양식 채움·문서 생성처럼 여러 단계를 거치는 작업은 서버가 상태와 안전 정책을
 강제하는 `start_workflow`를 1차 경로로 쓴다. `get_workflow`·`continue_workflow`로 진행하고,

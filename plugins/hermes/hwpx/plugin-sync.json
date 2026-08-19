@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "69a222432e33a8fc47bcfb03add3a69188d2c939c430716af85a0443198b7fc3",
+      "sourceSha256": "b60242f1721673c2bf0ef96b9a23b6a8d7505fb9c8d657d4ebebc4c2dd7dd4ef",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "69a222432e33a8fc47bcfb03add3a69188d2c939c430716af85a0443198b7fc3",
+      "destSha256": "b60242f1721673c2bf0ef96b9a23b6a8d7505fb9c8d657d4ebebc4c2dd7dd4ef",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "726ed1c1fcfd7e8033aecd13613d9036483f16df4b8e9a53088beff964cd11a8",
+      "sourceSha256": "fd35e1f42c160828dc972868a08bcb9d67338733bf44f5f9fff447db04e8847b",
       "dest": "plugins/hermes/hwpx/packaging/product-identity.json",
-      "destSha256": "726ed1c1fcfd7e8033aecd13613d9036483f16df4b8e9a53088beff964cd11a8",
+      "destSha256": "fd35e1f42c160828dc972868a08bcb9d67338733bf44f5f9fff447db04e8847b",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "58e1850d078aace554c37f655adbe39fbc8850cdaa51c438713746f5b2690f6c",
+      "sourceSha256": "81189f5934df422327dc4c113f5baf619da6f39f811b27bca4fc9fcb0c77254d",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "58e1850d078aace554c37f655adbe39fbc8850cdaa51c438713746f5b2690f6c",
+      "destSha256": "81189f5934df422327dc4c113f5baf619da6f39f811b27bca4fc9fcb0c77254d",
       "transformed": false
     },
     {
@@ -467,9 +467,9 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "cd3b034f79fdc4d533f4fbc38fd75ca79fe36902eda331a7077cdab58cc56331",
+      "sourceSha256": "f366eb1f69207d58bbb7d175ac2081e1712330e1f2e06b81dc908ff04067fc0a",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "cd3b034f79fdc4d533f4fbc38fd75ca79fe36902eda331a7077cdab58cc56331",
+      "destSha256": "f366eb1f69207d58bbb7d175ac2081e1712330e1f2e06b81dc908ff04067fc0a",
       "transformed": false
     }
   ]

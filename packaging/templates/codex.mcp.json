@@ -15,7 +15,8 @@
         "HWPX_SKILL_VERSION": "2.0.1"
       },
       "env_vars": [
-        "HWPX_AUTOMATION_CHROME_PATH"
+        "HWPX_AUTOMATION_CHROME_PATH",
+        "HWPX_MCP_CHROME_PATH"
       ]
     }
   }

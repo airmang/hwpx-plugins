@@ -19,9 +19,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "6b7843c0171ba1bfe185e9587bfb6453c9140320096bbf6b04e06e2fd21eef0d",
+      "sourceSha256": "f046bce8f0a5864a8632debaf7267cda6618cad808519e0b842f9a2b23efba1e",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "6b7843c0171ba1bfe185e9587bfb6453c9140320096bbf6b04e06e2fd21eef0d",
+      "destSha256": "f046bce8f0a5864a8632debaf7267cda6618cad808519e0b842f9a2b23efba1e",
       "transformed": false
     },
     {

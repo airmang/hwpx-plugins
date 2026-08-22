@@ -474,9 +474,9 @@
     },
     {
       "source": "packaging/templates/codex.mcp.json",
-      "sourceSha256": "238d7217d22d98c49cefb0a66451d1e4bbc153f1b15509b3f460952359aba8f5",
+      "sourceSha256": "6bb461d2a9da905416f69df78c0991b4b12a5070d2dc9135886becbf457baddb",
       "dest": "plugins/codex/hwpx-plugin/.mcp.json",
-      "destSha256": "238d7217d22d98c49cefb0a66451d1e4bbc153f1b15509b3f460952359aba8f5",
+      "destSha256": "6bb461d2a9da905416f69df78c0991b4b12a5070d2dc9135886becbf457baddb",
       "transformed": false
     },
     {

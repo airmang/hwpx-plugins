@@ -1,7 +1,7 @@
 ---
 name: hwpx
 description: "한글 문서(.hwpx/OWPML) 편집·추출·자동화 스킬. '한글 문서 편집해줘', 가정통신문·공문·한글 양식 작성, HWPX 편집, 한글 파일/OWPML 분석, 플레이스홀더 치환, 문서 자동화 요청이면 이 스킬을 반드시 사용하세요. 줄간격·여백·쪽번호·머리글 등 서식 변경, 그림 삽입/교체, 문서 비교·신구대조표, 메일머지 대량생산(상장·수료증·가정통신문), 사진대지·회의명패·조직도 생성, 표 합계/소계 계산 요청도 모두 이 스킬의 대상입니다."
-version: 2.0.3
+version: 2.1.0
 author: airmang
 license: Apache-2.0
 metadata:
@@ -36,9 +36,15 @@ primitive 도구는 workflow가 지원하지 않는 전문 작업 또는 진단�
 
 MCP 서버가 연결되어 있으면 작업 전에 `mcp_server_health()`를 호출해
 `version`, `pythonHwpxVersion`, `toolSurface.status`, `toolSurface.missingKeyTools`를 확인한다.
-`toolSurface.status != "ok"`이거나 핵심 도구가 누락되면 플러그인 재설치
-(`codex plugin remove hwpx-plugin@hwpx` 후 `codex plugin add hwpx-plugin@hwpx`)
-또는 stale plugin venv/cache 제거 후 **새 호스트 세션**을 시작하라고 안내한다.
+`toolSurface.status != "ok"`이거나 핵심 도구가 누락되면 플러그인 번들을 갱신하고 **새 호스트 세션**을
+시작하라고 안내한다 — Claude Code: `claude plugin marketplace update hwpx && claude plugin update hwpx-plugin@hwpx`,
+Codex: `codex plugin marketplace upgrade && codex plugin add hwpx-plugin@hwpx`. 그래도 같으면 stale
+런타임(`.hwpx-mcp-runtime`) 제거 후 재시도.
+응답에 `stackUpdate`가 있으면(automation 7.1.0 이상) 세션당 한 번만 본다.
+`stackUpdate.pluginBundle.latestKnown`이 `installed`보다 높으면 위 호스트별 갱신 명령을 사용자에게
+**한 번** 안내하고 작업을 계속한다. `stackUpdate.lastError`는 런타임 자동 갱신이 마지막에 실패했다는
+기록이지 작업 차단 사유가 아니다 — 보고만 한다. 런타임(`python-hwpx`·`python-hwpx-automation`)은
+런처가 하루 1회 같은 메이저 안의 최신으로 스스로 갱신하므로 사용자에게 재설치를 요구하지 않는다.
 단위는 인간 단위다: 글자 크기 pt, 줄간격 %, 들여쓰기 mm, 문단 간격 pt, 용지/여백 mm.
 
 ## 케이스 → 경로 라우팅 표

@@ -146,9 +146,10 @@ def test_bundled_launchers_use_isolated_editable_dev_stack() -> None:
         assert "HWPX_AUTOMATION_RUNTIME_ROOT" in text
         assert "find_stack_root" not in text
         assert "Editable mode is deliberately opt-in" in text
-        assert '"runtimeLayout": "relocatable-console-v1"' in text
+        assert '"runtimeLayout": "generations-v2"' in text
         assert "uv venv --quiet --relocatable" in text
-        assert 'RUNTIME_CONSOLE="${VENV_DIR}/bin/hwpx-automation-mcp"' in text
+        assert 'POINTER_FILE="${ENV_DIR}/current"' in text
+        assert 'name="gen-${core}-${automation}"' in text
         assert "relocated hwpx-automation-mcp console self-check failed" in text
         assert "-m hwpx_automation.server" not in text
         assert 'rm -rf "${VENV_DIR}"' not in text
@@ -160,28 +161,32 @@ def test_bundled_launchers_use_isolated_editable_dev_stack() -> None:
 
 
 def test_codex_mcp_command_is_workspace_preserving_and_root_independent() -> None:
-    components = _identity()["components"]
+    # Probe result (Feature 066 Task 7, evidence/p2-receipt.md): Codex does not
+    # resolve a relative `command` against the plugin root (no implicit cwd —
+    # confirmed against the working wily-client plugin, which needs an
+    # explicit "cwd": "." to make its relative launcher resolve). The bundled
+    # command must therefore stay PATH-resolved (`bash`/`uvx`), never a
+    # relative launcher path, and must not carry a "cwd" override of its own
+    # (that would break the thread's workspace-relative file access).
     config = json.loads(
         (ROOT / "plugins/codex/hwpx-plugin/.mcp.json").read_text(encoding="utf-8")
     )
     assert set(config["mcpServers"]) == {"hwpx"}
     config = config["mcpServers"]["hwpx"]
-    assert config["command"] == "uvx"
+    assert config["command"] == "bash"
     assert "cwd" not in config
-    # extra를 포함한 핀이어야 한다. 6.0.0부터 mcp SDK는 필수가 아니라 [mcp]
-    # extra이므로, extra 없는 핀으로 설치하면 MCP 서버가 없는 환경이 된다.
-    automation = components["automation"]
-    extras = ",".join(automation["pluginInstallExtras"])
-    assert (
-        f"{automation['distribution']}[{extras}]=={automation['currentVersion']}"
-        in config["args"]
-    )
-    assert (
-        f"{components['core']['distribution']}[preview]=={components['core']['currentVersion']}"
-        in config["args"]
-    )
-    assert automation["mcpConsole"] in config["args"]
     assert config["env"]["HWPX_AUTOMATION_ADVANCED"] == "0"
+
+
+def test_codex_bundle_refreshes_uvx_daily_without_blocking_start() -> None:
+    config = json.loads((ROOT / "plugins" / "codex" / "hwpx-plugin" / ".mcp.json").read_text(encoding="utf-8"))
+    server = config["mcpServers"]["hwpx"]
+    identity = _identity()
+    script = server["args"][1]
+    assert server["command"] == "bash" and server["args"][0] == "-c"
+    assert identity["installConstraint"]["automation"] in script and identity["installConstraint"]["core"] in script
+    assert "nohup uvx --refresh" in script and script.rstrip().endswith("exec uvx --with \"$C\" --from \"$S\" hwpx-automation-mcp")
+    assert "HWPX_STACK_AUTO_UPDATE" in server["env_vars"]
 
 
 def test_claude_mcp_command_preserves_project_cwd() -> None:
@@ -266,9 +271,10 @@ def test_api_reference_requires_current_open_safety_stack() -> None:
         assert "`hwpx-plugin 1.0.0`" not in text
         assert "`python-hwpx 6.0.2`" not in text
         assert "`hwpx-plugin 2.0.2`" not in text
+        assert "`hwpx-plugin 2.0.3`" not in text
         assert "`python-hwpx 6.3.0`" in text
         assert "`python-hwpx-automation 7.0.3`" in text
-        assert "`hwpx-plugin 2.0.3`" in text
+        assert "`hwpx-plugin 2.1.0`" in text
         assert "공개 릴리스" in text
         if status == "released":
             assert "미발행 후보" not in text
@@ -280,7 +286,9 @@ def test_api_reference_requires_current_open_safety_stack() -> None:
             assert "`python-hwpx-automation 6.7.1`" in text
             assert "`hwpx-plugin 1.7.0`" in text
         assert "최소 호환 버전" in text
-        assert "플러그인 설치 핀" in text
+        assert "플러그인 설치 제약" in text
+        assert "검증 좌표" in text
+        assert "플러그인 설치 핀" not in text
         assert "validate_editor_open_safety(path).ok == True" in text
         assert "2.11.1" not in text
         assert "2.5.0" not in text
@@ -351,14 +359,14 @@ def test_product_identity_is_the_name_version_and_maturity_authority() -> None:
             "canonicalAutomation": "7.0.3",
             "compatibilityDistribution": "hwpx-mcp-server",
             "compatibility": "7.0.3",
-            "plugin": "2.0.3",
+            "plugin": "2.1.0",
             "contractHash": "8c278ebd5becba08",
         },
         "currentPublic": {
             "pythonHwpx": "6.3.0",
             "primaryDistribution": "python-hwpx-automation",
             "primaryApplication": "7.0.3",
-            "plugin": "2.0.3",
+            "plugin": "2.1.0",
             "contractHash": "8c278ebd5becba08",
         },
         "promotionGate": (
@@ -379,7 +387,7 @@ def test_product_identity_is_the_name_version_and_maturity_authority() -> None:
             "distribution": "python-hwpx-automation",
             "version": "7.0.3",
         },
-        "plugin": {"installedPluginId": "hwpx-plugin", "version": "2.0.3"},
+        "plugin": {"installedPluginId": "hwpx-plugin", "version": "2.1.0"},
     }
     assert components["core"]["currentVersion"] == "6.3.0"
     assert components["core"]["minimumCompatibleVersion"] == "6.3.0"
@@ -391,8 +399,23 @@ def test_product_identity_is_the_name_version_and_maturity_authority() -> None:
     assert components["automation"]["launcherPath"] == "scripts/hwpx-automation-mcp"
     assert identity["compatibility"]["hostConfigKey"] == "hwpx-mcp-server"
     assert identity["compatibility"]["launcherPath"] == "scripts/hwpx-mcp-server"
-    assert components["plugin"]["currentVersion"] == "2.0.3"
+    assert components["plugin"]["currentVersion"] == "2.1.0"
     assert components["plugin"]["minimumCompatibleVersion"] == "2.0.0"
+    assert identity["pluginPinPolicy"] == {"core": "verified-floor", "automation": "verified-floor"}
+    assert identity["verifiedStack"] == {
+        "pythonHwpx": components["core"]["currentVersion"],
+        "automation": components["automation"]["currentVersion"],
+        "plugin": components["plugin"]["currentVersion"],
+        "contractHash": identity["releaseState"]["candidate"]["contractHash"],
+        "verifiedAt": identity["verifiedStack"]["verifiedAt"],
+    }
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", identity["verifiedStack"]["verifiedAt"])
+    core_major = int(components["core"]["currentVersion"].split(".")[0])
+    automation_major = int(components["automation"]["currentVersion"].split(".")[0])
+    assert identity["installConstraint"] == {
+        "core": f"python-hwpx[preview]>={components['core']['currentVersion']},<{core_major + 1}",
+        "automation": f"python-hwpx-automation[mcp,oracle]>={components['automation']['currentVersion']},<{automation_major + 1}",
+    }
     assert hosts["identityFile"] == "product-identity.json"
     assert "pluginName" not in hosts and "skillName" not in hosts
     assert identity["firstPartyLabelKo"] in readme
@@ -481,7 +504,7 @@ def test_product_identity_validator_supports_the_full_release_lifecycle(
             "pythonHwpx": "6.3.0",
             "primaryDistribution": "python-hwpx-automation",
             "primaryApplication": "7.0.3",
-            "plugin": "2.0.3",
+            "plugin": "2.1.0",
             "contractHash": "8c278ebd5becba08",
         }
         identity["releaseState"]["currentPublic"] = promoted
@@ -491,7 +514,7 @@ def test_product_identity_validator_supports_the_full_release_lifecycle(
                 "distribution": "python-hwpx-automation",
                 "version": "7.0.3",
             },
-            "plugin": {"installedPluginId": "hwpx-plugin", "version": "2.0.3"},
+            "plugin": {"installedPluginId": "hwpx-plugin", "version": "2.1.0"},
         }
         for stale in (
             "아직 공개되지 않은 1.1.0 미발행 후보",
@@ -781,3 +804,16 @@ def test_shipped_python_and_markdown_code_blocks_parse() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "JSON Markdown fences" in result.stdout
+
+
+def test_skill_start_check_routes_updates_per_host() -> None:
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    assert "claude plugin marketplace update hwpx && claude plugin update hwpx-plugin@hwpx" in skill
+    assert "codex plugin marketplace upgrade && codex plugin add hwpx-plugin@hwpx" in skill
+    assert "stackUpdate" in skill and "한 번" in skill
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "HWPX_STACK_AUTO_UPDATE=0" in readme and "HWPX_STACK_CHANNEL=verified" in readme
+    bundles = sorted([*ROOT.glob("plugins/*/hwpx-plugin/skills/hwpx/SKILL.md"), *ROOT.glob("plugins/hermes/hwpx/SKILL.md")])
+    assert len(bundles) == 4
+    for bundle in bundles:
+        assert "stackUpdate" in bundle.read_text(encoding="utf-8"), bundle

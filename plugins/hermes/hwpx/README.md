@@ -18,8 +18,8 @@
 
 > [!NOTE]
 > 현재 공개 트레인은 `python-hwpx 6.3.0` · `python-hwpx-automation 7.0.3` ·
-> `hwpx-plugin 2.0.3`입니다 (2026-09-03, 런처 자기검증 수리 패치 — 코어·
-> automation 핀과 계약 `8c278ebd5becba08` 불변).
+> `hwpx-plugin 2.1.0`입니다 (2026-09-03, 3스택 자동 갱신 트레인 — 검증된 플로어 핀,
+> 계약 `8c278ebd5becba08` 불변).
 
 HWPX를 잘 몰라도 됩니다. 스킬을 설치하면 Claude Code·Codex·Cursor 같은
 에이전트에게 자연어로 말하는 것만으로 한글 문서를 다룰 수 있습니다. 에이전트는
@@ -52,6 +52,13 @@ claude plugin install hwpx-plugin@hwpx
 codex plugin marketplace add airmang/hwpx-plugins
 codex plugin add hwpx-plugin@hwpx
 ```
+
+설치 뒤 런타임(`python-hwpx`·`python-hwpx-automation`)은 번들 런처가 하루 1회 같은 메이저 안의
+최신으로 스스로 갱신합니다. 끄려면 `HWPX_STACK_AUTO_UPDATE=0`, 검증 좌표에 고정하려면
+`HWPX_STACK_CHANNEL=verified`를 MCP 서버 환경에 둡니다. 스킬 번들 자체의 갱신은 호스트가 맡습니다 —
+Claude Code는 `/plugin` → Marketplaces → `hwpx`에서 자동 업데이트를 켜거나
+`claude plugin marketplace update hwpx && claude plugin update hwpx-plugin@hwpx`, Codex는
+`codex plugin marketplace upgrade && codex plugin add hwpx-plugin@hwpx`를 실행합니다.
 
 Cursor는 canonical skill 파일을 `.cursor/skills/hwpx/`(또는 글로벌 `~/.cursor/skills/hwpx/`)에 복사하고
 `.cursor/rules/hwpx.mdc` 트리거 룰을 둡니다. OpenClaw·Hermes는 각 호스트 번들(`plugins/openclaw/hwpx-plugin`,
@@ -86,9 +93,10 @@ skill 이름 `hwpx`를 혼동하지 마세요.
 
 | 구분 | 의미 | 현재 값 |
 |---|---|---|
-| 완전한 공개 트레인 | 현재 공개 릴리스 — plugin 설치까지 함께 검증한 조합 (plugin 2.0.3 released 2026-09-03, 런처 자기검증 수리 패치 — 코어·automation 핀 불변) | `python-hwpx 6.3.0` · `python-hwpx-automation 7.0.3` · `hwpx-plugin 2.0.3` |
+| 완전한 공개 트레인 | 현재 공개 릴리스 — plugin 설치까지 함께 검증한 조합 (plugin 2.1.0 released 2026-09-03, 3스택 자동 갱신 트레인 — 검증된 플로어 핀) | `python-hwpx 6.3.0` · `python-hwpx-automation 7.0.3` · `hwpx-plugin 2.1.0` |
 | 최소 호환 버전 | 2.0 스킬 계약이 지원하는 가장 낮은 조합 | `python-hwpx >= 6.3.0` · `python-hwpx-automation >= 7.0.1` · skill `>= 2.0.0` |
-| 플러그인 설치 핀 | 번들이 고정한 정확 버전 | `python-hwpx[preview]==6.3.0` · `python-hwpx-automation[mcp,oracle]==7.0.3` |
+| 검증 좌표 | 이 플러그인 릴리스가 함께 검증한 정확 조합. `HWPX_STACK_CHANNEL=verified`를 주면 이 조합만 설치하고 갱신하지 않음 | `python-hwpx 6.3.0` · `python-hwpx-automation 7.0.3` |
+| 플러그인 설치 제약 | 번들 런처가 설치하고 하루 1회 자동 갱신하는 창 — 같은 메이저 안의 최신 | `python-hwpx[preview]>=6.3.0,<7` · `python-hwpx-automation[mcp,oracle]>=7.0.3,<8` |
 
 - 코어 성숙도: `Development Status :: 3 - Alpha`. Python 기준은 3.10 이상입니다.
 - MCP 서버·플러그인 성숙도: 미선언. 버전 숫자를 성숙도 주장으로 해석하지 않습니다.

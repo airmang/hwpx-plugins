@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "bdc506bd227646223b1ff0a8f66893636c2cc5cd2c293db45d38ce2340d048fd",
+      "sourceSha256": "1a15887a0933a4531d4d7fc7021ddacf42aa5941ceb4ca442316d7b939f4cacd",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "bdc506bd227646223b1ff0a8f66893636c2cc5cd2c293db45d38ce2340d048fd",
+      "destSha256": "1a15887a0933a4531d4d7fc7021ddacf42aa5941ceb4ca442316d7b939f4cacd",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "1e6d192d51ebf1cd76cc391506ac57d2377f4aa05c3eef29865c09a35627f0d3",
+      "sourceSha256": "4467878710539a27892efb923aee6c8bcd9580a4fda94f62d79400d4b61352f5",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "1e6d192d51ebf1cd76cc391506ac57d2377f4aa05c3eef29865c09a35627f0d3",
+      "destSha256": "4467878710539a27892efb923aee6c8bcd9580a4fda94f62d79400d4b61352f5",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "466bf94820e233db9680823deeff4f36e052821112425b8d1765197bb861023a",
+      "sourceSha256": "b714dd8524fc7aa876feea2bea602f70d76f0d33ee43a16147e3bfc638e43803",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "466bf94820e233db9680823deeff4f36e052821112425b8d1765197bb861023a",
+      "destSha256": "b714dd8524fc7aa876feea2bea602f70d76f0d33ee43a16147e3bfc638e43803",
       "transformed": false
     },
     {

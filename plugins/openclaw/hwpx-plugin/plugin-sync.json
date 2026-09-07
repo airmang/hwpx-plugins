@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "f41a7863a42dd233d49315c1a1d5ccf13fd0fb0fa6eede214f66205b33f7d683",
+      "sourceSha256": "6f4efd9bb0e61c2d3fe82940c0c688c2c4383a2fcd5df6de9d26d0dd08d62e3a",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "f41a7863a42dd233d49315c1a1d5ccf13fd0fb0fa6eede214f66205b33f7d683",
+      "destSha256": "6f4efd9bb0e61c2d3fe82940c0c688c2c4383a2fcd5df6de9d26d0dd08d62e3a",
       "transformed": false
     },
     {
@@ -466,9 +466,9 @@
       "transformed": false
     },
     {
-      "source": "docs/releases/2026-09-07-managed-runtime.md",
+      "source": "references/release-2026-09-07-managed-runtime.md",
       "sourceSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
-      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/docs/releases/2026-09-07-managed-runtime.md",
+      "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/release-2026-09-07-managed-runtime.md",
       "destSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
       "transformed": false
     },

@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "fc36cc86c013fc9f376b08248320731179e5ef130946c2328e455e227ed2364c",
+      "sourceSha256": "f41a7863a42dd233d49315c1a1d5ccf13fd0fb0fa6eede214f66205b33f7d683",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "fc36cc86c013fc9f376b08248320731179e5ef130946c2328e455e227ed2364c",
+      "destSha256": "f41a7863a42dd233d49315c1a1d5ccf13fd0fb0fa6eede214f66205b33f7d683",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "da2a76dff2643a2cce66321b6508d78722544a12f9321f5e99e7e3ac6e9ea8e8",
+      "sourceSha256": "417ea0b8ccd9c36189ce9a5250deab0c9bf76de61ade0b30ec958ff66c35f272",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "da2a76dff2643a2cce66321b6508d78722544a12f9321f5e99e7e3ac6e9ea8e8",
+      "destSha256": "417ea0b8ccd9c36189ce9a5250deab0c9bf76de61ade0b30ec958ff66c35f272",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "d649655e93f8308d321787d783848363dbce02cec5ee586921810b3fa11a3b08",
+      "sourceSha256": "4641b88479993e0b527af51c504a0f9ec284e0f429734dfab14102b5c95342cb",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "d649655e93f8308d321787d783848363dbce02cec5ee586921810b3fa11a3b08",
+      "destSha256": "4641b88479993e0b527af51c504a0f9ec284e0f429734dfab14102b5c95342cb",
       "transformed": false
     },
     {
@@ -463,6 +463,13 @@
       "sourceSha256": "dffbd6ed04fe5647d601cf968caa584ab98d2a922e19757c949f03ffacc9049d",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
       "destSha256": "dffbd6ed04fe5647d601cf968caa584ab98d2a922e19757c949f03ffacc9049d",
+      "transformed": false
+    },
+    {
+      "source": "docs/releases/2026-09-07-managed-runtime.md",
+      "sourceSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/docs/releases/2026-09-07-managed-runtime.md",
+      "destSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
       "transformed": false
     },
     {

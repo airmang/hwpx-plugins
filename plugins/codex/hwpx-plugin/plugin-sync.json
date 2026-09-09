@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "3ff9625080cd49e7ec2a1044b5550c9561e7832101d392a4481924604536aa01",
+      "sourceSha256": "3a347aeeee39616b043d83fd59fb1e21f0fd5547a29f82f70f23430eada374c6",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "3ff9625080cd49e7ec2a1044b5550c9561e7832101d392a4481924604536aa01",
+      "destSha256": "3a347aeeee39616b043d83fd59fb1e21f0fd5547a29f82f70f23430eada374c6",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "e8da4f4a746652ad4595ebf61ccd0473681bbf8a49c2867a921c74004e719fa3",
+      "sourceSha256": "0003a3a93412432cd4e5a91d5a0d9486ab531cbfd09823738ae19c646b30a97b",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "e8da4f4a746652ad4595ebf61ccd0473681bbf8a49c2867a921c74004e719fa3",
+      "destSha256": "0003a3a93412432cd4e5a91d5a0d9486ab531cbfd09823738ae19c646b30a97b",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "8cf3638cb8ae771934fd3ecd61f90bce5f3160e81da394168979626ff2c4ad7e",
+      "sourceSha256": "3ab36af76916e3a9a11d283f7d0413919f69ba001456bf57459c678243b5bffe",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "8cf3638cb8ae771934fd3ecd61f90bce5f3160e81da394168979626ff2c4ad7e",
+      "destSha256": "3ab36af76916e3a9a11d283f7d0413919f69ba001456bf57459c678243b5bffe",
       "transformed": false
     },
     {
@@ -470,6 +470,13 @@
       "sourceSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/release-2026-09-07-managed-runtime.md",
       "destSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
+      "transformed": false
+    },
+    {
+      "source": "references/release-2026-09-09-existing-edit-stack.md",
+      "sourceSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
+      "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/release-2026-09-09-existing-edit-stack.md",
+      "destSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
       "transformed": false
     },
     {

@@ -12,23 +12,23 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "db13b92edc2c0c16b509022c9c3a5472f7f6f1c52283a7e6f08425620d4494cd",
+      "sourceSha256": "3ff9625080cd49e7ec2a1044b5550c9561e7832101d392a4481924604536aa01",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "db13b92edc2c0c16b509022c9c3a5472f7f6f1c52283a7e6f08425620d4494cd",
+      "destSha256": "3ff9625080cd49e7ec2a1044b5550c9561e7832101d392a4481924604536aa01",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "ac98729dd060165acf5436fbdece0e7f7b76a1a60a27354275ec5e997210ca39",
+      "sourceSha256": "a423723e8ede4b71bdadfd40d9724da3d07e842f8464d5babbeaf085fd8dcff4",
       "dest": "plugins/hermes/hwpx/CHANGELOG.md",
-      "destSha256": "ac98729dd060165acf5436fbdece0e7f7b76a1a60a27354275ec5e997210ca39",
+      "destSha256": "a423723e8ede4b71bdadfd40d9724da3d07e842f8464d5babbeaf085fd8dcff4",
       "transformed": false
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "2781bf0c9eabbe610e6c50c4785c4fade49fd6c4fccc8bfaa419546ec5746a4b",
+      "sourceSha256": "e8da4f4a746652ad4595ebf61ccd0473681bbf8a49c2867a921c74004e719fa3",
       "dest": "plugins/hermes/hwpx/packaging/product-identity.json",
-      "destSha256": "2781bf0c9eabbe610e6c50c4785c4fade49fd6c4fccc8bfaa419546ec5746a4b",
+      "destSha256": "e8da4f4a746652ad4595ebf61ccd0473681bbf8a49c2867a921c74004e719fa3",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "29b238bd9c20f4360bdab1ae1ce386493b6247a328dd1e4f22612fc8dbd8b0b1",
+      "sourceSha256": "8cf3638cb8ae771934fd3ecd61f90bce5f3160e81da394168979626ff2c4ad7e",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "29b238bd9c20f4360bdab1ae1ce386493b6247a328dd1e4f22612fc8dbd8b0b1",
+      "destSha256": "8cf3638cb8ae771934fd3ecd61f90bce5f3160e81da394168979626ff2c4ad7e",
       "transformed": false
     },
     {

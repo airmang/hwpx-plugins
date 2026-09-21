@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "13bea3ee6f1dc4c7b6e428d525472371e219b84a592ecb82c30698fd3a047cb3",
+      "sourceSha256": "5ca5e6fd3b0267197179e18a0ab58e8a220b135369eba8e6f92dc1d7f91b465f",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "13bea3ee6f1dc4c7b6e428d525472371e219b84a592ecb82c30698fd3a047cb3",
+      "destSha256": "5ca5e6fd3b0267197179e18a0ab58e8a220b135369eba8e6f92dc1d7f91b465f",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "dcb0c8b6036f36041d8e30cf7399b27238f8028810da674b7c3f17e8616f9880",
+      "sourceSha256": "23d2e70b393c604ab088350dd9390e3795038f27d03a77979a50e36448c8b547",
       "dest": "plugins/hermes/hwpx/packaging/product-identity.json",
-      "destSha256": "dcb0c8b6036f36041d8e30cf7399b27238f8028810da674b7c3f17e8616f9880",
+      "destSha256": "23d2e70b393c604ab088350dd9390e3795038f27d03a77979a50e36448c8b547",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "846e63c1365f81e57a017e53bf2462e19eca987c97bbddee4ffd92db45c7ff66",
+      "sourceSha256": "9804c09de9606774b35976d547b5e75670308eefac227d65516c2c04c749a51f",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "846e63c1365f81e57a017e53bf2462e19eca987c97bbddee4ffd92db45c7ff66",
+      "destSha256": "9804c09de9606774b35976d547b5e75670308eefac227d65516c2c04c749a51f",
       "transformed": false
     },
     {
@@ -477,6 +477,13 @@
       "sourceSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
       "dest": "plugins/hermes/hwpx/references/release-2026-09-09-existing-edit-stack.md",
       "destSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
+      "transformed": false
+    },
+    {
+      "source": "references/release-2026-09-22-trustworthy-edit-engine.md",
+      "sourceSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
+      "dest": "plugins/hermes/hwpx/references/release-2026-09-22-trustworthy-edit-engine.md",
+      "destSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
       "transformed": false
     },
     {

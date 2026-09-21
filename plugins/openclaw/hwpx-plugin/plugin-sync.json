@@ -12,23 +12,23 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "7be2180f81e5fb181feba4ed47aa1691719e7b7ada8b708c3ad61cfc9fd6ed17",
+      "sourceSha256": "13bea3ee6f1dc4c7b6e428d525472371e219b84a592ecb82c30698fd3a047cb3",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "7be2180f81e5fb181feba4ed47aa1691719e7b7ada8b708c3ad61cfc9fd6ed17",
+      "destSha256": "13bea3ee6f1dc4c7b6e428d525472371e219b84a592ecb82c30698fd3a047cb3",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "ae469459dafd1013a0b0e52231de5841aa00212a2cb9f86f3013facf8f04da1e",
+      "sourceSha256": "e23d3390d856a9f549ce1c264430bee0828f42cb7390438ab0b7558984120095",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "ae469459dafd1013a0b0e52231de5841aa00212a2cb9f86f3013facf8f04da1e",
+      "destSha256": "e23d3390d856a9f549ce1c264430bee0828f42cb7390438ab0b7558984120095",
       "transformed": false
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "ac0c7f097fef4c895793aeeb8605cadb00f1e5fbc8051ca1d338679c5f461ac4",
+      "sourceSha256": "dcb0c8b6036f36041d8e30cf7399b27238f8028810da674b7c3f17e8616f9880",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "ac0c7f097fef4c895793aeeb8605cadb00f1e5fbc8051ca1d338679c5f461ac4",
+      "destSha256": "dcb0c8b6036f36041d8e30cf7399b27238f8028810da674b7c3f17e8616f9880",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "a49e5262fba7116e2b3edb768156a05a8ecd8c0a69e847220e4b9555a4057830",
+      "sourceSha256": "846e63c1365f81e57a017e53bf2462e19eca987c97bbddee4ffd92db45c7ff66",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "a49e5262fba7116e2b3edb768156a05a8ecd8c0a69e847220e4b9555a4057830",
+      "destSha256": "846e63c1365f81e57a017e53bf2462e19eca987c97bbddee4ffd92db45c7ff66",
       "transformed": false
     },
     {

@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "c435a4a253f8c1bdcb2aa81d21d444a67e802cc62e1752ad2fab0b3458bff016",
+      "sourceSha256": "13c05a8c7f715798f4d7f0e1bf538c5a494bb1e17b2726a5c9aaf40d69e5e18a",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "c435a4a253f8c1bdcb2aa81d21d444a67e802cc62e1752ad2fab0b3458bff016",
+      "destSha256": "13c05a8c7f715798f4d7f0e1bf538c5a494bb1e17b2726a5c9aaf40d69e5e18a",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "5ca5e6fd3b0267197179e18a0ab58e8a220b135369eba8e6f92dc1d7f91b465f",
+      "sourceSha256": "0aeeb7897a6da1ab107425bfb6a73254010bd49e4f544ec80e33ed4b358d34a7",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "5ca5e6fd3b0267197179e18a0ab58e8a220b135369eba8e6f92dc1d7f91b465f",
+      "destSha256": "0aeeb7897a6da1ab107425bfb6a73254010bd49e4f544ec80e33ed4b358d34a7",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "e23d3390d856a9f549ce1c264430bee0828f42cb7390438ab0b7558984120095",
+      "sourceSha256": "721f37919acf6fd9995d69bc36df010f265b9aaff9dff83cc3cec07caa938e35",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "e23d3390d856a9f549ce1c264430bee0828f42cb7390438ab0b7558984120095",
+      "destSha256": "721f37919acf6fd9995d69bc36df010f265b9aaff9dff83cc3cec07caa938e35",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "9804c09de9606774b35976d547b5e75670308eefac227d65516c2c04c749a51f",
+      "sourceSha256": "8640ea9e805d4c8597f6255a83ec496d4d5e3577af9c6ec6fb5ff840dcd8b6b9",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "9804c09de9606774b35976d547b5e75670308eefac227d65516c2c04c749a51f",
+      "destSha256": "8640ea9e805d4c8597f6255a83ec496d4d5e3577af9c6ec6fb5ff840dcd8b6b9",
       "transformed": false
     },
     {

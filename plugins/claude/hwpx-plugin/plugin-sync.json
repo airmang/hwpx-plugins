@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "2dabb848dd3c4fb32fee749238ba1b019680e0d61c8ffa8b7dbefd332f9bf146",
+      "sourceSha256": "a28ad63e7d0aa076957581475e0bbc1c87a550f48d84ec0b783138b10d06d330",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "2dabb848dd3c4fb32fee749238ba1b019680e0d61c8ffa8b7dbefd332f9bf146",
+      "destSha256": "a28ad63e7d0aa076957581475e0bbc1c87a550f48d84ec0b783138b10d06d330",
       "transformed": false
     },
     {
@@ -26,9 +26,9 @@
     },
     {
       "source": "packaging/product-identity.json",
-      "sourceSha256": "37e8e73827e1c7c7fc8d880f7aa64ad053d62a2365ac90e0c88a1c2a6db4bc3f",
+      "sourceSha256": "dea7ff49c51a25f81b991e8f26f82ade7ecfac745fa7cc57ae7ec35514f85518",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/packaging/product-identity.json",
-      "destSha256": "37e8e73827e1c7c7fc8d880f7aa64ad053d62a2365ac90e0c88a1c2a6db4bc3f",
+      "destSha256": "dea7ff49c51a25f81b991e8f26f82ade7ecfac745fa7cc57ae7ec35514f85518",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "2dfa39853d2d7259e3db8ed08f1abaf045b9e40a15bb0a1e0355c259993962f9",
+      "sourceSha256": "34839e6065f0f04db241f5dc50f30aec0fd1c440db62e6094654f17ef9ef04d6",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "2dfa39853d2d7259e3db8ed08f1abaf045b9e40a15bb0a1e0355c259993962f9",
+      "destSha256": "34839e6065f0f04db241f5dc50f30aec0fd1c440db62e6094654f17ef9ef04d6",
       "transformed": false
     },
     {
@@ -484,6 +484,13 @@
       "sourceSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-22-trustworthy-edit-engine.md",
       "destSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
+      "transformed": false
+    },
+    {
+      "source": "references/release-2026-09-28-render-pdf-hwp5-stack.md",
+      "sourceSha256": "b9beb1cceea1a94540dde75ada37c536ce366fd8c807a3bb5f353eb1def8f52b",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-28-render-pdf-hwp5-stack.md",
+      "destSha256": "b9beb1cceea1a94540dde75ada37c536ce366fd8c807a3bb5f353eb1def8f52b",
       "transformed": false
     },
     {

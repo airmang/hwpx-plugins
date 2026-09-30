@@ -19,9 +19,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "e35cb0173e6f4cac9a106f6899036fb139208740e82bee9e2657e475d9a9f340",
+      "sourceSha256": "4ee7d6374789cf241fea51129571646ffbbcd7f09b42676c01116d15dfb9991c",
       "dest": "plugins/hermes/hwpx/CHANGELOG.md",
-      "destSha256": "e35cb0173e6f4cac9a106f6899036fb139208740e82bee9e2657e475d9a9f340",
+      "destSha256": "4ee7d6374789cf241fea51129571646ffbbcd7f09b42676c01116d15dfb9991c",
       "transformed": false
     },
     {

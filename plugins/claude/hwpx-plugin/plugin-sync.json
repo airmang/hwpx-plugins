@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "63bce01c72714f060cce71c6ea879a9ca876a50c63257e80d84170750142021f",
+      "sourceSha256": "569d5ae8d6c52e2c3026f007b9a86062b02512ceb40f60453ab254566235c8a0",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "63bce01c72714f060cce71c6ea879a9ca876a50c63257e80d84170750142021f",
+      "destSha256": "569d5ae8d6c52e2c3026f007b9a86062b02512ceb40f60453ab254566235c8a0",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "a664a468deae04f9e60b9dd2529237789627356a6cdf0ac13b3b69943c605edd",
+      "sourceSha256": "c5f4e8cb3b353ca7738445e05ea45d991558e6e92451d20ae039da3c5b3f43c5",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "a664a468deae04f9e60b9dd2529237789627356a6cdf0ac13b3b69943c605edd",
+      "destSha256": "c5f4e8cb3b353ca7738445e05ea45d991558e6e92451d20ae039da3c5b3f43c5",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "d7e70d3278a056ae3a969a9c413e0372fa531926581075b80b222022daeb52f7",
+      "sourceSha256": "b05eb0f26cb81fb59d730a618a22a2cfb8dfa75ac87c3b2b1ee64bb62668ad72",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "d7e70d3278a056ae3a969a9c413e0372fa531926581075b80b222022daeb52f7",
+      "destSha256": "b05eb0f26cb81fb59d730a618a22a2cfb8dfa75ac87c3b2b1ee64bb62668ad72",
       "transformed": false
     },
     {
@@ -71,13 +71,6 @@
       "sourceSha256": "7fc651284ae50b49a22399fcff54ffd074e4f0acabf29afc7b5d7a3cbddc828c",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/tool-contract.generated.md",
       "destSha256": "7fc651284ae50b49a22399fcff54ffd074e4f0acabf29afc7b5d7a3cbddc828c",
-      "transformed": false
-    },
-    {
-      "source": "references/tool-contract.generated.json",
-      "sourceSha256": "1431e7a7589bc5f7f3c278a7ba5f2c01d11567b8c7b51c771cc962ef26b4035a",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/tool-contract.generated.json",
-      "destSha256": "1431e7a7589bc5f7f3c278a7ba5f2c01d11567b8c7b51c771cc962ef26b4035a",
       "transformed": false
     },
     {
@@ -499,6 +492,27 @@
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-existing-edit.md",
       "destSha256": "6bb8244563e5fb73b9c01a4264ed2944d764de9df9c2460fe76bb3d556641635",
       "transformed": false
+    },
+    {
+      "source": "packaging/templates/claude-chat-engine.md",
+      "sourceSha256": "855a8c3f9ee275b684684a6a28d51c8f5f29f4f7a1db59cf3938b15baf0113a9",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
+      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "transformed": true
+    },
+    {
+      "source": "packaging/chatgpt/skill/references/web-workflows.md",
+      "sourceSha256": "081e3f3e93443ef6c38cfdf220c9509ebf20f587d41259a3e365b14730e972fa",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
+      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "transformed": true
+    },
+    {
+      "source": "packaging/chatgpt/skill/references/automation-python-api.md",
+      "sourceSha256": "8f3d25553248f81826cf6113f64cd29b0418abafdd4228595d9f24c95b405840",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
+      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "transformed": true
     },
     {
       "source": "packaging/templates/claude.plugin.json",

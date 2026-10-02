@@ -1,0 +1,376 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Structured exception base for python-hwpx.
+
+The structured contract covers the safe-write and preservation path, the
+moved-surface guidance, and the failures documented on an individual API: those
+raise a :class:`HwpxError` (or a subclass). It is not a blanket wrapper around
+every call. Operating-system and container-level failures keep the exception
+Python already raises — ``FileNotFoundError`` for a missing path,
+:class:`zipfile.BadZipFile` for a payload that is not an HWPX package — and the
+support matrix documents them in that form.
+
+The base carries three machine-readable fields on top of the human-readable
+message, so a caller can branch on a stable ``code``, read the measured
+``context``, and surface an actionable ``suggestion`` without parsing prose:
+
+- ``code`` — a stable, kebab-case identifier for the failure class. Callers may
+  switch on it; it is part of the contract and changes only on a major boundary.
+- ``context`` — a JSON-serialisable dict of the measured values that triggered
+  the failure (offending parts, indices, counts…). Empty when there is nothing
+  to measure.
+- ``suggestion`` — one actionable next step, or ``None`` when there is nothing
+  specific to advise.
+
+``str(exc)`` stays the human sentence (the ``message``), so existing ``except``
+handlers and log lines are unchanged. Subclasses set :attr:`default_code`, which
+lets a historical ``raise Subclass("message")`` site keep working while gaining
+the structured fields with no raise-site churn (§11 — no bulk raise rewrites).
+"""
+
+from __future__ import annotations
+
+from typing import Any, Mapping
+
+
+class HwpxError(Exception):
+    """Base for structured, fail-closed python-hwpx errors."""
+
+    #: Stable ``code`` used when a raise site does not pass an explicit ``code``.
+    default_code: str = "hwpx-error"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        context: Mapping[str, Any] | None = None,
+        suggestion: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.code = code if code is not None else self.default_code
+        self.context: dict[str, Any] = dict(context) if context else {}
+        self.suggestion = suggestion
+
+    def to_dict(self) -> dict[str, Any]:
+        """The structured envelope: ``code`` / ``message`` / ``context`` / ``suggestion``."""
+
+        return {
+            "code": self.code,
+            "message": self.message,
+            "context": dict(self.context),
+            "suggestion": self.suggestion,
+        }
+
+
+class SaveError(HwpxError, ValueError):
+    """A representative save path (``save_to_path`` / ``save_to_stream`` /
+    ``to_bytes``) failed closed before writing any output.
+
+    Subclasses :class:`ValueError` for backward compatibility: pre-4.0 callers
+    caught ``ValueError`` from these paths and must keep working.
+    """
+
+    default_code = "save-failed"
+
+
+class HwpxValueError(HwpxError, ValueError):
+    """An argument's *value* is not usable for the requested operation.
+
+    Dual inheritance follows the :class:`SaveError` precedent: a 5.x caller
+    that wrote ``except ValueError`` around a facade call keeps working, and
+    gains ``code`` / ``context`` / ``suggestion`` for free.
+    """
+
+    default_code = "hwpx-value-error"
+
+
+class HwpxTypeError(HwpxError, TypeError):
+    """An argument's *type* is not one the operation accepts."""
+
+    default_code = "hwpx-type-error"
+
+
+class HwpxLookupError(HwpxError, KeyError):
+    """A named or indexed thing (style, section, paragraph, field…) is absent.
+
+    ``KeyError.__str__`` would wrap the message in the repr quotes it uses for
+    missing keys, which contradicts the base contract stated above — ``str(exc)``
+    stays the human sentence. :meth:`__str__` restores it.
+    """
+
+    default_code = "hwpx-lookup-error"
+
+    def __str__(self) -> str:
+        return self.message
+
+
+class HwpxStateError(HwpxError, RuntimeError):
+    """The document is not in a state where the operation is meaningful."""
+
+    default_code = "hwpx-state-error"
+
+
+#: The kebab-case ``HwpxError.code`` vocabulary. Codes are ``<domain>-<condition>``
+#: where the domain names a surface area (the 6.0 namespaces plus the package-level
+#: concerns). This is deliberately **not** unified with the SCREAMING_SNAKE codes in
+#: :mod:`hwpx.quality.report`: those are values in a released receipt schema
+#: (``hwpx.mutation-report/v1``, ``VisualCompleteReport``), and renaming them would
+#: break receipt consumers. The two vocabularies meet in exactly one place —
+#: :mod:`hwpx._document.persistence` wraps a quality failure as ``quality-gate-failed``.
+ERROR_CODE_DOMAINS = frozenset(
+    {
+        "capability",
+        "cell",
+        "contract",
+        "document",
+        "field",
+        "header",
+        "heading",
+        "hwp5",
+        "hwpx",
+        "master",
+        "media",
+        "note",
+        "open",
+        "package",
+        "page",
+        "paragraph",
+        "parts",
+        "plan",
+        "preservation",
+        "quality",
+        "ref",
+        "save",
+        "section",
+        "shape",
+        "story",
+        "style",
+        "table",
+        "text",
+        "track",
+    }
+)
+
+
+#: 5.x 에 이미 나간 코드 중 ``<도메인>-<조건>`` 문법에 맞지 않는 것들.
+#:
+#: 이름이 "무엇이"가 아니라 "무슨 일이"로 시작해서 도메인이 성립하지 않는다
+#: (``unknown-contract-document`` 의 도메인은 ``unknown`` 이 아니라
+#: ``contract`` 이어야 했다). 그런데 이 코드들은 5.6.0 에 발행됐고, 계약상
+#: 코드는 호출자가 분기하는 값이다. 문법을 지키자고 **이미 나간 값을 바꾸는
+#: 것**보다 유예 목록을 명시하는 쪽이 정직하다. 7.0 에서 정리한다.
+GRANDFATHERED_CODES = frozenset(
+    {
+        "unknown-contract-document",
+        "unknown-contract-schema",
+    }
+)
+
+#: The public-path code vocabulary: ``code`` → one-line meaning.
+#:
+#: This registry is the **single source** for ``docs/error-codes.md`` — the doc is
+#: rendered from it, so the two cannot drift apart. (A guard that compared two
+#: documents to each other is exactly what let a shipped capability go unrecorded
+#: in 5.7.0; comparing a document against code is the direction that catches it.)
+#:
+#: Codes are contract. A caller may ``switch`` on them, so they change only on a
+#: major boundary.
+ERROR_CODES: dict[str, str] = {
+    # -- 계약 위반 일반 --------------------------------------------------
+    "hwpx-error": "분류되지 않은 구조화 오류(베이스 기본값).",
+    "hwpx-value-error": "인자 값이 이 연산에 쓸 수 없다(분류되지 않음).",
+    "hwpx-type-error": "인자 타입이 이 연산이 받는 것이 아니다(분류되지 않음).",
+    "hwpx-lookup-error": "이름·인덱스로 지목한 것이 없다(분류되지 않음).",
+    "hwpx-state-error": "문서 상태가 이 연산을 할 수 있는 상태가 아니다(분류되지 않음).",
+    # -- 계약 문서·스키마 ------------------------------------------------
+    "contract-document-missing": "동봉돼야 할 계약 문서가 휠에 없다.",
+    "unknown-contract-document": "그런 이름의 계약 문서가 없다.",
+    "unknown-contract-schema": "그런 이름의 계약 스키마가 없다.",
+    # -- 문서·섹션·문단 --------------------------------------------------
+    "document-header-missing": "문서에 header.xml 파트가 없다.",
+    "document-settings-root-invalid": "settings.xml 루트가 ha:HWPApplicationSetting이 아니다.",
+    "document-validation-failed": "저장 전 문서 검증이 실패했다.",
+    "document-history-root-invalid": "history.xml 루트가 history 가 아니다.",
+    "document-master-page-root-invalid": "바탕쪽 파트 루트가 masterPage 가 아니다.",
+    "document-version-root-invalid": "version.xml 루트가 HCFVersion 이 아니다.",
+    "section-missing": "문서에 섹션이 하나도 없다.",
+    "section-not-found": "섹션 인덱스가 범위를 벗어났다.",
+    "section-invalid-type": "section 인자가 정수도 섹션 객체도 아니다.",
+    "section-argument-conflict": "section 과 section_index 를 동시에 지정했다.",
+    "section-clear-mode-invalid": "clear_body 의 on_control_content 값이 raise/keep/strip 밖이다.",
+    "section-clear-no-section-properties": "섹션 첫 문단의 첫 run 에 hp:secPr 가 없어 clear_body 가 남길 쪽 설정이 없다.",
+    "section-clear-control-content": "clear_body 가 남길 hp:secPr/hp:ctrl 안에 글·표·개체가 있다(머리말·꼬리말 등, strip 으로도 못 지우는 경우 포함, 태그는 context 에).",
+    "paragraph-missing": "문서(또는 지정 범위)에 문단이 하나도 없다.",
+    "paragraph-not-found": "문단 인덱스가 범위를 벗어났다.",
+    "paragraph-invalid-type": "paragraph 인자가 정수도 문단 객체도 아니다.",
+    "paragraph-not-in-document": "넘긴 문단 객체가 이 문서에 속해 있지 않다(다른 문서의 문단이거나 지운 문단).",
+    "paragraph-argument-conflict": "paragraph_index·paragraph_indexes·paragraphs 중 둘 이상을 동시에 지정했다.",
+    "paragraph-indexes-empty": "paragraph_indexes 또는 paragraphs 가 비어 있다.",
+    "paragraph-format-empty": "적용할 문단 서식 항목이 하나도 없다.",
+    "paragraph-line-spacing-invalid": "줄 간격은 양수여야 한다.",
+    "paragraph-outline-level-out-of-range": "문단 개요 수준이 0~10 밖이다.",
+    "paragraph-border-invalid": "문단 테두리(border) 지정에 모르는 키·면이 있거나 여백이 네 개의 0 이상 수가 아니다.",
+    "paragraph-tab-pos-invalid": "탭 정지 위치(pos_mm/pos)가 없거나 음수다.",
+    "paragraph-tab-type-invalid": "탭 정지 type 값이 OWPML 어휘(LEFT/RIGHT/CENTER/DECIMAL) 밖이다.",
+    "paragraph-tab-leader-invalid": "탭 정지 leader 값이 OWPML 어휘(hc:LineType2) 밖이다.",
+    "paragraph-title-mark-no-text-run": "문단에 hp:t를 가진 run이 없어 titleMark를 넣을 자리가 없다.",
+    "paragraph-index-mark-no-text-run": "문단에 hp:t를 가진 run이 없어 indexmark를 넣을 자리가 없다.",
+    "paragraph-index-mark-empty-key": "찾아보기 표시의 first/second 키가 빈 문자열이다.",
+    "paragraph-text-missing": "문단에 고칠 일반 텍스트(hp:t) 노드가 없다.",
+    "paragraph-text-style-ambiguous": "텍스트 수정이 run 경계를 넘거나 삽입할 글자 모양이 모호하다.",
+    "paragraph-mixed-text-unsupported": "hp:t 안에 인라인 마크업이 섞여 있어 안전하게 고칠 수 없다.",
+    "paragraph-tab-target-required": "탭 컨트롤이 있는 문단은 고칠 run을 명시해야 한다.",
+    "paragraph-remove-last": "구역·셀·머리말·꼬리말의 마지막 문단은 지울 수 없다(담은 곳은 context.container).",
+    # -- 표 셀 -----------------------------------------------------------
+    "cell-margin-value": "셀 여백 값이 0 이상 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부).",
+    "cell-border-edit-unsupported": "셀 테두리 편집 대상 스타일이 없거나 모호하거나 네 변이 온전하지 않다(또는 색·선 종류가 잘못됐다).",
+    "table-position-missing": "표에 hp:pos 가 없어 글자처럼 취급을 바꿀 수 없다.",
+    "table-cell-zone-grid-mismatch": "셀 영역(hp:cellzone)이 새 열 격자에서 같은 셀들을 덮을 수 없어 열 너비를 바꾸지 않았다.",
+    # -- 머리말·꼬리말 story ------------------------------------------------
+    "story-ambiguous": "그 쪽 종류·id 에 맞는 머리말/꼬리말 story 가 여럿이거나 식별이 모호하다.",
+    "story-linkage": "기존 머리말/꼬리말 컨트롤과 구역 적용 정보가 서로 맞지 않는다.",
+    # -- 문서 파트(doc.parts) ----------------------------------------------
+    "parts-no-header-part": "문서에 header.xml 파트가 없다(doc.parts 경로).",
+    "parts-auto-spacing-unknown-para-pr": "그 id 의 hh:paraPr 를 문서에서 찾지 못했다.",
+    "header-compat-empty-target-program": "target_program 값이 비어 있다.",
+    "header-compat-empty-flag-name": "layout compatibility 플래그 이름이 비어 있다.",
+    "header-compat-empty-license-mark-type": "라이선스 표시 mark_type 값이 비어 있다.",
+    "master-page-manifest-missing": "content.hpf 매니페스트에 opf:manifest 요소가 없다.",
+    "master-page-type-unsupported": "바탕쪽 type 값이 OWPML 어휘(BOTH/EVEN/ODD/LAST_PAGE/OPTIONAL_PAGE) 밖이다.",
+    # -- 문서 병합(doc.merge) ------------------------------------------------
+    "document-merge-index-out-of-range": "after_paragraph_index 가 대상 섹션의 문단 개수 범위를 벗어났다.",
+    "document-merge-unsupported-policy-axis": "그 정책 축의 값이 아직 지원 기본값 밖이다(신규 값 미구현).",
+    "document-merge-unsupported-reference": "가져올 문단이 아직 지원 안 하는 참조 요소를 담고 있다(예: 메모 필드).",
+    # -- 스타일·제목 -----------------------------------------------------
+    "style-not-found": "그 id·이름의 스타일이 없다(가용 목록·가장 가까운 이름 동봉).",
+    "style-ambiguous": "같은 이름을 쓰는 스타일이 둘 이상이다(후보 동봉).",
+    "style-argument-conflict": "style 과 style_id_ref 를 동시에 지정했다.",
+    "style-list-level-invalid": "글머리표/번호 수준은 1 이상이어야 한다.",
+    "style-list-property-failed": "번호 문단모양을 만들지 못했다.",
+    "style-font-face-empty": "face 값이 비어 있다.",
+    "style-font-lang-invalid": "lang 값이 OWPML 어휘(HANGUL/LATIN/HANJA/JAPANESE/OTHER/SYMBOL/USER) 밖이다.",
+    "style-font-type-invalid": "font_type/subst_type 값이 OWPML 어휘(REP/TTF/HFT) 밖이다.",
+    "style-font-substitute-incomplete": "대체 글꼴 인자가 일부만 주어졌다(subst_face 가 필요하다).",
+    "style-font-replace-same-face": "replace_font 의 src_face 와 dst_face 가 같은 글꼴이다.",
+    "style-font-container-create-failed": "fontfaces/fontface 컨테이너를 만들지 못했다.",
+    "style-tab-container-create-failed": "tabProperties 컨테이너를 만들지 못했다.",
+    "style-container-create-failed": "styles 컨테이너를 만들지 못했다(방어적 분기).",
+    "style-border-fill-conflict": "fill_color/fill_image/fill_gradient 를 둘 이상 동시에 지정했다.",
+    "style-border-fill-image-missing": "fill_image 가 doc.media 이진 항목을 가리키지 않는다.",
+    "style-border-fill-image-mode-invalid": "fill_image 의 mode 값이 OWPML 어휘(hc:imgBrush/@mode) 밖이다.",
+    "style-border-fill-image-effect-invalid": "fill_image 의 effect 값이 OWPML 어휘(REAL_PIC/GRAY_SCALE/BLACK_WHITE) 밖이다.",
+    "style-border-fill-gradient-type-invalid": "fill_gradient 의 type 값이 OWPML 어휘(LINEAR/RADIAL/CONICAL/SQUARE) 밖이다.",
+    "style-border-fill-gradient-colors-invalid": "fill_gradient 의 colors 가 2개 미만이다.",
+    "style-border-fill-width-invalid": "hh:borderFill 선의 width 가 '<숫자> mm' 꼴이 아니다(border_fill_info).",
+    "style-memo-shape-line-type-invalid": "메모 모양의 line_type 값이 OWPML 어휘(hc:LineType2) 밖이다.",
+    "style-memo-shape-memo-type-invalid": "메모 모양의 memo_type 값이 OWPML 어휘(NOMAL/USER_INSERT/USER_DELETE/USER_UPDATE) 밖이다.",
+    "style-color-invalid": "색 인자가 #RRGGBB·#AARRGGBB(16진 6·8자리)나 none이 아니다.",
+    "style-number-format-invalid": "번호 형식이 한컴 번호 모양 밖이다(목록·개요 머리와 쪽 번호는 hc:NumberType1 15개, 각주·미주 번호는 hc:NumberType2 19개).",
+    "style-line-width-invalid": "선 굵기가 0보다 큰 mm 값이 아니다(목록 밖 값은 가장 가까운 한컴 선 굵기로 쓴다).",
+    "style-run-outline-type-invalid": "ensure_run 의 outline 값이 OWPML 어휘(hc:LineType1: NONE/SOLID/DOT/THICK/DASH/DASH_DOT/DASH_DOT_DOT) 밖이다.",
+    "heading-level-invalid": "개요 수준이 정수가 아니다.",
+    "heading-level-out-of-range": "개요 수준이 1~10 밖이다.",
+    "heading-style-missing": "이 문서에 해당 수준의 개요 스타일이 없다.",
+    # -- 쪽 기하 ---------------------------------------------------------
+    "page-argument-conflict": "text 와 content 를 동시에 지정했다.",
+    "page-argument-missing": "text 또는 content 중 하나는 있어야 한다.",
+    "page-kind-invalid": "kind 는 'header' 또는 'footer' 여야 한다.",
+    "page-columns-invalid": "단 수는 1 이상이어야 한다.",
+    "page-orientation-unsupported": "지원하지 않는 용지 방향이다.",
+    "page-paper-size-unsupported": "지원하지 않는 용지 규격이다.",
+    "page-new-num-kind-invalid": "쪽번호 재시작 kind 값이 OWPML 어휘(hp:AutoNumNewNumType/@numType) 밖이다.",
+    "page-text-direction-unsupported": "글자 방향 값이 OWPML 어휘(hp:secPr/@textDirection: HORIZONTAL/VERTICAL/VERTICALALL) 밖이다.",
+    # -- 양식개체 --------------------------------------------------------
+    "field-name-empty": "누름틀 이름이 비어 있다.",
+    "field-not-found": "그 선택자로 누름틀을 찾지 못했다.",
+    "field-ambiguous": "선택자가 누름틀 여럿에 걸린다.",
+    "field-not-created": "만든 누름틀을 표준 매처가 다시 찾지 못했다.",
+    "field-selector-conflict": "선택자를 둘 이상 동시에 지정했다.",
+    "field-checkbox-caption-empty": "체크박스 캡션이 비어 있다.",
+    "field-checkbox-not-found": "그 선택자로 체크박스를 찾지 못했다.",
+    "field-checkbox-ambiguous": "선택자가 체크박스 여럿에 걸린다.",
+    "field-cell-not-found": "그 이름(과 순번)의 셀 필드(이름 붙은 표 칸)가 없다.",
+    "field-checkbox-not-created": "만든 체크박스를 표준 리더가 다시 찾지 못했다.",
+    "field-fit-failed": "값이 FitPolicy 하에서 필드 상자에 들어가지 않는다(측정치·재시도 제안 동봉).",
+    # -- 자동 갱신 필드(날짜/시간·교정 부호·파일 이름, 누름틀과 다른 부류) --
+    "field-date-format-unsupported": "날짜/시간 필드 date_format 값이 실증된 어휘(단일 관측값) 밖이다.",
+    "field-proofreading-mark-unsupported": "교정 부호 mark 값이 $RevisionSign 인덱스가 확인된 어휘 밖이다.",
+    "field-path-format-unsupported": "파일 이름 필드 path_format 값이 실증된 어휘(단일 관측값) 밖이다.",
+    "field-mail-merge-empty-name": "메일 머지 필드 이름이 비어 있다.",
+    # -- 인라인 개체 -----------------------------------------------------
+    "shape-equation-script-empty": "수식 스크립트가 비어 있다.",
+    "shape-equation-script-too-large": "수식 스크립트가 크기 한도를 넘었다.",
+    "shape-equation-not-verbatim": "만든 수식이 스크립트를 그대로 담지 않았다.",
+    "shape-equation-not-created": "만든 수식을 표준 스캔이 다시 찾지 못했다.",
+    "shape-chart-xml-empty": "차트 XML 이 비어 있다.",
+    "shape-chart-xml-malformed": "차트 XML 이 올바른 XML 이 아니다.",
+    "shape-chart-root-invalid": "차트 XML 루트가 c:chartSpace 가 아니다.",
+    "shape-chart-axes-missing": "축이 필요한 차트(막대·꺾은선·영역·분산형·방사형·거품형 등)에 두 축(c:axId와 정의된 축)이 없다(한컴이 빈 차트를 그리거나 멈춘다).",
+    "shape-chart-anchor-detached": "만든 차트 앵커가 자기 파트를 가리키지 않는다.",
+    "shape-chart-not-created": "만든 차트를 표준 스캔이 다시 찾지 못했다.",
+    "shape-caption-side-invalid": "캡션 side 값이 OWPML 어휘(LEFT/RIGHT/TOP/BOTTOM) 밖이다.",
+    "shape-draw-text-vert-align": "도형 글상자 vert_align 값이 OWPML 어휘(hp:subList/@vertAlign, TOP/CENTER/BOTTOM) 밖이다.",
+    "shape-position-value": "도형 오프셋이 signed 32-bit 정수(HWPUNIT)가 아니다.",
+    "shape-position-unsupported": "위치를 바꿀 도형이 떠 있는 개체가 아니거나 hp:pos 가 없다.",
+    "shape-position-frame": "도형 기준 프레임·정렬 값이 OWPML 어휘(hp:pos 의 vertRelTo/horzRelTo/vertAlign/horzAlign) 밖이다.",
+    "shape-arc-corner-invalid": "add_arc 의 corner 인자가 지원하는 모서리(TOP_LEFT 등) 밖이다.",
+    "shape-arc-type-invalid": "add_arc 의 arc_type 인자가 OWPML 어휘(NORMAL/PIE/CHORD) 밖이다.",
+    "shape-container-no-members": "add_container 에 부재를 하나도 안 줬다.",
+    "shape-polygon-too-few-points": "add_polygon 에 꼭짓점을 3개 미만으로 줬다.",
+    "shape-drop-cap-style-unsupported": "드롭캡 dropcapstyle 값이 실증된 어휘(TripleLine) 밖이다.",
+    "shape-drop-cap-character-empty": "드롭캡으로 키울 문자가 비어 있다.",
+    "shape-drop-cap-anchor-detached": "만든 드롭캡이 요청한 dropcapstyle 을 안 갖고 있다(방어적 분기).",
+    "shape-drop-cap-not-created": "만든 드롭캡을 표준 섹션 스캔이 다시 찾지 못했다.",
+    # -- 미디어 ----------------------------------------------------------
+    "media-item-id-taken": "그 이진 항목 id 가 이미 쓰이고 있다.",
+    "media-item-in-use": "지우려는 이진 항목을 문서가 아직 가리킨다(그림·채우기·동영상·OLE 등). force=True 로만 지운다.",
+    "media-owner-paragraph-missing": "교체한 그림 요소가 소속 문단을 찾지 못했다(방어적 분기).",
+    # -- 주석 ------------------------------------------------------------
+    "note-anchor-detached": "앵커를 걸 문단이 섹션에 속해 있지 않다.",
+    "note-memo-detached": "메모가 섹션에 속해 있지 않다.",
+    "note-argument-conflict": "앵커 없는 메모에 앵커 전용 인자를 줬다.",
+    # -- 변경추적 --------------------------------------------------------
+    "track-text-empty": "변경추적 삽입 텍스트가 비어 있다.",
+    "track-match-empty": "찾을 문자열이 비어 있다.",
+    "track-match-not-found": "문단에서 찾을 문자열을 찾지 못했다.",
+    "track-match-crosses-markup": "찾은 구간이 인라인 마크업을 가로질러 안전하게 감쌀 수 없다.",
+    "track-paragraph-empty": "지울 텍스트가 문단에 없다.",
+    # -- 텍스트 ----------------------------------------------------------
+    "text-search-empty": "바꿀 대상 문자열이 비어 있다.",
+    "text-highlight-match-empty": "형광펜으로 감쌀 문자열이 비어 있다.",
+    "text-highlight-match-not-found": "문단에서 형광펜으로 감쌀 문자열을 찾지 못했다.",
+    "text-highlight-match-crosses-markup": "찾은 구간이 인라인 마크업을 가로질러 안전하게 감쌀 수 없다.",
+    "text-highlight-color-invalid": "형광펜 색이 #RRGGBB 6자리 16진 형식이 아니다.",
+    # -- 저장·패키지 -----------------------------------------------------
+    "save-failed": "저장 경로가 아무것도 쓰기 전에 fail-closed 했다.",
+    "save-package-contract-violated": "package.save(None) 이 bytes 를 돌려주지 않았다.",
+    "save-format-unsupported": "저장 형식(format)이 'hwpx'도 'hwp'도 아니다.",
+    "open-safety-failed": "산출 패키지가 편집기 열기 안전성 검사를 통과하지 못했다.",
+    "quality-gate-failed": "품질 게이트가 저장을 막았다(quality 코드는 context 에).",
+    "preservation-downgrade": "요청한 보존 등급을 저장이 달성하지 못했다.",
+    # -- HWP 5.0 (.hwp) ------------------------------------------------
+    "hwp5-damaged": "HWP 5.0 문서의 컨테이너나 레코드가 깨졌다(잘림·범위 밖 섹터·순환·레코드 길이·압축).",
+    "hwp5-password": "암호가 걸린 HWP 5.0 문서다.",
+    "hwp5-distribution": "배포용 HWP 5.0 문서라 본문이 암호화돼 있다.",
+    "hwp5-drm": "DRM·인증서로 암호화된 HWP 5.0 문서다.",
+    "hwp5-not-hwp5": "복합 파일이지만 HWP 5.0 FileHeader가 없다.",
+    "hwp5-version-unsupported": "FileHeader의 주 버전이 5가 아니다.",
+    "hwp5-limit-exceeded": "HWP 5.0 입력이 파싱 상한(스트림 크기·레코드 수·디렉터리 수)을 넘는다.",
+    "hwp5-write-unsupported": "HWP 5.0 작성기가 표현할 수 없는 내용이다.",
+    # -- 계획 실행기 -----------------------------------------------------
+    "plan-invalid": "편집 계획이 v1 계약을 위반한다.",
+}
+
+
+__all__ = [
+    "ERROR_CODES",
+    "GRANDFATHERED_CODES",
+    "ERROR_CODE_DOMAINS",
+    "HwpxError",
+    "HwpxLookupError",
+    "HwpxStateError",
+    "HwpxTypeError",
+    "HwpxValueError",
+    "SaveError",
+]

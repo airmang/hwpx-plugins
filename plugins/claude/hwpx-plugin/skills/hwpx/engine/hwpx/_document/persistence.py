@@ -1,0 +1,572 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Save/validate/export domain owner behind the HwpxDocument facade."""
+
+from __future__ import annotations
+
+import dataclasses
+import hashlib
+from os import PathLike
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Sequence
+
+from ..errors import HwpxTypeError, HwpxValueError, SaveError
+from ..mutation_report import (
+    Fallback,
+    Mode,
+    MutationReport,
+    PreservationDowngradeError,
+    PreservationMeasurement,
+    VerificationSummary,
+    VerificationValue,
+    measure_save,
+)
+from ..opc.package import _UNCHECKED_SAVE_TOKEN
+from ..quality import QualityPolicy
+from ..quality.report import OpenSafetyReport
+
+#: The file formats a document saves to: HWPX, or HWP 5.0.
+SaveFormat = Literal["hwpx", "hwp"]
+
+if TYPE_CHECKING:
+    from hwpx.document import HwpxDocument
+    from ..quality import VisualCompleteReport
+    from ..tools.validator import ValidationIssue, ValidationReport
+
+
+def _summarize_validation_issues(issues: Sequence[Any], *, limit: int = 5) -> str:
+    selected = [str(issue) for issue in issues[:limit]]
+    remaining = len(issues) - len(selected)
+    summary = "; ".join(selected)
+    if remaining > 0:
+        summary += f" ... and {remaining} more"
+    return summary
+
+
+def export_text(doc: "HwpxDocument", **kwargs: object) -> str:
+    """Export content as plain text.  Keyword args forwarded to :func:`~hwpx.tools.exporter.export_text`."""
+    from ..tools.exporter import export_text
+    return export_text(doc, **kwargs)  # type: ignore[arg-type]
+
+
+def export_html(doc: "HwpxDocument", **kwargs: object) -> str:
+    """Export content as HTML.  Keyword args forwarded to :func:`~hwpx.tools.exporter.export_html`."""
+    from ..tools.exporter import export_html
+    return export_html(doc, **kwargs)  # type: ignore[arg-type]
+
+
+def export_markdown(doc: "HwpxDocument", **kwargs: object) -> str:
+    """Export content as Markdown.  Keyword args forwarded to :func:`~hwpx.tools.exporter.export_markdown`."""
+    from ..tools.exporter import export_markdown
+    return export_markdown(doc, **kwargs)  # type: ignore[arg-type]
+
+
+def export_rich_markdown(doc: "HwpxDocument", **kwargs: object) -> str:
+    """Export rich Markdown preserving inline styles, tables, footnotes, hyperlinks, images, and shape text.
+
+    Keyword args forwarded to :func:`~hwpx.tools.markdown_export.export_markdown`.
+    """
+    from ..tools.markdown_export import export_markdown as _rich
+    return _rich(doc, **kwargs)  # type: ignore[arg-type]
+
+
+def validate(doc: "HwpxDocument") -> "ValidationReport":
+    """Run XML schema validation on the current document state.
+
+    Returns a :class:`~hwpx.tools.validator.ValidationReport` with
+    any issues found.  This does **not** require ``validate_on_save``
+    to be enabled.
+    """
+    from ..tools.validator import validate_document
+
+    archive = _to_bytes_for_validation(doc)
+    report = validate_document(archive)
+    drift = _manifest_drift_issues(archive)
+    if not drift:
+        return report
+    return dataclasses.replace(report, issues=report.issues + tuple(drift))
+
+
+def _manifest_drift_issues(archive: bytes) -> list["ValidationIssue"]:
+    """Warn about manifest items with no part and ``BinData/`` parts with no item.
+
+    Warnings, not errors: the editor-open safety check already treats a
+    manifest href missing from the archive as advisory. An item marked
+    ``isEmbeded="0"`` whose href lies outside ``BinData/`` links a file
+    outside the package (a video, say), so its missing part is not drift.
+    Hancom also marks OLE objects ``isEmbeded="0"``, but keeps their file in
+    ``BinData/``; a missing one of those is reported.
+    """
+
+    from ..opc.package import HwpxPackage
+    from ..opc.relationships import parse_manifest_relationships
+    from ..tools.validator import ValidationIssue
+
+    package = HwpxPackage.open(archive)
+    manifest_path = package.main_content.full_path
+    part_names = set(package.part_names())
+    relationships = parse_manifest_relationships(
+        package.manifest_tree(), manifest_path, known_parts=part_names
+    )
+
+    linked = {
+        item.get("id")
+        for item in package._manifest_items()
+        if item.get("isEmbeded") == "0" and not (item.get("href") or "").startswith("BinData/")
+    }
+
+    issues: list[ValidationIssue] = []
+    declared: set[str] = set()
+    for item in relationships.items:
+        declared.add(item.resolved_path)
+        if item.resolved_path not in part_names and item.item_id not in linked:
+            issues.append(
+                ValidationIssue(
+                    part_name=manifest_path,
+                    message=(
+                        f"manifest item {item.item_id!r} names {item.href!r}, "
+                        "which is not a part in the package"
+                    ),
+                    severity="warning",
+                )
+            )
+    for part_name in sorted(part_names):
+        if part_name.startswith("BinData/") and part_name not in declared:
+            issues.append(
+                ValidationIssue(
+                    part_name=part_name,
+                    message=f"BinData part {part_name!r} has no manifest item in {manifest_path}",
+                    severity="warning",
+                )
+            )
+    return issues
+
+
+def _run_pre_save_validation(doc: "HwpxDocument") -> None:
+    """Raise if validate_on_save is enabled and the document is invalid."""
+    if not doc.validate_on_save:
+        return
+    report = doc.validate()
+    if not report.ok:
+        msgs = _summarize_validation_issues(report.issues)
+        raise SaveError(
+            f"Document validation failed: {msgs}",
+            code="document-validation-failed",
+            context={"issueCount": len(report.issues), "issues": msgs},
+            suggestion=(
+                "Fix the reported schema issues, or disable validate_on_save if "
+                "the validation is a false positive for your document."
+            ),
+        )
+
+
+def _run_open_safety_validation(doc: "HwpxDocument", archive_bytes: bytes) -> None:
+    """Raise if generated bytes are unsafe to hand to an HWPX editor.
+
+    The package's own save already ran the same validation when it built
+    these exact bytes (``HwpxPackage._save_to_zip`` records their digest), so
+    the check is not repeated then. Bytes it did not verify are validated here.
+    """
+
+    from ..tools.package_validator import validate_editor_open_safety
+
+    verified = getattr(doc._package, "_verified_archive_digest", None)
+    if verified is not None and verified == hashlib.sha256(archive_bytes).digest():
+        return
+    report = validate_editor_open_safety(archive_bytes)
+    if not report.ok:
+        raise SaveError(
+            "Generated HWPX package failed open-safety validation: "
+            + report.summary,
+            code="open-safety-failed",
+            context={"summary": report.summary},
+            suggestion=(
+                "The serialized package would not reopen in an HWPX editor; "
+                "inspect validate_editor_open_safety(...) for the failing checks."
+            ),
+        )
+
+
+def _gate_and_write(
+    doc: "HwpxDocument",
+    archive_bytes: bytes,
+    *,
+    output_path: str | PathLike[str] | None = None,
+    output_stream: BinaryIO | None = None,
+    source_label: str,
+) -> VisualCompleteReport:
+    """Funnel a serialized archive through the SavePipeline (transparent).
+
+    ``_to_bytes_raw`` already ran open-safety and raised on failure, so the
+    gate is transparent here — it performs the single atomic write and returns
+    the uniform report. Raises if the gate unexpectedly rejects the bytes.
+    """
+
+    report = doc._save_pipeline.run(
+        archive_bytes,
+        output_path=output_path,
+        output_stream=output_stream,
+        quality=QualityPolicy.transparent(),
+        open_safety=OpenSafetyReport.passed("validated during serialize"),
+        publish="on_pass",
+        source_label=source_label,
+    )
+    if not report.ok:
+        detail = "; ".join(str(error) for error in report.errors)
+        raise SaveError(
+            f"Document save failed the quality gate: {detail}",
+            code="quality-gate-failed",
+            context={"errors": [str(error) for error in report.errors]},
+            suggestion=(
+                "The SavePipeline quality gate rejected the archive; inspect the "
+                "returned report's errors before retrying."
+            ),
+        )
+    return report
+
+
+def _build_measured(
+    doc: "HwpxDocument", *, reset_dirty: bool
+) -> tuple[bytes, PreservationMeasurement]:
+    """Serialize + open-safety validate exactly like ``_to_bytes_raw`` and measure
+    the built archive's preservation against the pre-save part payloads.
+
+    The pre-save snapshot is captured *before* the ``serialize()`` updates are
+    applied so a per-save normalizer touching a part the editor never declared
+    dirty surfaces as an ``unexpected`` change (Safe Write Contract §2).
+    """
+
+    package = doc._package
+    # Measure against the OPEN-TIME baseline, not the current package state: a
+    # low-level ``set_part`` applied before this save already lives in
+    # ``_files``, and measuring against it would silently launder that change
+    # through a ``mode="patch"`` grade (Safe Write Contract §1, fail-closed).
+    source_members = dict(
+        getattr(package, "_opened_members", None) or package._files
+    )
+    source_infos = dict(
+        getattr(package, "_opened_zip_infos", None) or package._zip_infos
+    )
+    updates = doc._root.serialize()
+    predeclared = set(updates)
+    if updates:
+        for part_name, payload in updates.items():
+            package.set_part(part_name, payload)
+    result = package._save_to_bytes(verify_open_safety=True, mark_clean=False)
+    if not isinstance(result, bytes):
+        raise HwpxTypeError(
+            "package.save(None) must return bytes",
+            code="save-package-contract-violated",
+            suggestion="Check that the custom package implementation honours this contract.",
+        )
+    doc._run_open_safety_validation(result)
+    if reset_dirty:
+        _mark_save_clean(doc)
+    measurement = measure_save(source_members, source_infos, result, predeclared)
+    return result, measurement
+
+
+def _resolve_grade(
+    mode: Mode,
+    fallback: Fallback,
+    measurement: PreservationMeasurement,
+) -> tuple[Literal["patch", "rebuild"], bool]:
+    """Return ``(actual_mode, fallback_used)``; raise before any write when a
+    requested ``patch`` grade is unmet and ``fallback="error"`` (§1)."""
+
+    if mode == "patch" and not measurement.patch_grade_ok:
+        if fallback == "error":
+            raise PreservationDowngradeError(
+                requested_mode=mode,
+                achieved_grade=measurement.achieved_grade,
+                offending_parts=measurement.offending_parts,
+                suggestion=(
+                    "route these edits through a byte-preserving primitive "
+                    "(hwpx.patch/table_patch/body_patch) or pass fallback='rebuild'."
+                ),
+            )
+        return "rebuild", True
+    if mode == "auto":
+        return measurement.achieved_grade, False
+    if mode == "patch":
+        return "patch", False
+    return "rebuild", False
+
+
+def _verification_summary(report: "VisualCompleteReport") -> VerificationSummary:
+    """Reflect what the pipeline actually ran; never fabricate a pass (§2)."""
+
+    package: VerificationValue = "passed" if report.ok else "failed"
+    open_safety: VerificationValue = "passed" if report.open_safety.ok else "failed"
+    # Open-safety validation (which includes the reopen probe) already ran during
+    # serialize and raised on failure, so reaching here means reopen passed.
+    reopen: VerificationValue = "passed"
+    status = report.visual_complete_status
+    visual: VerificationValue = (
+        "passed"
+        if status == "verified"
+        else "failed"
+        if status == "failed"
+        else "not_performed"
+    )
+    return VerificationSummary(
+        package=package, open_safety=open_safety, reopen=reopen, visual=visual
+    )
+
+
+def _compose_mutation_report(
+    *,
+    path: str | None,
+    requested_mode: Mode,
+    actual_mode: Literal["patch", "rebuild"],
+    fallback_used: bool,
+    measurement: PreservationMeasurement,
+    report: "VisualCompleteReport",
+) -> MutationReport:
+    return MutationReport(
+        requested_mode=requested_mode,
+        actual_mode=actual_mode,
+        fallback_used=fallback_used,
+        changed_parts=measurement.changed_parts,
+        preservation=measurement.preservation,
+        verification=_verification_summary(report),
+        path=path,
+    )
+
+
+def save_to_path(
+    doc: "HwpxDocument",
+    path: str | PathLike[str],
+    *,
+    mode: Mode = "auto",
+    fallback: Fallback = "error",
+    return_report: bool = False,
+) -> str | PathLike[str] | MutationReport:
+    """Persist pending changes to *path*.
+
+    Returns *path* by default; ``return_report=True`` returns the
+    :class:`~hwpx.mutation_report.MutationReport` receipt instead. ``mode`` and
+    ``fallback`` are the Safe Write Contract grade controls — ``mode="patch"``
+    with ``fallback="error"`` raises :class:`PreservationDowngradeError` and
+    writes nothing when the save cannot keep every untouched part byte-identical.
+    """
+
+    _run_pre_save_validation(doc)
+    archive_bytes, measurement = _build_measured(doc, reset_dirty=False)
+    actual_mode, fallback_used = _resolve_grade(mode, fallback, measurement)
+    if str(path).lower().endswith(".hwp"):
+        # An .hwp target is written as HWP 5.0 from the validated HWPX parts;
+        # the gate still checks those parts, and nothing is written when the
+        # HWP 5.0 writer cannot express the document.
+        report = _gate_and_write(doc, archive_bytes, source_label="document.save_to_path")
+        _write_hwp5(path, archive_bytes)
+    else:
+        report = _gate_and_write(
+            doc, archive_bytes, output_path=path, source_label="document.save_to_path"
+        )
+    _mark_save_clean(doc)
+    if return_report:
+        return _compose_mutation_report(
+            path=str(path),
+            requested_mode=mode,
+            actual_mode=actual_mode,
+            fallback_used=fallback_used,
+            measurement=measurement,
+            report=report,
+        )
+    return path
+
+
+def _write_hwp5(path: str | PathLike[str], archive_bytes: bytes) -> None:
+    from ..quality.save_pipeline import write_bytes_atomically
+
+    write_bytes_atomically(path, _hwp5_bytes(archive_bytes))
+
+
+def _hwp5_bytes(archive_bytes: bytes) -> bytes:
+    """The HWP 5.0 file for the validated HWPX parts of *archive_bytes*."""
+
+    import io
+    import zipfile
+
+    from ..hwp5.writer import write_hwp5
+
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+        files = {name: archive.read(name) for name in archive.namelist() if not name.endswith("/")}
+    return write_hwp5(files)
+
+
+def _check_format(format: str) -> None:
+    if format not in ("hwpx", "hwp"):
+        raise HwpxValueError(
+            f"Unknown save format {format!r}; use 'hwpx' or 'hwp'.",
+            code="save-format-unsupported",
+            context={"format": format},
+            suggestion="Pass format='hwpx' (the default) or format='hwp'.",
+        )
+
+
+def save_to_stream(
+    doc: "HwpxDocument",
+    stream: BinaryIO,
+    *,
+    mode: Mode = "auto",
+    fallback: Fallback = "error",
+    return_report: bool = False,
+    format: SaveFormat = "hwpx",
+) -> BinaryIO | MutationReport:
+    """Persist pending changes to *stream*.
+
+    Returns *stream* by default; ``return_report=True`` returns the
+    :class:`~hwpx.mutation_report.MutationReport` receipt instead. See
+    :func:`save_to_path` for the ``mode``/``fallback`` grade semantics.
+    ``format="hwp"`` writes HWP 5.0 the way an ``.hwp`` path does.
+    """
+
+    _check_format(format)
+    _run_pre_save_validation(doc)
+    archive_bytes, measurement = _build_measured(doc, reset_dirty=False)
+    actual_mode, fallback_used = _resolve_grade(mode, fallback, measurement)
+    if format == "hwp":
+        # As for an .hwp path: the gate checks the HWPX parts, and nothing is
+        # written when the HWP 5.0 writer cannot express the document.
+        report = _gate_and_write(doc, archive_bytes, source_label="document.save_to_stream")
+        stream.write(_hwp5_bytes(archive_bytes))
+    else:
+        report = _gate_and_write(
+            doc, archive_bytes, output_stream=stream, source_label="document.save_to_stream"
+        )
+    _mark_save_clean(doc)
+    if return_report:
+        return _compose_mutation_report(
+            path=None,
+            requested_mode=mode,
+            actual_mode=actual_mode,
+            fallback_used=fallback_used,
+            measurement=measurement,
+            report=report,
+        )
+    return stream
+
+
+def save_report(
+    doc: "HwpxDocument",
+    path_or_stream: str | PathLike[str] | BinaryIO | None = None,
+    *,
+    quality: QualityPolicy | None = None,
+    before: str | PathLike[str] | None = None,
+    edit_mask: Any | None = None,
+    ledger: Any | None = None,
+) -> VisualCompleteReport:
+    """Save through the SavePipeline and return the full ``VisualCompleteReport``.
+
+    This is the canonical Phase-B write: it funnels through the one gate and
+    returns the uniform report (open-safety, reference integrity, and — when
+    the policy renders and a Hancom oracle is reachable — the visual verdict).
+    ``quality`` defaults to :meth:`QualityPolicy.transparent` so the call is a
+    drop-in for ``save_to_path`` that simply also hands back the report; pass
+    ``QualityPolicy.strict()`` (or ``render_check="required"``) to demand the
+    oracle-verified ``visual_complete`` tier (plan §0.0).
+
+    Like the legacy savers it raises only if the serialize step's open-safety
+    check fails; all other gate outcomes are returned in the report.
+    """
+
+    _run_pre_save_validation(doc)
+    archive_bytes = doc._to_bytes_raw(reset_dirty=False)
+
+    output_path: str | PathLike[str] | None = None
+    output_stream: BinaryIO | None = None
+    if isinstance(path_or_stream, (str, PathLike)):
+        output_path = path_or_stream
+    elif path_or_stream is not None:
+        output_stream = path_or_stream
+
+    report = doc._save_pipeline.run(
+        archive_bytes,
+        output_path=output_path,
+        output_stream=output_stream,
+        quality=quality or QualityPolicy.transparent(),
+        before=before,
+        edit_mask=edit_mask,
+        ledger=ledger,
+        reference_document=doc,
+        source_label="document.save_report",
+    )
+    if report.ok:
+        _mark_save_clean(doc)
+    return report
+
+
+def to_bytes(
+    doc: "HwpxDocument",
+    *,
+    mode: Mode = "auto",
+    fallback: Fallback = "error",
+    format: SaveFormat = "hwpx",
+) -> bytes:
+    """Serialize pending changes and return the HWPX archive as bytes.
+
+    ``mode``/``fallback`` enforce the Safe Write Contract grade the same way as
+    :func:`save_to_path`: ``mode="patch"`` with ``fallback="error"`` raises
+    :class:`PreservationDowngradeError` before returning when the archive is not
+    patch-grade. There is no ``return_report`` — the enforcement is via the typed
+    exception, so the byte return stays unchanged. ``format="hwp"`` returns an
+    HWP 5.0 file instead; the document stays unsaved when that cannot be written.
+    """
+
+    _check_format(format)
+    _run_pre_save_validation(doc)
+    archive_bytes, measurement = _build_measured(doc, reset_dirty=False)
+    _resolve_grade(mode, fallback, measurement)
+    data = _hwp5_bytes(archive_bytes) if format == "hwp" else archive_bytes
+    _mark_save_clean(doc)
+    return data
+
+
+def _to_bytes_raw(
+    doc: "HwpxDocument",
+    *,
+    reset_dirty: bool = True,
+) -> bytes:
+    """Serialize and run editor-open safety validation.
+
+    When ``reset_dirty`` is ``False``, the document remains marked as
+    modified after the archive snapshot is generated.
+    """
+    updates = doc._root.serialize()
+    if updates:
+        for part_name, payload in updates.items():
+            doc._package.set_part(part_name, payload)
+    result = doc._package._save_to_bytes(
+        verify_open_safety=True,
+        mark_clean=False,
+    )
+    if isinstance(result, bytes):
+        doc._run_open_safety_validation(result)
+        if reset_dirty:
+            _mark_save_clean(doc)
+        return result
+    raise HwpxTypeError(
+            "package.save(None) must return bytes",
+            code="save-package-contract-violated",
+            suggestion="Check that the custom package implementation honours this contract.",
+        )
+
+
+def _to_bytes_for_validation(doc: "HwpxDocument") -> bytes:
+    """Serialize current state for document validation without handing bytes to callers."""
+
+    updates = doc._root.serialize()
+    return doc._package._save_bytes_unchecked(
+        updates,
+        _unchecked_token=_UNCHECKED_SAVE_TOKEN,
+    )
+
+
+def _mark_save_clean(doc: "HwpxDocument") -> None:
+    doc._root.reset_dirty()
+    doc._package.version_info.mark_clean()
+    # The published archive is the new preservation baseline for any further
+    # save on this document instance.
+    package = doc._package
+    package._opened_members = dict(package._files)
+    package._opened_zip_infos = dict(package._zip_infos)

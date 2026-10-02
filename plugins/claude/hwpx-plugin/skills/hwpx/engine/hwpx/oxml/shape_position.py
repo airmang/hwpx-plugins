@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Floating-shape reference frames and shape-text vertical alignment.
+"""Floating-shape reference frames, shape-text vertical alignment, a new
+shape's original size (``hp:orgSz``) apart from its current size, and a
+group resized the way Hancom resizes one.
 
 ``HwpxOxmlShape.set_position`` is attached to the class in ``objects.py`` as a
 plain class attribute, the same escape valve ``dutmal_compose.py`` uses:
@@ -11,16 +13,30 @@ The vocabularies are the OWPML enumerations in the bundled schema,
 ``AbstractShapeObjectType`` (``vertRelTo``/``horzRelTo``/``vertAlign``/
 ``horzAlign``) and ``ParaListType/@vertAlign`` for ``hp:subList``. Note the
 schema gives ``vertRelTo`` no ``COLUMN`` — only ``horzRelTo`` has one.
+
+A shape Hancom has resized keeps its geometry in ``orgSz`` space and scales
+it with ``hc:scaMatrix``: in the corpus (``error__20240305__2022.hwpx``,
+``error__20250808__…_분석_및_전망.hwpx``) a rect's ``pt2`` and an ellipse's
+``ax2`` sit at ``orgSz``, ``curSz`` equals ``sz``, ``scaMatrix`` ``e1``/``e5``
+are ``curSz/orgSz`` per axis, and ``rotationInfo``'s centre is half of
+``curSz``. :func:`build_at_original_size` writes that same layout.
+
+A group (``hp:container``) is drawn at its ``sz`` whatever its members hold;
+:func:`resize_group` writes the rest of it as Hancom saves a resized group.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import math
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..errors import HwpxValueError
-from ._document_primitives import _HP
+from ._document_primitives import _HC, _HP
 
 if TYPE_CHECKING:
+    import xml.etree.ElementTree as ET
+
     from .objects import HwpxOxmlShape
 
 POS_VERT_REL_TO = ("PAPER", "PAGE", "PARA")
@@ -118,11 +134,149 @@ def _shape_set_position(
     self.paragraph.section.mark_dirty()
 
 
+def _matrix_number(value: float) -> str:
+    """A matrix entry as Hancom prints it: six decimals, no trailing zeros."""
+
+    text = f"{value:.6f}".rstrip("0").rstrip(".")
+    return "0" if text in ("-0", "") else text
+
+
+def validate_original_size(original_size: object) -> tuple[int, int] | None:
+    """Check *original_size* is ``None`` or two positive integers."""
+
+    if original_size is None:
+        return None
+    try:
+        org_width, org_height = original_size  # type: ignore[misc]
+    except (TypeError, ValueError):
+        org_width = org_height = None
+    if not all(
+        isinstance(value, int) and not isinstance(value, bool) and value > 0
+        for value in (org_width, org_height)
+    ):
+        raise HwpxValueError(
+            f"original_size must be two positive integer HWP units; got {original_size!r}",
+            code="shape-original-size-invalid",
+            context={"requested": repr(original_size)},
+            suggestion="Pass original_size=(width, height), both positive integers.",
+        )
+    return org_width, org_height  # type: ignore[return-value]
+
+
+def build_at_original_size(
+    factory: "Callable[..., ET.Element]",
+    width: int,
+    height: int,
+    original_size: "tuple[int, int] | None",
+    **options: Any,
+) -> "ET.Element":
+    """Build a shape with *factory* and give it *original_size* as ``orgSz``.
+
+    With *original_size* ``None`` this is ``factory(width, height, **options)``
+    unchanged (``orgSz`` equals ``curSz``). Otherwise the shape and its
+    geometry are built at the original size, then ``curSz``/``sz`` and the
+    rotation centre are set to *width* x *height* and ``scaMatrix`` scales
+    between the two. A size that is not two positive integers refuses with
+    ``shape-original-size-invalid`` before anything is built.
+    """
+
+    checked = validate_original_size(original_size)
+    if checked is None:
+        return factory(width, height, **options)
+    org_width, org_height = checked
+    element = factory(org_width, org_height, **options)
+    for tag in ("curSz", "sz"):
+        child = element.find(f"{_HP}{tag}")
+        if child is not None:
+            child.set("width", str(width))
+            child.set("height", str(height))
+    rotation = element.find(f"{_HP}rotationInfo")
+    if rotation is not None:
+        rotation.set("centerX", str(width // 2))
+        rotation.set("centerY", str(height // 2))
+    scale = element.find(f"{_HP}renderingInfo/{_HC}scaMatrix")
+    if scale is not None:
+        scale.set("e1", _matrix_number(width / org_width))
+        scale.set("e5", _matrix_number(height / org_height))
+    return element
+
+
+def resize_group(shape: "HwpxOxmlShape", width: int, height: int) -> bool:
+    """Resize the group *shape* (``hp:container``) the way Hancom does.
+
+    The group keeps ``orgSz``: ``sz`` and ``curSz`` take *width* x *height*
+    (``curSz`` 0 on an axis left at ``orgSz``) and the group's ``scaMatrix``
+    the factors new over original. Every member, members of groups in it
+    included, takes the factors in its first ``scaMatrix``, moved by its
+    offset (its ``transMatrix``) times the factor less 1, so the group grows
+    from its origin, and takes ``curSz`` = its ``orgSz`` times the factors
+    of the groups it is in (rounded down, 0 on an axis they leave alone).
+    Offsets, rotation centres and the members' own matrices stay. ``False``,
+    with nothing changed, for a group without an original size.
+    """
+
+    element = shape.element
+    original = element.find(f"{_HP}orgSz")
+    sizes = (0, 0) if original is None else (int(original.get("width", "0")), int(original.get("height", "0")))
+    if min(sizes) <= 0:
+        return False
+    factors = (width / sizes[0], height / sizes[1])
+    _set_size(element, "sz", width, height)
+    _set_size(element, "curSz", width if factors[0] != 1 else 0, height if factors[1] != 1 else 0)
+    scale = element.find(f"{_HP}renderingInfo/{_HC}scaMatrix")
+    if scale is not None:
+        _set_scale(scale, factors, (0.0, 0.0))
+    for member, depth in _group_members(element, 1):
+        scales = member.findall(f"{_HP}renderingInfo/{_HC}scaMatrix")
+        if not scales:
+            continue
+        trans = member.find(f"{_HP}renderingInfo/{_HC}transMatrix")
+        offset = (0.0, 0.0) if trans is None else (float(trans.get("e3", "0")), float(trans.get("e6", "0")))
+        _set_scale(scales[0], factors, offset)
+        own = member.find(f"{_HP}orgSz")
+        if own is None:
+            continue
+        grown = [factor * math.prod(float(matrix.get(key, "1")) for matrix in scales[1:depth])
+                 for factor, key in zip(factors, ("e1", "e5"))]
+        _set_size(member, "curSz", *(int(int(own.get(side, "0")) * factor + 1e-6) if factor != 1 else 0
+                                      for side, factor in zip(("width", "height"), grown)))
+    shape.paragraph.section.mark_dirty()
+    return True
+
+
+def _group_members(group: "ET.Element", depth: int) -> "Iterator[tuple[ET.Element, int]]":
+    """Each member of *group* at *depth*, then the members of a group among them one deeper."""
+
+    for child in group:
+        if child.find(f"{_HP}renderingInfo") is not None:
+            yield child, depth
+            if child.tag == f"{_HP}container":
+                yield from _group_members(child, depth + 1)
+
+
+def _set_size(element: "ET.Element", tag: str, width: int, height: int) -> None:
+    child = element.find(f"{_HP}{tag}")
+    if child is not None:
+        child.set("width", str(width))
+        child.set("height", str(height))
+
+
+def _set_scale(matrix: "ET.Element", factors: tuple[float, float], offset: tuple[float, float]) -> None:
+    """*matrix* scaling by *factors* from the origin of a member at *offset*."""
+
+    for key, value in (("e1", factors[0]), ("e2", 0.0), ("e3", offset[0] * (factors[0] - 1)),
+                       ("e4", 0.0), ("e5", factors[1]), ("e6", offset[1] * (factors[1] - 1))):
+        matrix.set(key, _matrix_number(value))
+
+
 __all__ = [
     "POS_HORZ_ALIGN",
     "POS_HORZ_REL_TO",
     "POS_VERT_ALIGN",
     "POS_VERT_REL_TO",
     "SUBLIST_VERT_ALIGN",
+    "build_at_original_size",
+    "resize_group",
     "validate_draw_text_vert_align",
+    "validate_original_size",
 ]

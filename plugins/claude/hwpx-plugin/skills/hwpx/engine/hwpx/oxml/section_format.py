@@ -25,7 +25,12 @@ from ._document_primitives import (
 from .numbering import SectionStartNumbering
 from .numbering_kinds import number_format
 from .utils import normalize_line_width
-from .section_story import HwpxOxmlSectionHeaderFooter, _section_story_elements, remember_story_pair
+from .section_story import (
+    HwpxOxmlSectionHeaderFooter,
+    _section_story_elements,
+    remember_story_pair,
+    story_control_index,
+)
 
 if TYPE_CHECKING:
     from .section import HwpxOxmlSection
@@ -1119,6 +1124,13 @@ class HwpxOxmlSectionProperties:
         self._set_note_spacing("footNotePr", **kwargs)
 
     def set_footnote_numbering(self, **kwargs: Any) -> None:
+        """Set how footnotes are numbered: ``type`` (``CONTINUOUS``, ``ON_SECTION``
+        or ``ON_PAGE``) and ``new_num``, the first number.
+
+        Hancom starts the numbers at ``new_num`` only with ``ON_SECTION``. With
+        ``CONTINUOUS`` and ``ON_PAGE`` it numbers from 1; the value stays in the
+        file.
+        """
         self._set_note_numbering("footNotePr", **kwargs)
 
     def set_footnote_placement(self, **kwargs: Any) -> None:
@@ -1138,6 +1150,13 @@ class HwpxOxmlSectionProperties:
         self._set_note_spacing("endNotePr", **kwargs)
 
     def set_endnote_numbering(self, **kwargs: Any) -> None:
+        """Set how endnotes are numbered: ``type`` (``CONTINUOUS``, ``ON_SECTION``
+        or ``ON_PAGE``) and ``new_num``, the first number.
+
+        Hancom starts the numbers at ``new_num`` only with ``ON_SECTION``. With
+        ``CONTINUOUS`` and ``ON_PAGE`` it numbers from 1; the value stays in the
+        file.
+        """
         self._set_note_numbering("endNotePr", **kwargs)
 
     def set_endnote_placement(self, **kwargs: Any) -> None:
@@ -1309,7 +1328,9 @@ class HwpxOxmlSectionProperties:
         followed by a BOTH page-number footer lost the ODD text in Hancom), and
         a BOTH control placed after an ODD one hid it on every odd page. The
         ``BOTH`` control therefore goes before the page-specific ones: ODD and
-        EVEN override it on their pages whatever order they were set in.
+        EVEN override it on their pages whatever order they were set in. Every
+        control also goes ahead of a field that starts in that run: Hancom drops
+        a header or footer control inside a field's span.
         """
         run = self._header_footer_control_run()
         page_type = source.get("applyPageType", "BOTH")
@@ -1325,10 +1346,8 @@ class HwpxOxmlSectionProperties:
             if (story := existing.find(f"{_HP}{tag}")) is not None
             and story.get("applyPageType", "BOTH") != "BOTH"
         ]
-        if page_type == "BOTH" and specific:
-            run.insert(list(run).index(specific[0]), ctrl)  # stdlib and lxml elements alike
-        else:
-            run.append(ctrl)
+        before = specific[0] if page_type == "BOTH" and specific else None
+        run.insert(story_control_index(run, before), ctrl)
         remember_story_pair(self.section, source)
         self.section.mark_dirty()
 

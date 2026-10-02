@@ -45,7 +45,7 @@ class ShapesNamespace(_Namespace):
         end_y: int = 0,
         *,
         line_color: str = "#000000",
-        line_width: str = "283",
+        line_width: str = "33",
         treat_as_char: bool = True,
         paragraph: "Paragraph | None" = None,
         section: "int | Section | None" = None,
@@ -144,14 +144,20 @@ class ShapesNamespace(_Namespace):
         *,
         ratio: int = 0,
         line_color: str = "#000000",
-        line_width: str = "283",
+        line_width: str = "33",
         fill_color: str | None = None,
         treat_as_char: bool = True,
         paragraph: "Paragraph | None" = None,
         section: "int | Section | None" = None,
         section_index: int | None = None,
+        original_size: "tuple[int, int] | None" = None,
     ) -> "Shape":
-        """사각형을 넣는다(`ratio` 로 모서리 둥글기)."""
+        """사각형을 넣는다(`ratio` 로 모서리 둥글기).
+
+        *original_size* `(w, h)`를 주면 `hp:orgSz`를 그리는 크기와 따로 쓴다.
+        도형은 원래 크기로 만들고 `scaMatrix`로 *width* x *height*에 맞춘다.
+        주지 않으면 `orgSz`는 `curSz`와 같다.
+        """
 
         from .. import shapes as _shapes
 
@@ -166,6 +172,7 @@ class ShapesNamespace(_Namespace):
             treat_as_char=treat_as_char,
             paragraph=paragraph,
             section=self._section(section, section_index, "add_rectangle"),
+            original_size=original_size,
         )
 
     def add_ellipse(
@@ -174,14 +181,15 @@ class ShapesNamespace(_Namespace):
         height: int = 7200,
         *,
         line_color: str = "#000000",
-        line_width: str = "283",
+        line_width: str = "33",
         fill_color: str | None = None,
         treat_as_char: bool = True,
         paragraph: "Paragraph | None" = None,
         section: "int | Section | None" = None,
         section_index: int | None = None,
+        original_size: "tuple[int, int] | None" = None,
     ) -> "Shape":
-        """타원을 넣는다."""
+        """타원을 넣는다. *original_size*는 `add_rectangle`과 같다."""
 
         from .. import shapes as _shapes
 
@@ -195,6 +203,7 @@ class ShapesNamespace(_Namespace):
             treat_as_char=treat_as_char,
             paragraph=paragraph,
             section=self._section(section, section_index, "add_ellipse"),
+            original_size=original_size,
         )
 
     def add_arc(
@@ -205,7 +214,7 @@ class ShapesNamespace(_Namespace):
         corner: str = "TOP_LEFT",
         arc_type: str = "NORMAL",
         line_color: str = "#000000",
-        line_width: str = "283",
+        line_width: str = "33",
         fill_color: str | None = None,
         treat_as_char: bool = True,
         paragraph: "Paragraph | None" = None,
@@ -235,7 +244,7 @@ class ShapesNamespace(_Namespace):
         points_mm: Sequence[tuple[float, float]],
         *,
         line_color: str = "#000000",
-        line_width: str = "283",
+        line_width: str = "33",
         fill_color: str | None = None,
         treat_as_char: bool = True,
         paragraph: "Paragraph | None" = None,
@@ -260,6 +269,71 @@ class ShapesNamespace(_Namespace):
             paragraph=paragraph,
             section=self._section(section, section_index, "add_polygon"),
             closed=closed,
+        )
+
+    def add_curve(
+        self,
+        points_mm: Sequence[tuple[float, float]],
+        *,
+        closed: bool = False,
+        line_color: str = "#000000",
+        line_width: str = "33",
+        fill_color: str | None = None,
+        treat_as_char: bool = True,
+        paragraph: "Paragraph | None" = None,
+        section: "int | Section | None" = None,
+        section_index: int | None = None,
+    ) -> "Shape":
+        """곡선을 넣는다(앵커는 mm, 2개 이상, 닫으면 3개 이상).
+
+        한/글은 앵커를 지나는 곡선을 그리고 크기 상자는 스스로 다시 계산하지 않는다.
+        그래서 한/글 곡선이 갖는 상자(구간마다 16단계 꺾은선으로 근사한 곡선의 상자)를 쓰고,
+        앵커는 그 상자 좌상단 원점 로컬 좌표로 둔다."""
+
+        from .. import shapes as _shapes
+
+        return _shapes.add_curve(
+            self._doc,
+            points_mm=points_mm,
+            closed=closed,
+            line_color=line_color,
+            line_width=line_width,
+            fill_color=fill_color,
+            treat_as_char=treat_as_char,
+            paragraph=paragraph,
+            section=self._section(section, section_index, "add_curve"),
+        )
+
+    def add_connector(
+        self,
+        start: "Shape",
+        end: "Shape",
+        *,
+        start_side: str = "right",
+        end_side: str = "left",
+        kind: str = "STRAIGHT",
+        line_color: str = "#000000",
+        line_width: str = "33",
+        paragraph: "Paragraph | None" = None,
+    ) -> "Shape":
+        """두 도형을 잇는 연결선을 넣는다(각 도형 상자의 한 변 가운데: top/right/bottom/left).
+
+        `kind`는 직선(`STRAIGHT`)이나 꺾인 선(`STROKE`)이다. 두 도형은 글자처럼 두지 않고
+        같은 기준(종이·쪽, 또는 연결선 문단의 단·문단)에서 왼쪽·위로 놓여 있어야 한다. 한/글은
+        붙은 연결선을 도형 상자로 다시 그리므로 도형을 옮기거나 키워도 선이 따라간다."""
+
+        from .. import shapes as _shapes
+
+        return _shapes.add_connector(
+            self._doc,
+            start,
+            end,
+            start_side=start_side,
+            end_side=end_side,
+            kind=kind,
+            line_color=line_color,
+            line_width=line_width,
+            paragraph=paragraph,
         )
 
     def add_container(
@@ -311,6 +385,19 @@ class ShapesNamespace(_Namespace):
             char_pr_id_ref=char_pr_id_ref,
         )
 
+    def remove_unused_charts(self) -> tuple[str, ...]:
+        """어떤 차트도 가리키지 않는 차트 파트(``Chart/...``)를 모두 지우고, 지운 파트 이름을 돌려준다.
+
+        한/글은 문서를 저장할 때 이런 파트를 지운다. 본문에서 차트를 지우면
+        (``section.clear_body()``, 문단 삭제) 그 차트의 파트가 차트 자료와 함께
+        패키지에 남는다. 문서 어디든(구역, 바탕쪽, header, 기록) ``hp:chart``가 그
+        파일을 가리키면 지우지 않는다. 한/글 문서의 차트에 딸린 OLE 대체본
+        (``BinData``)은 :meth:`doc.media.remove_unused_images`가 지운다."""
+
+        from .. import shapes as _shapes
+
+        return _shapes.remove_unused_charts(self._doc)
+
     def add_drop_cap(
         self,
         character: str,
@@ -324,8 +411,8 @@ class ShapesNamespace(_Namespace):
         char_pr_id_ref: str | int | None = None,
         para_pr_id_ref: str | int | None = None,
     ) -> "InlineObject":
-        """문단 첫 글자 장식(drop cap) — 실코퍼스 실측 기반, `style="TripleLine"`만
-        지원(`hwpx.oxml.drop_cap` 독스트링 참조). *width*/*height*는 HWPUNIT,
+        """문단 첫 글자 장식(drop cap) — 실코퍼스 실측 기반, `style="TripleLine"`과
+        `"DoubleLine"`을 지원(`hwpx.oxml.drop_cap` 독스트링 참조). *width*/*height*는 HWPUNIT,
         자동 계산 안 함(실측된 공식이 없음)."""
 
         from .. import shapes as _shapes

@@ -16,8 +16,10 @@ Catches *likely* visual problems without a renderer so the **structural tier**
    (reuses ``package_validator``).
 5. **table taller than the page** — a body table Hancom does not break across
    pages (inline, or ``pageBreak="NONE"``) whose rows alone are taller than the
-   page body. Rows past the paper's bottom edge + an ``overflow="fail"`` policy
-   ⇒ a hard error; otherwise a warning.
+   page body, or a row taller than the page body in a table Hancom breaks only
+   between rows (``pageBreak="TABLE"``). A row is at least as tall as the lines
+   its cells' paragraphs and line breaks force. Rows past the paper's bottom
+   edge + an ``overflow="fail"`` policy ⇒ a hard error; otherwise a warning.
 
 Severity discipline (acceptance "stricter, never wronger"): only renderer-less
 *provable* defects are errors. Heuristics warn. So the lint never contradicts the
@@ -29,10 +31,11 @@ from __future__ import annotations
 import io
 import zipfile
 from collections.abc import Iterator
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 from xml.etree import ElementTree as ET
 
-from hwpx.opc.relationships import is_section_part_name
+from hwpx.opc.relationships import is_header_part_name, is_section_part_name
 from hwpx.tools.package_validator import (
     _check_line_seg_text_positions,
     _check_table_editor_acceptance,
@@ -41,7 +44,9 @@ from hwpx.tools.package_validator import (
 
 from .report import LayoutFinding, LayoutLintReport
 from ..opc.security import guard_zip_file, read_member
+from ..oxml.header import parse_char_property, parse_paragraph_property
 from ..oxml.section_format import _drawn_page_size
+from ..oxml.table_sizes import cell_margins_of
 
 if TYPE_CHECKING:
     from hwpx.quality.ledger import DirtyLayoutLedger
@@ -91,7 +96,7 @@ def lint_layout(
 
     _lint_stale_cache(report, section_roots)
     _lint_table_structure(report, section_roots)
-    _lint_table_page_fit(report, section_roots, overflow_policy)
+    _lint_table_page_fit(report, section_roots, overflow_policy, _header_root(data))
     if ledger is not None:
         _lint_dirty_lineseg(report, section_roots, ledger)
 
@@ -194,6 +199,24 @@ def _section_roots(data: bytes) -> list[tuple[str, ET.Element]]:
     except (zipfile.BadZipFile, OSError):
         return []
     return roots
+
+
+def _header_root(data: bytes) -> ET.Element | None:
+    """The header part: its character and paragraph shapes size a cell's lines."""
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            guard_zip_file(archive)
+            for info in archive.infolist():
+                if info.is_dir() or not is_header_part_name(info.filename):
+                    continue
+                try:
+                    return ET.fromstring(read_member(archive, info))
+                except ET.ParseError:
+                    return None
+    except (zipfile.BadZipFile, OSError):
+        return None
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -390,7 +413,7 @@ def _iter_cells(doc: Any):
 
 
 # --------------------------------------------------------------------------- #
-# 5: a table Hancom does not break across pages, taller than the page.
+# 5: a table (or a row) Hancom does not break across pages, taller than the page.
 # --------------------------------------------------------------------------- #
 _HWPUNIT_PER_MM = 7200 / 25.4
 
@@ -399,6 +422,7 @@ def _lint_table_page_fit(
     report: LayoutLintReport,
     roots: list[tuple[str, ET.Element]],
     overflow_policy: str,
+    header: ET.Element | None = None,
 ) -> None:
     """Flag body tables that cannot break across pages yet are taller than one.
 
@@ -406,11 +430,18 @@ def _lint_table_page_fit(
     default) across pages, nor a table whose ``pageBreak`` is ``NONE``. Such a
     table taller than the page body is drawn on one page (the next one unless it
     starts at the top of a page) and runs on into the bottom margin; rows past
-    the paper's bottom edge are not drawn at all. The
-    height is a lower bound (every row is at least its tallest single-row cell),
-    so a finding never rests on how the text wraps.
+    the paper's bottom edge are not drawn at all. A table whose ``pageBreak`` is
+    ``TABLE`` breaks only between rows, so one of its rows taller than the page
+    body is drawn the same way; ``CELL`` also breaks a row between its lines.
+
+    The heights are lower bounds: every row is at least its tallest single-row
+    cell, and a cell at least the lines its text takes (see :class:`_LineHeights`).
+    Lines text wraps into count only as many as the text takes even with every
+    character narrower by its measurement error, so a finding never rests on a
+    line Hancom may not draw.
     """
 
+    lines = _LineHeights(header)
     for part_name, root in roots:
         page = _page_heights(root)
         if page is None:
@@ -420,14 +451,17 @@ def _lint_table_page_fit(
         for paragraph, table in _body_tables(root):
             position = next((child for child in table if _local_name(child) == "pos"), None)
             inline = position is not None and position.get("treatAsChar", "1") == "1"
-            if not inline and table.get("pageBreak") != "NONE":
-                continue  # Hancom breaks it between rows (CELL) or inside cells (TABLE)
-            height = _table_min_height(table)
+            page_break = table.get("pageBreak", "CELL")
+            if not inline and page_break not in ("NONE", "TABLE"):
+                continue  # Hancom breaks it between rows and inside them (CELL)
+            rows = _row_min_heights(table, lines)
+            whole = inline or page_break == "NONE"
+            height = sum(rows) if whole else max(rows, default=0)
             if height > body:
                 report.add(
                     _table_page_finding(
                         part_name, numbers.get(id(paragraph)), inline, height, body, to_edge,
-                        overflow_policy,
+                        overflow_policy, row=None if whole else rows.index(height),
                     )
                 )
 
@@ -440,24 +474,37 @@ def _table_page_finding(
     body: int,
     to_edge: int,
     overflow_policy: str,
+    row: int | None = None,
 ) -> LayoutFinding:
     cut = height > to_edge
-    kind = "an inline table" if inline else 'a table with pageBreak="NONE"'
-    fix = "Table.set_treat_as_char(False)" if inline else 'pageBreak="CELL"'
-    outcome = "rows past the paper's bottom edge are not drawn" if cut else "it runs into the bottom margin"
-    return LayoutFinding(
-        code=TABLE_TALLER_THAN_PAGE,
-        message=(
+    detail: dict[str, Any] = {"min_height": height, "page_body": body, "to_paper_edge": to_edge,
+                              "inline": inline, "rows_cut": cut}
+    if row is None:
+        kind = "an inline table" if inline else 'a table with pageBreak="NONE"'
+        fix = "Table.set_treat_as_char(False)" if inline else 'pageBreak="CELL"'
+        outcome = "rows past the paper's bottom edge are not drawn" if cut else "it runs into the bottom margin"
+        message = (
             f"{kind} at least {height / _HWPUNIT_PER_MM:.0f} mm tall does not fit the "
             f"{body / _HWPUNIT_PER_MM:.0f} mm page body, and Hancom does not break it across pages: "
             f"it is drawn on one page (the next one unless it starts at the top) and {outcome} "
             f"(use {fix} to let it flow across pages)"
-        ),
+        )
+    else:
+        detail["row"] = row
+        outcome = "lines past the paper's bottom edge are not drawn" if cut else "it runs into the bottom margin"
+        message = (
+            f'a row of a table with pageBreak="TABLE" at least {height / _HWPUNIT_PER_MM:.0f} mm tall does '
+            f"not fit the {body / _HWPUNIT_PER_MM:.0f} mm page body, and Hancom breaks this table only "
+            f"between rows: the row is drawn on one page and {outcome} "
+            f'(use pageBreak="CELL" to let the row break across pages)'
+        )
+    return LayoutFinding(
+        code=TABLE_TALLER_THAN_PAGE,
+        message=message,
         severity="error" if (cut and overflow_policy == "fail") else "warning",
         part=part_name,
         paragraph=paragraph,
-        detail={"min_height": height, "page_body": body, "to_paper_edge": to_edge,
-                "inline": inline, "rows_cut": cut},
+        detail=detail,
     )
 
 
@@ -501,19 +548,173 @@ def _body_tables(root: ET.Element) -> Iterator[tuple[ET.Element, ET.Element]]:
                     yield paragraph, child
 
 
-def _table_min_height(table: ET.Element) -> int:
-    """A lower bound of the drawn height: each row is at least its tallest single-row cell."""
+def _row_min_heights(table: ET.Element, lines: "_LineHeights") -> list[int]:
+    """Lower bounds of the drawn row heights: each row is at least its tallest
+    single-row cell, and a cell at least its declared height and the lines its text takes."""
 
-    total = 0
+    heights_by_row = []
     for row in table:
         if _local_name(row) != "tr":
             continue
         heights = [0]
         for cell in row:
             if _local_name(cell) == "tc" and _cell_int(cell, "cellSpan", "rowSpan", 1) == 1:
-                heights.append(_cell_int(cell, "cellSz", "height", 0))
-        total += max(heights)
-    return total
+                heights.append(max(_cell_int(cell, "cellSz", "height", 0), lines.cell_height(cell, table)))
+        heights_by_row.append(max(heights))
+    return heights_by_row
+
+
+class _LineHeights:
+    """How tall Hancom draws, at least, the lines of a cell's text, from the header's shapes.
+
+    A paragraph has at least one line, plus one per line break (``hp:lineBreak``,
+    or a newline in its text, which Hancom shows as one). Text in a single
+    character shape also takes the lines it wraps into at the cell's inner width
+    (FormFit's line breaking), counted with every character narrower by its
+    measurement error so that the count never exceeds what Hancom draws. A
+    paragraph with a tab, an object or text in more than one character shape
+    counts its forced lines only. Its n lines take n - 1 line pitches and one
+    line's size, and the next paragraph starts one pitch below the last line. A
+    line is at least as tall as the smallest character shape of its paragraph,
+    and the spacing before and after paragraphs is left out, so the sum is a
+    lower bound. A cell with a paragraph whose shapes are unknown, sized from the
+    font (``fontLineHeight``) or set vertically adds nothing to its declared height.
+    """
+
+    def __init__(self, header: ET.Element | None) -> None:
+        self._sizes: dict[str, int] = {}
+        self._spacings: dict[str, tuple[str, float]] = {}
+        for element in header.iter() if header is not None else ():
+            name = _local_name(element)
+            if name == "charPr":
+                try:
+                    self._sizes[element.get("id", "")] = int(element.get("height", ""))
+                except ValueError:
+                    continue
+            elif name == "paraPr":
+                shape = parse_paragraph_property(element)
+                spacing = shape.line_spacing
+                if shape.font_line_height or spacing is None or spacing.value is None:
+                    continue
+                self._spacings[element.get("id", "")] = (spacing.spacing_type or "PERCENT", spacing.value)
+        self._shapes = _HeaderShapes(header) if header is not None else None
+        self._styles: dict[tuple[str, str], Any] = {}
+
+    def cell_height(self, cell: ET.Element, table: ET.Element) -> int:
+        sub_list = next((el for el in cell if _local_name(el) == "subList"), None)
+        if sub_list is None or sub_list.get("textDirection", "HORIZONTAL") != "HORIZONTAL":
+            return 0
+        margins = cell_margins_of(cell, table)
+        width = _cell_int(cell, "cellSz", "width", 0) - (margins.left + margins.right if margins is not None else 0)
+        content = self._paragraphs_height([el for el in sub_list if _local_name(el) == "p"], width)
+        if content is None:
+            return 0
+        return content + (margins.top + margins.bottom if margins is not None else 0)
+
+    def _paragraphs_height(self, paragraphs: list[ET.Element], width: int) -> int | None:
+        from hwpx.form_fit.measure import _line_pitch
+
+        if not paragraphs:
+            return None
+        total = 0
+        for index, paragraph in enumerate(paragraphs):
+            spacing = self._spacings.get(paragraph.get("paraPrIDRef", ""))
+            sizes = [self._sizes.get(run.get("charPrIDRef", "")) for run in paragraph if _local_name(run) == "run"]
+            if spacing is None or not sizes or None in sizes:
+                return None
+            size = min(size for size in sizes if size is not None)
+            pitch = int(_line_pitch(spacing[0], spacing[1], size))
+            total += max(_forced_lines(paragraph), self._wrapped_lines(paragraph, width)) * pitch
+            if index == len(paragraphs) - 1:
+                total += size - pitch  # the last line takes its size, not a pitch
+        return total
+
+    def _wrapped_lines(self, paragraph: ET.Element, width: int) -> int:
+        """Lines single-shape text takes at *width*, never more than Hancom draws (0 when not counted)."""
+
+        from hwpx.form_fit.measure import MIN_LINE_WIDTH, _uncertainty_band, hancom_line_starts, text_style_from_refs
+
+        text, shapes = _measurable_text(paragraph)
+        size = self._sizes.get(next(iter(shapes), ""))
+        if self._shapes is None or not text or len(shapes) != 1 or size is None:
+            return 0
+        key = (paragraph.get("paraPrIDRef", ""), next(iter(shapes)))
+        if key not in self._styles:
+            self._styles[key] = text_style_from_refs(self._shapes, key[0], [key[1]])
+        style = self._styles[key]
+        # Every advance narrower by the measurement error: the line holds at least as much as Hancom's.
+        line = max(width - style.margin_left - style.margin_right, MIN_LINE_WIDTH) / (1.0 - _uncertainty_band(text))
+        return sum(len(hancom_line_starts(part, [line], size / 100, style)) if part else 1 for part in text.split("\n"))
+
+
+class _HeaderShapes:
+    """The character and paragraph shapes of a raw ``header.xml``, as FormFit reads them from a document."""
+
+    def __init__(self, header: ET.Element) -> None:
+        self.headers = [SimpleNamespace(element=header)]
+        self._chars = {el.get("id", ""): el for el in header.iter() if _local_name(el) == "charPr"}
+        self._paras = {el.get("id", ""): el for el in header.iter() if _local_name(el) == "paraPr"}
+
+    def char_property(self, char_pr_id_ref: object) -> Any:
+        element = self._chars.get(str(char_pr_id_ref))
+        return parse_char_property(element) if element is not None else None  # type: ignore[arg-type]
+
+    def paragraph_property(self, para_pr_id_ref: object) -> Any:
+        element = self._paras.get(str(para_pr_id_ref))
+        return parse_paragraph_property(element) if element is not None else None
+
+
+#: Run children with no width of their own: field start and end marks.
+_ZERO_WIDTH_CONTROLS = frozenset({"fieldBegin", "fieldEnd"})
+
+
+def _measurable_text(paragraph: ET.Element) -> tuple[str | None, set[str]]:
+    """The paragraph's text (line breaks as newlines) and the character shapes of the runs holding it;
+    no text when anything but plain text, line breaks and field marks is in it."""
+
+    parts: list[str] = []
+    shapes: set[str] = set()
+    for run in paragraph:
+        if _local_name(run) != "run":
+            continue
+        for child in run:
+            name = _local_name(child)
+            if name == "ctrl" and all(_local_name(mark) in _ZERO_WIDTH_CONTROLS for mark in child):
+                continue
+            text = _plain_text(child) if name == "t" else None
+            if text is None:
+                return None, set()
+            if text:
+                parts.append(text)
+                shapes.add(run.get("charPrIDRef", ""))
+    return "".join(parts), shapes
+
+
+def _plain_text(text_element: ET.Element) -> str | None:
+    """An ``hp:t``'s text with ``hp:lineBreak`` as a newline; None when it holds anything else."""
+
+    parts = [text_element.text or ""]
+    for child in text_element:
+        if _local_name(child) != "lineBreak":
+            return None
+        parts.append("\n" + (child.tail or ""))
+    return "".join(parts)
+
+
+def _forced_lines(paragraph: ET.Element) -> int:
+    """One line, plus one per ``hp:lineBreak`` or newline in the paragraph's text."""
+
+    lines = 1
+    for run in paragraph:
+        if _local_name(run) != "run":
+            continue
+        for text in run:
+            if _local_name(text) != "t":
+                continue
+            lines += (text.text or "").count("\n")
+            for child in text:
+                lines += (_local_name(child) == "lineBreak") + (child.tail or "").count("\n")
+    return lines
 
 
 def _cell_int(cell: ET.Element, child_name: str, attribute: str, default: int) -> int:

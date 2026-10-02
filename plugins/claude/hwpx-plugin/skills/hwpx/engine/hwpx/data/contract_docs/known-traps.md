@@ -30,6 +30,16 @@
 - **텍스트를 갈아 끼우면 lineseg 캐시가 무효다.** 스플라이스 계열은 편집 문단의
   `<hp:linesegarray>`를 스스로 떨군다(안 떨구면 한컴이 옛 줄 자리에 새 글자를
   그려 겹침이 생긴다). 직접 XML을 만질 때도 같은 규칙을 지켜야 한다.
+- **본문에서 지운 그림의 이미지는 파일에 남는다.** `section.clear_body()`나 문단
+  삭제로 그림을 지워도 그 이미지의 `BinData` 파트·매니페스트 항목·`hh:binItem`은
+  그대로 저장된다. 화면에는 없지만 파일을 풀면 이미지가 나온다. 한/글은 저장할 때
+  아무것도 가리키지 않는 이미지를 지운다. 지운 그림을 파일에서도 없애려면 저장
+  전에 `doc.media.remove_unused_images()`를 부르라.
+- **본문에서 지운 차트의 자료도 파일에 남는다.** 차트를 지워도 그 차트의 파트
+  (`Chart/chartN.xml`, 항목 이름과 값이 든 차트 XML)는 그대로 저장된다. 한/글은 저장할
+  때 아무 차트도 가리키지 않는 차트 파트를 지운다. 파일에서도 없애려면 저장 전에
+  `doc.shapes.remove_unused_charts()`를 부르라. 한/글 문서의 차트에는 OLE 대체본
+  (`BinData`)도 딸려 있어 `doc.media.remove_unused_images()`도 함께 부른다.
 
 ## 검증·오라클
 
@@ -54,6 +64,11 @@
   3수준 `^3)`)를 써서 2수준을 `가.`, 3수준을 `1)`로 그리고, python-hwpx는 수준을 이어 붙여
   `1.1.`, `1.1.1.`로 그린다. 한/글처럼 보이게 하려면 글머리표는 `bullet_char="●"`를 준다
   (번호 수준의 글자 모양은 아직 고를 수 없다).
+- **번호 목록을 문단마다 따로 적용하면 번호가 이어지지 않는다.**
+  `apply_list_format(kind="number")`은 부를 때마다 번호 정의를 새로 만들고, 한/글은
+  번호 정의마다 번호를 센다. 그래서 세 문단에 하나씩 부르면 한/글에서 셋 다 `1.`이다.
+  이어지는 목록은 `paragraph_indexes=[...]`로 한 번에 적용하거나, 뒤의 호출에
+  `continue_list=True`를 주어 앞 목록에 이어 붙인다.
 - **네이티브 목차는 `dirty="1"`이 재계산 트리거다.** 목차 삽입/문서 변경 후
   `mark_toc_dirty`를 잊으면 한컴이 옛 페이지 번호를 그대로 보여준다. dirty
   재생성 직후 같은 세션에서 export하면 한컴이 크래시할 수 있다(refresh와
@@ -78,7 +93,13 @@
   행들만으로 쪽 본문보다 높은 표(행마다 적어도 셀 글 한 줄과 셀 위아래 여백)를
   흐르는 표로 만든다. 만든 뒤 행을 늘리거나 글을 채워 쪽을 넘게 된 표는 글자처럼
   취급 그대로이니 `table.set_treat_as_char(False)`로 흐르게 하라.
-  `hwpx.layout.lint_layout`이 이런 표를 `TABLE_TALLER_THAN_PAGE`로 알린다.
+  흐르는 표도 `pageBreak="TABLE"`이면 행 사이에서만 나눈다. 쪽 본문보다 높은 행은
+  한 쪽에 그리고 같은 식으로 잘린다. `pageBreak="CELL"`(새 표의 기본)은 행 안의
+  줄 사이에서도 나눈다.
+  `hwpx.layout.lint_layout`이 이런 표와 행을 `TABLE_TALLER_THAN_PAGE`로 알린다.
+  행 높이는 칸의 문단과 줄바꿈 수로 센다. 글자 모양이 하나인 문단은 긴 글이 칸 폭에서
+  접혀 생긴 줄도 센다. 글자마다 측정 오차만큼 좁게 재므로 한/글이 그리는 줄보다 많이
+  세지 않는다. 탭·개체가 있거나 글자 모양이 여럿인 문단은 접힌 줄을 세지 않는다.
 - **`set_page_number()`의 번호는 한컴의 쪽 번호 감추기로 숨지 않는다.** 이 번호는
   머리말/꼬리말 안의 자동 번호 글이고, `set_visibility(hide_first_page_num=True)`와
   `hide_page_elements(page_num=True)`는 한컴 쪽 번호 컨트롤("쪽 번호 매기기")만
@@ -87,6 +108,9 @@
   쓴다. `set_page_number()`는 그 머리말/꼬리말의 내용을 번호로 바꾼다.
 - **`hide_page_elements()`는 그 쪽만 감춘다.** 한컴의 "현재 쪽만 감추기"와 같아서,
   문단이 있는 쪽에서만 숨고 다음 쪽부터는 다시 보인다.
+- **각주·미주 시작 번호는 구역마다 새로 매길 때만 보인다.** `set_footnote_numbering(new_num=)`·
+  `set_endnote_numbering(new_num=)`의 시작 번호는 번호 방식이 `ON_SECTION`일 때만 한/글에 보인다.
+  `CONTINUOUS`와 `ON_PAGE`에서는 1부터 매기고, 값은 파일에만 남는다.
 - **줄 번호는 `show_line_number=True`일 때만 보인다.** `set_line_numbers()`는 모양
   (재시작·간격·거리·시작 번호)만 정한다. `set_visibility(show_line_number=True)`를
   함께 준다. `restart_type=1`이면 쪽마다 1부터 다시 센다.

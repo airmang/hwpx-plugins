@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Sequence, cast
 from ._units import _mm_to_hwp_units
 from ..errors import HwpxStateError, HwpxValueError
 from ..oxml.objects import _closed_points
+from ..oxml.shape_position import validate_original_size
 
 if TYPE_CHECKING:
     from hwpx.document import HwpxDocument
@@ -152,7 +153,7 @@ def add_line(
     end_y: int = 0,
     *,
     line_color: str = "#000000",
-    line_width: str = "283",
+    line_width: str = "33",
     treat_as_char: bool = True,
     paragraph: HwpxOxmlParagraph | None = None,
     section: HwpxOxmlSection | None = None,
@@ -251,18 +252,20 @@ def add_rectangle(
     *,
     ratio: int = 0,
     line_color: str = "#000000",
-    line_width: str = "283",
+    line_width: str = "33",
     fill_color: str | None = None,
     treat_as_char: bool = True,
     paragraph: HwpxOxmlParagraph | None = None,
     section: HwpxOxmlSection | None = None,
     section_index: int | None = None,
+    original_size: tuple[int, int] | None = None,
 ) -> HwpxOxmlShape:
     """Insert a rectangle drawing shape.
 
     Dimensions are in HWPUNIT.  *ratio* controls corner roundness
     (0 = sharp, 50 = semicircle).
     """
+    validate_original_size(original_size)
     if paragraph is None:
         paragraph = doc.add_paragraph(
             "", section=section, section_index=section_index,
@@ -272,6 +275,7 @@ def add_rectangle(
         width, height, ratio=ratio,
         line_color=line_color, line_width=line_width,
         fill_color=fill_color, treat_as_char=treat_as_char,
+        original_size=original_size,
     )
 
 
@@ -281,17 +285,19 @@ def add_ellipse(
     height: int = 7200,
     *,
     line_color: str = "#000000",
-    line_width: str = "283",
+    line_width: str = "33",
     fill_color: str | None = None,
     treat_as_char: bool = True,
     paragraph: HwpxOxmlParagraph | None = None,
     section: HwpxOxmlSection | None = None,
     section_index: int | None = None,
+    original_size: tuple[int, int] | None = None,
 ) -> HwpxOxmlShape:
     """Insert an ellipse drawing shape.
 
     Dimensions are in HWPUNIT.
     """
+    validate_original_size(original_size)
     if paragraph is None:
         paragraph = doc.add_paragraph(
             "", section=section, section_index=section_index,
@@ -301,6 +307,7 @@ def add_ellipse(
         width, height,
         line_color=line_color, line_width=line_width,
         fill_color=fill_color, treat_as_char=treat_as_char,
+        original_size=original_size,
     )
 
 
@@ -312,7 +319,7 @@ def add_arc(
     corner: str = "TOP_LEFT",
     arc_type: str = "NORMAL",
     line_color: str = "#000000",
-    line_width: str = "283",
+    line_width: str = "33",
     fill_color: str | None = None,
     treat_as_char: bool = True,
     paragraph: HwpxOxmlParagraph | None = None,
@@ -345,7 +352,7 @@ def add_polygon(
     points_mm: Sequence[tuple[float, float]],
     *,
     line_color: str = "#000000",
-    line_width: str = "283",
+    line_width: str = "33",
     fill_color: str | None = None,
     treat_as_char: bool = True,
     paragraph: HwpxOxmlParagraph | None = None,
@@ -386,6 +393,59 @@ def add_polygon(
         hwp_points,
         line_color=line_color, line_width=line_width,
         fill_color=fill_color, treat_as_char=treat_as_char,
+    )
+
+
+def add_curve(
+    doc: "HwpxDocument",
+    points_mm: Sequence[tuple[float, float]],
+    *,
+    closed: bool = False,
+    line_color: str = "#000000",
+    line_width: str = "33",
+    fill_color: str | None = None,
+    treat_as_char: bool = True,
+    paragraph: HwpxOxmlParagraph | None = None,
+    section: HwpxOxmlSection | None = None,
+    section_index: int | None = None,
+) -> HwpxOxmlShape:
+    """Insert a curve through *points_mm* (millimetre anchors, 2 or more; 3 or more when *closed*).
+
+    Hancom draws a curve through its anchors and does not size it itself: the box written is the one its
+    own curves carry (see :mod:`hwpx.oxml.curves`), and the anchors are stored in that box's own
+    top-left-anchored space, so they do not place the curve on the page -- its paragraph and position do.
+    """
+    if paragraph is None:
+        paragraph = doc.add_paragraph(
+            "", section=section, section_index=section_index,
+            include_run=False,
+        )
+    return paragraph.add_curve(
+        [(_mm_to_hwp_units(x), _mm_to_hwp_units(y)) for x, y in points_mm],
+        closed=closed, line_color=line_color, line_width=line_width,
+        fill_color=fill_color, treat_as_char=treat_as_char,
+    )
+
+
+def add_connector(
+    doc: "HwpxDocument",
+    start: HwpxOxmlShape,
+    end: HwpxOxmlShape,
+    *,
+    start_side: str = "right",
+    end_side: str = "left",
+    kind: str = "STRAIGHT",
+    line_color: str = "#000000",
+    line_width: str = "33",
+    paragraph: HwpxOxmlParagraph | None = None,
+) -> HwpxOxmlShape:
+    """Insert a connector attached to *start* and *end* at the middle of a side of each (``top``,
+    ``right``, ``bottom``, ``left``), ``STRAIGHT`` or bent (``STROKE``), in *start*'s paragraph unless
+    *paragraph* is given. Hancom redraws an attached connector from the shapes' boxes, so it follows them
+    when they move or grow (see :mod:`hwpx.oxml.curves`)."""
+    return (paragraph or start.paragraph).add_connector(
+        start, end, start_side=start_side, end_side=end_side, kind=kind,
+        line_color=line_color, line_width=line_width,
     )
 
 
@@ -654,6 +714,35 @@ def add_chart(
     )
 
 
+def remove_unused_charts(doc: "HwpxDocument") -> tuple[str, ...]:
+    """Remove every chart part (``Chart/...``) no chart points at and return
+    the removed part names.
+
+    Hancom drops such parts when it saves a document; a chart removed from the
+    body (``section.clear_body()``, a deleted paragraph) leaves its part, with
+    the chart's data, behind. A part is kept while a ``hp:chart`` anywhere in
+    the document (sections, master pages, header, histories) names its file.
+    """
+    from pathlib import PurePosixPath
+
+    from ..oxml.namespaces import HP
+    from ..opc.relationships import normalize_part_name
+
+    root = doc._root
+    used = {
+        PurePosixPath(normalize_part_name(anchor.get("chartIDRef", ""))).name
+        for part in (*root.headers, *root.sections, *root.master_pages, *root.histories)
+        for anchor in part.element.iter(f"{HP}chart")
+    }
+    removed: list[str] = []
+    for part_name in doc._package.part_names():
+        if part_name.startswith("Chart/") and PurePosixPath(part_name).name not in used:
+            doc._package.remove_manifest_item(part_name)
+            doc._package.delete(part_name)
+            removed.append(part_name)
+    return tuple(removed)
+
+
 def add_drop_cap(
     doc: "HwpxDocument",
     character: str,
@@ -670,8 +759,8 @@ def add_drop_cap(
     """Insert a drop cap (문단 첫 글자 장식), reverse-engineered from the one
     real-corpus example that carries a non-default ``dropcapstyle``
     (``error__20230809__test.hwpx`` -- see ``oxml.drop_cap``'s own
-    docstring for the full structural reverse engineering and why v1
-    supports only ``style="TripleLine"``).
+    docstring for the full structural reverse engineering and why it
+    supports ``style="TripleLine"`` and ``"DoubleLine"`` only).
 
     Element construction (element-building validation included) happens in
     :func:`hwpx.oxml.drop_cap.create_drop_cap_element`; after insertion the

@@ -52,7 +52,7 @@ stable 로 올리면 24개 모듈 수백 멤버가 major 에서만 바뀔 수 �
 멤버**.
 
 - 목록 **안**의 멤버 → stable. major 경계에서만 바뀐다.
-- 목록 **밖**의 멤버(79개 — `apply_model`·`mark_dirty`·`remove_stale_layout_caches`
+- 목록 **밖**의 멤버(156개 — `apply_model`·`mark_dirty`·`remove_stale_layout_caches`
   등) → 구현 세부. minor 에서 바뀔 수 있다.
 
 `hwpx.oxml.*` import 경로는 그대로 살아 있다. 옮기지도, deprecate 하지도 않는다.
@@ -114,7 +114,7 @@ major 경계에서만 깨지는 이름들입니다.
 ### 메타
 - `__version__`
 
-## experimental (23)
+## experimental (26)
 
 `from hwpx.experimental import ...`로 사용하세요. 계약이 유동적입니다.
 
@@ -123,6 +123,9 @@ major 경계에서만 깨지는 이름들입니다.
   `ConversionAttempt`, `DocumentIngestError`, `UnsupportedDocumentFormat`
 - **레이아웃 프리뷰**(한컴 없는 정직 근사): `render_layout_preview`,
   `LayoutPreview`, `PreviewPage`
+- **쪽 수 추정**(한/글 없이, `hwpx.layout.pages`): `estimate_pages`, `PageEstimate`,
+  `EstimatedLine` — 본문 문단의 줄마다 쪽·단·세로 위치를 추정한다. 따르지 않는 요소가
+  있으면 `pages`는 `None`이고 `unsupported`가 까닭을 구역마다 적는다
 - **문서 프리뷰 뷰어**(3.8.0 신규): `render_document_viewer`, `DocumentViewer`
 - **수식 저작**(5.2.0 신규, LaTeX → EqEdit): `latex_to_eqedit`,
   `estimate_equation_size`, `UnsupportedLatexError`

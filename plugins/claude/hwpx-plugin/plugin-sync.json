@@ -516,23 +516,23 @@
     },
     {
       "source": "packaging/templates/claude.plugin.json",
-      "sourceSha256": "05b13b62cef85a33f76a8052ce6e26d2c0a09ff39842a81b20cb3120d8c77c89",
+      "sourceSha256": "4f01de961a23eb53960df502272e2c5895c5754b370ed4c251f4c32501d62122",
       "dest": "plugins/claude/hwpx-plugin/.claude-plugin/plugin.json",
-      "destSha256": "05b13b62cef85a33f76a8052ce6e26d2c0a09ff39842a81b20cb3120d8c77c89",
+      "destSha256": "4f01de961a23eb53960df502272e2c5895c5754b370ed4c251f4c32501d62122",
       "transformed": false
     },
     {
       "source": "packaging/templates/claude-runtime/pyproject.toml",
-      "sourceSha256": "64ac6f9694725c913fa9f78acaf4ead50ebd09ce7b49e31c372eedcec225654e",
+      "sourceSha256": "01326805f7bbcf31ae46704aefff3e70dbe623a47b3c50fc24f16580a6cc242c",
       "dest": "plugins/claude/hwpx-plugin/server/pyproject.toml",
-      "destSha256": "64ac6f9694725c913fa9f78acaf4ead50ebd09ce7b49e31c372eedcec225654e",
+      "destSha256": "01326805f7bbcf31ae46704aefff3e70dbe623a47b3c50fc24f16580a6cc242c",
       "transformed": false
     },
     {
       "source": "packaging/templates/claude-runtime/uv.lock",
-      "sourceSha256": "ba40b07d85779373d587ace534afd645a50da5a5b4acdb16693141bfce0f4720",
+      "sourceSha256": "82a21fc3a6bda1806f1d99b70bbfc9ae8aed8911c72d4fc53d6126bd3ae32623",
       "dest": "plugins/claude/hwpx-plugin/server/uv.lock",
-      "destSha256": "ba40b07d85779373d587ace534afd645a50da5a5b4acdb16693141bfce0f4720",
+      "destSha256": "82a21fc3a6bda1806f1d99b70bbfc9ae8aed8911c72d4fc53d6126bd3ae32623",
       "transformed": false
     },
     {

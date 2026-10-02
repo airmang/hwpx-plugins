@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "1844eba723ada2c9f085a1d5c94bb425e8b7162fd63ec5838e7e05337919f068",
+      "sourceSha256": "63bce01c72714f060cce71c6ea879a9ca876a50c63257e80d84170750142021f",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "1844eba723ada2c9f085a1d5c94bb425e8b7162fd63ec5838e7e05337919f068",
+      "destSha256": "63bce01c72714f060cce71c6ea879a9ca876a50c63257e80d84170750142021f",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "9a95a2590cd7a70f3f0ae3b475566484063b613f7c92b2ba7da2dcdd69be95a7",
+      "sourceSha256": "a664a468deae04f9e60b9dd2529237789627356a6cdf0ac13b3b69943c605edd",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "9a95a2590cd7a70f3f0ae3b475566484063b613f7c92b2ba7da2dcdd69be95a7",
+      "destSha256": "a664a468deae04f9e60b9dd2529237789627356a6cdf0ac13b3b69943c605edd",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "4ee7d6374789cf241fea51129571646ffbbcd7f09b42676c01116d15dfb9991c",
+      "sourceSha256": "d7e70d3278a056ae3a969a9c413e0372fa531926581075b80b222022daeb52f7",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "4ee7d6374789cf241fea51129571646ffbbcd7f09b42676c01116d15dfb9991c",
+      "destSha256": "d7e70d3278a056ae3a969a9c413e0372fa531926581075b80b222022daeb52f7",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "34839e6065f0f04db241f5dc50f30aec0fd1c440db62e6094654f17ef9ef04d6",
+      "sourceSha256": "7dad73d6a2106fa0dae3e48f8559ae9d2801e2d1e6301816d12bdea4d4e9c7f6",
       "dest": "plugins/openclaw/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "34839e6065f0f04db241f5dc50f30aec0fd1c440db62e6094654f17ef9ef04d6",
+      "destSha256": "7dad73d6a2106fa0dae3e48f8559ae9d2801e2d1e6301816d12bdea4d4e9c7f6",
       "transformed": false
     },
     {

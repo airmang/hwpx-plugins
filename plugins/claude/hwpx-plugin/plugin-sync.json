@@ -5,23 +5,23 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "1d93cd6d8922f9720625f89f4cce919376340089b1cb40ab3192ca9a0955fff7",
+      "sourceSha256": "fc9c65acaff2f95c06ae5aafa968b1be70d42c7725ba6f2a5e781c65c5b9474e",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "1d93cd6d8922f9720625f89f4cce919376340089b1cb40ab3192ca9a0955fff7",
+      "destSha256": "fc9c65acaff2f95c06ae5aafa968b1be70d42c7725ba6f2a5e781c65c5b9474e",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "c5f4e8cb3b353ca7738445e05ea45d991558e6e92451d20ae039da3c5b3f43c5",
+      "sourceSha256": "2f16a2eaf7f7b37ad42591d1e2a7a8b8ac74833c50f14a6ac124c1042020d907",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "c5f4e8cb3b353ca7738445e05ea45d991558e6e92451d20ae039da3c5b3f43c5",
+      "destSha256": "2f16a2eaf7f7b37ad42591d1e2a7a8b8ac74833c50f14a6ac124c1042020d907",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "dbbd501cb087514a9e83c5e17f13438aacf786e7369afd84b8db2080066df199",
+      "sourceSha256": "8c52b3921ebcc4f2134dda656368598640b829c96b562c2db81aaea739b7d47c",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "dbbd501cb087514a9e83c5e17f13438aacf786e7369afd84b8db2080066df199",
+      "destSha256": "8c52b3921ebcc4f2134dda656368598640b829c96b562c2db81aaea739b7d47c",
       "transformed": false
     },
     {
@@ -326,13 +326,6 @@
       "transformed": false
     },
     {
-      "source": "examples/12_task_eval_replay.md",
-      "sourceSha256": "9624643d7a0de7ca99f40063647a9cc78ba852a9f495c662662d448afefda16a",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/12_task_eval_replay.md",
-      "destSha256": "9624643d7a0de7ca99f40063647a9cc78ba852a9f495c662662d448afefda16a",
-      "transformed": false
-    },
-    {
       "source": "examples/13_advanced_generators.py",
       "sourceSha256": "04ef2ca9e31491633b7bdb8fdd5b3b066b9dcb1b59ca25ca48621d1d001a47c1",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/13_advanced_generators.py",
@@ -344,62 +337,6 @@
       "sourceSha256": "c4a9f86b40f9986dd7799ac9514356d07a21109fca7a8a413fb3d4ba0372fac0",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/14_mail_merge_table_compute.py",
       "destSha256": "c4a9f86b40f9986dd7799ac9514356d07a21109fca7a8a413fb3d4ba0372fac0",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/tasks.json",
-      "sourceSha256": "c817fc8b9b737b4e606b6559f623ead2c27ce0a043d5b3e1f710e63e202e667c",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/tasks.json",
-      "destSha256": "c817fc8b9b737b4e606b6559f623ead2c27ce0a043d5b3e1f710e63e202e667c",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-0.8.0.json",
-      "sourceSha256": "20f142be80e6835e4c15389ae77b55e0325211c477fc59b42452c4132d43e0ef",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.8.0.json",
-      "destSha256": "20f142be80e6835e4c15389ae77b55e0325211c477fc59b42452c4132d43e0ef",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-1.1.0.json",
-      "sourceSha256": "0ce908f6aebed8924b1e35246056ff05f477a32af1364f434c6d015f9f468892",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-1.1.0.json",
-      "destSha256": "0ce908f6aebed8924b1e35246056ff05f477a32af1364f434c6d015f9f468892",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-1.0.0.json",
-      "sourceSha256": "28e83b668930dd2c4e2cd802e42605b372e6955a993b4c0d241632fb9f75e58e",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-1.0.0.json",
-      "destSha256": "28e83b668930dd2c4e2cd802e42605b372e6955a993b4c0d241632fb9f75e58e",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-0.3.0.json",
-      "sourceSha256": "742809ef3f6c4f64360b64e00ca8b326d4f3d60bad8f4676d87583d4264304ef",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.3.0.json",
-      "destSha256": "742809ef3f6c4f64360b64e00ca8b326d4f3d60bad8f4676d87583d4264304ef",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-0.1.8.json",
-      "sourceSha256": "d61c8112765a4eda56c9fdd8ee27d660597ed0eca6945b3edd8169e5c4b36a2d",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.1.8.json",
-      "destSha256": "d61c8112765a4eda56c9fdd8ee27d660597ed0eca6945b3edd8169e5c4b36a2d",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/current-0.1.6.json",
-      "sourceSha256": "c4160dfce45ee84e42351d485d5a380933f43f1573443f5a6381bd74e9441b27",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/current-0.1.6.json",
-      "destSha256": "c4160dfce45ee84e42351d485d5a380933f43f1573443f5a6381bd74e9441b27",
-      "transformed": false
-    },
-    {
-      "source": "examples/eval_tasks/profiles/baseline-0.1.5.json",
-      "sourceSha256": "33bc96471608b83687849ad5ae8962426dfa0b8c483ba00f6dbc1c36aed3aed7",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/examples/eval_tasks/profiles/baseline-0.1.5.json",
-      "destSha256": "33bc96471608b83687849ad5ae8962426dfa0b8c483ba00f6dbc1c36aed3aed7",
       "transformed": false
     },
     {
@@ -421,13 +358,6 @@
       "sourceSha256": "a6aa8715cc35a09e47028cb438de7d0477335875b724d5d67a71e0609357f322",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/quickcheck.py",
       "destSha256": "a6aa8715cc35a09e47028cb438de7d0477335875b724d5d67a71e0609357f322",
-      "transformed": false
-    },
-    {
-      "source": "scripts/task_eval_harness.py",
-      "sourceSha256": "a18e110ce099a27dc4543930e7abfdcc925aa77121552f9111f85c462a90417d",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/task_eval_harness.py",
-      "destSha256": "a18e110ce099a27dc4543930e7abfdcc925aa77121552f9111f85c462a90417d",
       "transformed": false
     },
     {
@@ -495,23 +425,23 @@
     },
     {
       "source": "packaging/templates/claude-chat-engine.md",
-      "sourceSha256": "855a8c3f9ee275b684684a6a28d51c8f5f29f4f7a1db59cf3938b15baf0113a9",
+      "sourceSha256": "dd90f0c299895b9a99e5f3e0bca7b0f60ce5fe1a2876cc122e98bb29fdf18e83",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/web-workflows.md",
       "sourceSha256": "081e3f3e93443ef6c38cfdf220c9509ebf20f587d41259a3e365b14730e972fa",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/automation-python-api.md",
       "sourceSha256": "8f3d25553248f81826cf6113f64cd29b0418abafdd4228595d9f24c95b405840",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "60dd589809dbc6c369a5397e0e8d68253d65aedd7cff92cde1a62b2624d54086",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {
@@ -523,16 +453,16 @@
     },
     {
       "source": "packaging/templates/claude-runtime/pyproject.toml",
-      "sourceSha256": "01326805f7bbcf31ae46704aefff3e70dbe623a47b3c50fc24f16580a6cc242c",
+      "sourceSha256": "2f58774b3fc4100db40ed4705e58f96336cff7aa7f0a44621df5b2ba10937982",
       "dest": "plugins/claude/hwpx-plugin/server/pyproject.toml",
-      "destSha256": "01326805f7bbcf31ae46704aefff3e70dbe623a47b3c50fc24f16580a6cc242c",
+      "destSha256": "2f58774b3fc4100db40ed4705e58f96336cff7aa7f0a44621df5b2ba10937982",
       "transformed": false
     },
     {
       "source": "packaging/templates/claude-runtime/uv.lock",
-      "sourceSha256": "82a21fc3a6bda1806f1d99b70bbfc9ae8aed8911c72d4fc53d6126bd3ae32623",
+      "sourceSha256": "f0ccfc9bb46df705dd6d4cf7a577e1527f558ca20b51af4cbe168bafbd72b447",
       "dest": "plugins/claude/hwpx-plugin/server/uv.lock",
-      "destSha256": "82a21fc3a6bda1806f1d99b70bbfc9ae8aed8911c72d4fc53d6126bd3ae32623",
+      "destSha256": "f0ccfc9bb46df705dd6d4cf7a577e1527f558ca20b51af4cbe168bafbd72b447",
       "transformed": false
     },
     {

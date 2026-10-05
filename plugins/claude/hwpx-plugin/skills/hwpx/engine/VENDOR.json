@@ -14,6 +14,13 @@
    "filename": "python_hwpx_automation-7.3.2-py3-none-any.whl",
    "url": "https://files.pythonhosted.org/packages/7c/8a/5260d6ff2fa36c784e2a212a5a8a67f8f3a34f9fda57e13c838accf917a9/python_hwpx_automation-7.3.2-py3-none-any.whl",
    "sha256": "4f2a7be3dc6461401514f2c456098ef7b8074e11448bd35d2f2f64c18a52483d"
+  },
+  {
+   "distribution": "tomli",
+   "version": "2.4.1",
+   "filename": "tomli-2.4.1-py3-none-any.whl",
+   "url": "https://files.pythonhosted.org/packages/7b/61/cceae43728b7de99d9b847560c262873a1f6c98202171fd5ed62640b494b/tomli-2.4.1-py3-none-any.whl",
+   "sha256": "0d85819802132122da43cb86656f8d1f8c6587d54ae7dcaf30e90533028b49fe"
   }
  ],
  "coreDocs": [
@@ -455,6 +462,13 @@
   "python_hwpx_automation-7.3.2.dist-info/METADATA": "8c9cd98c0b3884391eecbb6c3584c63c7775406466bd0e565cf024556f77f389",
   "python_hwpx_automation-7.3.2.dist-info/licenses/LICENSE": "fee6f3e30bfe064913de5de0bbe42e1fb2467958ee458199a192bde5e36c0875",
   "python_hwpx_automation-7.3.2.dist-info/licenses/NOTICE": "07abe5f52cc1759d0b94078477cf50dcfeabfeb9576560fa6492ba36dcf7b3a0",
-  "python_hwpx_automation-7.3.2.dist-info/top_level.txt": "8d0659a85d6ef6b54826fada81251ff07087926d2015568256234364429f8750"
+  "python_hwpx_automation-7.3.2.dist-info/top_level.txt": "8d0659a85d6ef6b54826fada81251ff07087926d2015568256234364429f8750",
+  "tomli-2.4.1.dist-info/METADATA": "b2b3fdf2566bba313106abf4a806f9c217f8f814587f1017c494d49079a0a683",
+  "tomli-2.4.1.dist-info/licenses/LICENSE": "b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe",
+  "tomli/__init__.py": "9eb042d7c0db5d14c2168ec4946e410de5a91c9cce86892f5e4db5e4633c6762",
+  "tomli/_parser.py": "a412234c86bf710b361e0943276961f0e25fa6d7c36ba7a0e7eec87a3e018c7b",
+  "tomli/_re.py": "a12359fe294523a72112e434d58452a14c9d050affa2417f9927474e4166bfdd",
+  "tomli/_types.py": "f864c6d9552a929c7032ace654ee05ef26ca75d21b027b801d77e65907138b74",
+  "tomli/py.typed": "f0f8f2675695a10a5156fb7bd66bafbaae6a13e8d315990af862c792175e6e67"
  }
 }

@@ -5,16 +5,16 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "1d93cd6d8922f9720625f89f4cce919376340089b1cb40ab3192ca9a0955fff7",
+      "sourceSha256": "fc9c65acaff2f95c06ae5aafa968b1be70d42c7725ba6f2a5e781c65c5b9474e",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "1d93cd6d8922f9720625f89f4cce919376340089b1cb40ab3192ca9a0955fff7",
+      "destSha256": "fc9c65acaff2f95c06ae5aafa968b1be70d42c7725ba6f2a5e781c65c5b9474e",
       "transformed": true
     },
     {
       "source": "README.md",
-      "sourceSha256": "0351770372a76a2c0a34718dcb83c6783b078468e6e55c339599d41a4c0a7431",
+      "sourceSha256": "2f16a2eaf7f7b37ad42591d1e2a7a8b8ac74833c50f14a6ac124c1042020d907",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "0351770372a76a2c0a34718dcb83c6783b078468e6e55c339599d41a4c0a7431",
+      "destSha256": "2f16a2eaf7f7b37ad42591d1e2a7a8b8ac74833c50f14a6ac124c1042020d907",
       "transformed": false
     },
     {
@@ -425,23 +425,23 @@
     },
     {
       "source": "packaging/templates/claude-chat-engine.md",
-      "sourceSha256": "7f8271a86cbb1c25cf1d42b3fff52fb5d5c78de563fa761639d7837677e562fe",
+      "sourceSha256": "dd90f0c299895b9a99e5f3e0bca7b0f60ce5fe1a2876cc122e98bb29fdf18e83",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "1feb34ba3c48d09b7c2596264a238fc79513382765802f0b16784c6259171817",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/web-workflows.md",
       "sourceSha256": "081e3f3e93443ef6c38cfdf220c9509ebf20f587d41259a3e365b14730e972fa",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "1feb34ba3c48d09b7c2596264a238fc79513382765802f0b16784c6259171817",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/automation-python-api.md",
       "sourceSha256": "8f3d25553248f81826cf6113f64cd29b0418abafdd4228595d9f24c95b405840",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "1feb34ba3c48d09b7c2596264a238fc79513382765802f0b16784c6259171817",
+      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
       "transformed": true
     },
     {

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "hwpx-file-preview",
+  "version": "0.1.8",
+  "description": "Mac·Windows 로컬 렌더러를 사용하는 앱 내 HWPX 파일 미리보기",
+  "author": {
+    "name": "HWPX Preview contributors"
+  },
+  "license": "Apache-2.0",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "HWPX 미리보기",
+        "shortDescription": "HWPX 파일을 앱 안에서 미리보기",
+        "longDescription": "앱에서 .hwpx 파일을 열면 대화 옆에서 페이지를 확인합니다. Mac·Windows 로컬 렌더러로 처리하고 저장 후 변경을 반영합니다. 원본 파일은 수정하지 않습니다. 지원하지 않는 서식과 필요한 글꼴 대체를 표시합니다. 비공개 로컬 평가용입니다.",
+        "developerName": "HWPX Preview contributors",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Interactive"
+        ],
+        "defaultPrompt": "HWPX 문서의 미리보기를 열어 줘"
+      }
+    }
+  }
+}

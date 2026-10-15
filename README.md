@@ -177,9 +177,3 @@ canonical `SKILL.md`·`references/`·`examples/`·`scripts/`를 편집한 뒤
 ## License · Maintainer
 
 Apache-2.0 ([LICENSE](https://github.com/airmang/hwpx-plugins/blob/main/LICENSE) · [NOTICE](https://github.com/airmang/hwpx-plugins/blob/main/NOTICE)) — **Kohkyuhyun** [@airmang](https://github.com/airmang) · [kokyuhyun@hotmail.com](mailto:kokyuhyun@hotmail.com)
-
-## Experimental desktop file preview
-
-The opt-in [native preview component](components/native-preview/README.md) packages
-the coordinated core scene and automation runtime into a desktop file viewer.
-It is separate from the current skill bundles and release coordinates.

@@ -446,6 +446,9 @@ def test_product_identity_validator_supports_the_full_release_lifecycle(
             ".pytest_cache",
             "__pycache__",
             "examples/out",
+            "node_modules",
+            "dist",
+            "build-local",
         ),
     )
     identity_path = checkout / "packaging" / "product-identity.json"

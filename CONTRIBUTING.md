@@ -27,3 +27,9 @@ commit local virtual environments, private benchmark routing, real user document
 credentials, workstation paths, generated evidence, or output documents. Keep
 fixtures synthetic and repository-only unless they are explicitly part of the
 installed product. Report vulnerabilities through [SECURITY.md](SECURITY.md).
+
+## Optional desktop preview component
+
+The [native preview component](components/native-preview/README.md) has its own
+core/automation development dependencies, target-platform build and protocol
+checks. It is not part of the four default generated skill bundles above.

@@ -7,6 +7,10 @@ on:
       - 'packaging/native-preview-artifacts.json'
       - 'scripts/*native_preview*'
       - 'tests/test_native_preview*'
+      - 'tests/test_codex_portable_runtime.py'
+      - 'packaging/templates/codex_runtime.py'
+      - 'scripts/build_hwpx_plugins.py'
+      - 'scripts/package_desktop_plugin.py'
       - '.github/workflows/native-preview.yml'
   push:
     paths:
@@ -14,6 +18,10 @@ on:
       - 'packaging/native-preview-artifacts.json'
       - 'scripts/*native_preview*'
       - 'tests/test_native_preview*'
+      - 'tests/test_codex_portable_runtime.py'
+      - 'packaging/templates/codex_runtime.py'
+      - 'scripts/build_hwpx_plugins.py'
+      - 'scripts/package_desktop_plugin.py'
       - '.github/workflows/native-preview.yml'
 
 permissions:
@@ -43,5 +51,5 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install pytest
-      - run: python -m pytest -q tests/test_native_preview_bootstrap.py tests/test_native_preview_release.py
+      - run: python -m pytest -q tests/test_native_preview_bootstrap.py tests/test_native_preview_release.py tests/test_codex_portable_runtime.py
       - run: python scripts/validate_native_preview_assets.py

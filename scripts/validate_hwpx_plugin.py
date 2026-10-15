@@ -1135,7 +1135,7 @@ def validate_host(host: dict, config: dict, identity: dict) -> None:
             validate_claude_locked_runtime(out, identity)
         if host["id"] == "codex":
             args = server.get("args", [])
-            require(command == "bash" and args[:1] == ["-c"], "codex must execute the managed launcher bootstrap")
+            require(command == "uv" and args[:1] == ["run"], "codex must execute the portable managed launcher bootstrap")
             require("cwd" not in server, "codex must preserve the thread workspace cwd")
             module_spec = importlib.util.spec_from_file_location("hwpx_bundle_builder", ROOT / "scripts/build_hwpx_plugins.py")
             builder = importlib.util.module_from_spec(module_spec)

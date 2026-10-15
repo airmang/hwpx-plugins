@@ -6,6 +6,13 @@ automatically. There is no separate consumer preview plugin or Node/Python setup
 The existing plugin prerequisite `uv` manages the bootstrap interpreter. Browser
 and mobile code-execution bundles do not acquire desktop file access.
 
+Both Codex MCP commands enter through `uv`. Windows does not require Bash:
+the editing server uses an automatically prepared, verified Python environment,
+while preview uses the pinned helper's private Node and frozen renderer. Python
+launcher source is cached by its content hash, and embedded JSON stays inside
+the Python process to preserve Windows quoting. POSIX editing retains the existing
+managed shell launcher after the uv bootstrap.
+
 Ownership is split deliberately:
 
 - `python-hwpx`: experimental cache-independent document scene with injected glyph metrics.
@@ -100,3 +107,11 @@ their independent MCP server. No system Node or Python is required by users.
 Run `python scripts/validate_hwpx_plugin.py --release` before publishing. Empty
 platform coordinates and local file URLs cannot pass that gate. Source-only
 protocol CI does not constitute a Windows/Mac binary build or native click test.
+
+Windows uses extended filesystem paths when preparing the helper and importing
+editing modules. The Node entrypoint receives a normal drive/UNC path because
+its main-module resolver does not accept the extended Win32 namespace. Automation
+also normalizes the frozen font-resource path; use the coordinated development
+automation branch when rebuilding. Hidden editing children explicitly inherit
+MCP stdin/stdout/stderr. Do not change system long-path policy to work around a
+package relocation failure.

@@ -41,6 +41,16 @@ def test_one_plugin_helper_install_reuses_verified_cache_offline(tmp_path, monke
         bootstrap.prepare(manifest, tmp_path / 'cache')
 
 
+def test_verified_helper_can_be_prepared_under_a_long_consumer_cache_path(tmp_path, monkeypatch):
+    manifest = fixture(tmp_path)
+    cache = tmp_path / ('long-cache-' * 12) / ('nested-' * 12)
+    assert len(str(cache / ('a' * 64))) > 260
+    installed = bootstrap.prepare(manifest, cache)
+    assert (installed / 'FILES.json').is_file()
+    monkeypatch.setattr(bootstrap, 'download', lambda *a, **k: pytest.fail('cache should be reusable offline'))
+    assert bootstrap.prepare(manifest, cache) == installed
+
+
 def test_cache_inventory_cannot_be_replaced_with_a_new_untrusted_receipt(tmp_path):
     manifest = fixture(tmp_path)
     installed = bootstrap.prepare(manifest, tmp_path / 'cache')

@@ -21,6 +21,24 @@ MAX_ARCHIVE = 256 * 1024 * 1024
 MAX_EXPANDED = 1024 * 1024 * 1024
 
 
+def filesystem_path(path: Path) -> Path:
+    """Use the Win32 extended path namespace without changing logical manifests."""
+    value = os.path.abspath(path)
+    if os.name == 'nt' and not value.startswith('\\\\?\\'):
+        value = ('\\\\?\\UNC\\' + value[2:]) if value.startswith('\\\\') else ('\\\\?\\' + value)
+    return Path(value)
+
+
+def application_path(path: Path) -> Path:
+    """Node's entrypoint resolver requires a drive/UNC path, not Win32 syntax."""
+    value = str(path)
+    if value.startswith('\\\\?\\UNC\\'):
+        value = '\\\\' + value[8:]
+    elif value.startswith('\\\\?\\'):
+        value = value[4:]
+    return Path(value)
+
+
 def target_key() -> str:
     machine = platform.machine().lower()
     arch = {'aarch64': 'arm64', 'amd64': 'x64', 'x86_64': 'x64'}.get(machine, machine)
@@ -134,6 +152,7 @@ def prepare(manifest: dict, cache: Path) -> Path:
     sha = artifact.get('sha256', '')
     if not re.fullmatch(r'[0-9a-f]{64}', sha):
         raise ValueError('Missing native helper SHA256')
+    cache = filesystem_path(cache)
     cache.mkdir(parents=True, exist_ok=True, mode=0o700)
     generation = cache / sha
     if generation.exists():
@@ -161,7 +180,7 @@ def prepare(manifest: dict, cache: Path) -> Path:
 def main() -> int:
     manifest = json.loads(sys.argv[1])
     cache_base = Path(os.environ.get('LOCALAPPDATA', str(Path.home() / '.cache'))) if os.name == 'nt' else Path(os.environ.get('XDG_CACHE_HOME', str(Path.home() / '.cache')))
-    root = prepare(manifest, cache_base / 'hwpx-plugin/native-preview')
+    root = application_path(prepare(manifest, cache_base / 'hwpx-plugin/native-preview'))
     node = root / 'runtime' / ('node.exe' if os.name == 'nt' else 'node')
     command = [str(node), str(root / 'server/index.mjs')]
     env = dict(os.environ)

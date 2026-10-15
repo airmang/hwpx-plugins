@@ -39,14 +39,15 @@ def main() -> int:
     output.mkdir(parents=True, exist_ok=False)
     # Reuse the tested component builder and its complete dependency notices.
     subprocess.run([str(node), 'build.mjs'], cwd=component, check=True)
-    with tempfile.TemporaryDirectory(prefix='.assemble-', dir=output) as temporary:
+    with tempfile.TemporaryDirectory(prefix='.assemble-', dir=bootstrap.filesystem_path(output)) as temporary:
+        Path(temporary).resolve().relative_to(bootstrap.filesystem_path(output).resolve())
         staged = Path(temporary) / 'helper-source'
         subprocess.run([str(node), 'prepare-local.mjs', str(staged), str(runtime), str(node)], cwd=component, check=True)
         helper = Path(temporary) / 'helper'
         helper.mkdir()
         for name in ['server', 'assets', 'runtime', 'licenses']:
             shutil.copytree(staged / 'plugins/hwpx-file-preview' / name, helper / name)
-        version = json.loads((component / 'package.json').read_text())['version']
+        version = json.loads((component / 'package.json').read_text(encoding='utf-8'))['version']
         files = [{'path': p.relative_to(helper).as_posix(), 'sha256': digest(p)} for p in sorted(helper.rglob('*')) if p.is_file()]
         inventory = helper / 'FILES.json'
         inventory.write_text(json.dumps({'version': version, 'files': files}, indent=2), encoding='utf-8')
@@ -69,31 +70,31 @@ def main() -> int:
     plugin = output / 'plugins/hwpx-plugin'
     shutil.copytree(ROOT / 'plugins/codex/hwpx-plugin', plugin)
     mcp = json.loads(render_mcp_config(
-        (PACKAGING / 'templates/codex.mcp.json').read_text(),
-        (PACKAGING / 'templates/hwpx-automation-mcp').read_text(), manifest,
+        (PACKAGING / 'templates/codex.mcp.json').read_text(encoding='utf-8'),
+        (PACKAGING / 'templates/hwpx-automation-mcp').read_text(encoding='utf-8'), manifest,
     ))
     if args.version:
         metadata = plugin / '.codex-plugin/plugin.json'
-        data = json.loads(metadata.read_text()); data['version'] = args.version
-        metadata.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+        data = json.loads(metadata.read_text(encoding='utf-8')); data['version'] = args.version
+        metadata.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         mcp['mcpServers']['hwpx']['env']['HWPX_SKILL_VERSION'] = args.version
     if args.test_namespace:
         mcp['mcpServers']['hwpx_integration_check'] = mcp['mcpServers'].pop('hwpx')
-    (plugin / '.mcp.json').write_text(json.dumps(mcp, ensure_ascii=False, indent=2) + '\n')
+    (plugin / '.mcp.json').write_text(json.dumps(mcp, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     marketplace = output / '.agents/plugins'
     marketplace.mkdir(parents=True)
     (marketplace / 'marketplace.json').write_text(json.dumps({
         'name': 'hwpx-integrated-local', 'interface': {'displayName': 'HWPX integration build'},
         'plugins': [{'name': 'hwpx-plugin', 'source': {'source': 'local', 'path': './plugins/hwpx-plugin'},
                      'policy': {'installation': 'AVAILABLE', 'authentication': 'ON_INSTALL'}, 'category': 'Productivity'}],
-    }, indent=2))
-    (output / 'native-preview-artifacts.json').write_text(json.dumps(manifest, indent=2))
+    }, indent=2), encoding='utf-8')
+    (output / 'native-preview-artifacts.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
     inventory = [{'path': p.relative_to(plugin).as_posix(), 'sha256': digest(p)} for p in sorted(plugin.rglob('*')) if p.is_file()]
     (output / 'PACKAGE-MANIFEST.json').write_text(json.dumps({
         'plugin': 'hwpx-plugin', 'singlePluginInstall': True, 'nativeTarget': target_key,
         'localOnly': True, 'testNamespace': args.test_namespace, 'files': inventory,
         'nativeArtifacts': manifest,
-    }, indent=2))
+    }, indent=2), encoding='utf-8')
     print(json.dumps({'marketplace': str(output), 'plugin': 'hwpx-plugin', 'nativeTarget': target_key}))
     return 0
 

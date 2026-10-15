@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
+import base64
+import zlib
 import importlib.util
 import json
 import os
@@ -173,7 +175,7 @@ def test_codex_mcp_command_is_workspace_preserving_and_root_independent() -> Non
     )
     assert set(config["mcpServers"]) == {"hwpx", "hwpx_native_preview"}
     config = config["mcpServers"]["hwpx"]
-    assert config["command"] == "bash"
+    assert config["command"] == "uv"
     assert "cwd" not in config
     assert "HWPX_AUTOMATION_ADVANCED" not in config["env"]
     assert "HWPX_AUTOMATION_ADVANCED" in config["env_vars"]
@@ -183,8 +185,12 @@ def test_codex_bundle_embeds_the_common_managed_launcher() -> None:
     config = json.loads((ROOT / "plugins" / "codex" / "hwpx-plugin" / ".mcp.json").read_text(encoding="utf-8"))
     server = config["mcpServers"]["hwpx"]
     identity = _identity()
-    script = server["args"][1]
-    assert server["command"] == "bash" and server["args"][0] == "-c"
+    source, embedded = json.loads(zlib.decompress(base64.b64decode(server["args"][-1])))
+    coordinates = json.loads(embedded[0])
+    script = coordinates['posix']
+    assert server["command"] == "uv" and server["args"][0] == "run"
+    assert 'windows-generations-v1' in source
+    assert coordinates['floor'] == [identity['installConstraint']['automation'], identity['installConstraint']['core']]
     assert identity["installConstraint"]["automation"] in script and identity["installConstraint"]["core"] in script
     assert "_verify_generation" in script and "_run_refresh" in script
     assert script.rstrip().endswith('exec bash "$runner" "$@"')

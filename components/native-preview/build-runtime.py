@@ -76,6 +76,7 @@ def main() -> int:
                str(entry)]
     if sys.platform == 'win32':
         command.insert(3, '--windowed')
+        command[3:3] = ['--runtime-hook', str(Path(__file__).with_name('windows_paths_hook.py'))]
     with (root / 'BUILD.log').open('w', encoding='utf-8') as log:
         subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
     bundle = root / 'dist/HwpxPreview'

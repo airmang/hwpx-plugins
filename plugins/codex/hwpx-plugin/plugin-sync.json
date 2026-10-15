@@ -7,7 +7,7 @@
       "source": "SKILL.md",
       "sourceSha256": "edb122dd1866ef6db9b57d66d9ab585a9153a4410c109d5692d9d4bc708456de",
       "dest": "plugins/codex/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "edb122dd1866ef6db9b57d66d9ab585a9153a4410c109d5692d9d4bc708456de",
+      "destSha256": "f5bdc31b8bfcea39fb3592d5afebf368701d02bed40efb4fa977e54cf1a20382",
       "transformed": true
     },
     {
@@ -511,7 +511,7 @@
       "source": "packaging/templates/codex.mcp.json",
       "sourceSha256": "34537c137ed5c9f4c88d58729fbb4351e7084e8804c877007d0483065d0e90fa",
       "dest": "plugins/codex/hwpx-plugin/.mcp.json",
-      "destSha256": "f5fa3c0350765b32c253270578bb3c70bde5cb7b3475914d5e36733e9705e8ef",
+      "destSha256": "d17ec52ba03eefe4c8a071d0304572deec85ae9af6da79f28639fb6e2e51617b",
       "transformed": true
     },
     {

@@ -177,3 +177,15 @@ canonical `SKILL.md`·`references/`·`examples/`·`scripts/`를 편집한 뒤
 ## License · Maintainer
 
 Apache-2.0 ([LICENSE](https://github.com/airmang/hwpx-plugins/blob/main/LICENSE) · [NOTICE](https://github.com/airmang/hwpx-plugins/blob/main/NOTICE)) — **Kohkyuhyun** [@airmang](https://github.com/airmang) · [kokyuhyun@hotmail.com](mailto:kokyuhyun@hotmail.com)
+
+## Codex 데스크톱 파일 미리보기 (개발 중)
+
+이 브랜치는 HWPX 미리보기를 기본 `hwpx-plugin`에 통합합니다. 사용자는 기존
+플러그인만 설치하며, 처음 실행할 때 플러그인이 해당 OS의 미리보기 실행물을
+자동으로 준비합니다. 별도 미리보기 플러그인이나 Node·Python 설치는 필요하지
+않습니다. 기존 플러그인의 `uv` 사전 요구사항은 유지됩니다.
+
+현재 공개 릴리스에는 이 통합이 포함되지 않았습니다. Mac·Windows 실행물의
+배포와 해시 고정, 통합 패키지 검증 후 정식 버전에서 제공할 예정입니다.
+개발 빌드의 배포 좌표가 비어 있으면 미리보기 서버는 미출시 상태를 명시하고
+종료합니다. 문서 편집 도구는 독립된 서버에서 계속 제공됩니다.

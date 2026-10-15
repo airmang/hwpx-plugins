@@ -7,9 +7,11 @@ import json
 import os
 import subprocess
 import sys
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.skipif(os.name == 'nt', reason='POSIX executable uv double; Windows uses the portable runtime tests')
 HARNESS_BIN = ROOT / "tests" / "launcher_harness" / "bin"
 
 

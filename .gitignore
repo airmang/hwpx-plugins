@@ -5,3 +5,7 @@ examples/out/
 **/examples/out/
 dist/
 .cache/
+
+components/native-preview/node_modules/
+components/native-preview/dist/
+components/native-preview/build-local/

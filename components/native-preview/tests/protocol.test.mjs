@@ -10,7 +10,10 @@ import {Script} from 'node:vm';
 
 test('built stdio server advertises a real .hwpx file viewer and rejects unauthorized render', async () => {
   const client = new Client({name: 'hwpx-plugin-probe', version: '1.0.0'});
-  const transport = new StdioClientTransport({command: process.env.HWPX_TEST_SERVER_NODE || process.execPath, args: [resolve(process.env.HWPX_TEST_SERVER || 'dist/server/index.mjs')], stderr: 'pipe', env: {...process.env}});
+  const installed = process.env.HWPX_TEST_MCP_CONFIG
+    ? JSON.parse(await readFile(process.env.HWPX_TEST_MCP_CONFIG, 'utf8')).mcpServers.hwpx_native_preview
+    : {command: process.env.HWPX_TEST_SERVER_NODE || process.execPath, args: [resolve(process.env.HWPX_TEST_SERVER || 'dist/server/index.mjs')]};
+  const transport = new StdioClientTransport({...installed, stderr: 'pipe', env: {...process.env, ...installed.env}});
   await client.connect(transport);
   try {
     const tools = await client.listTools();

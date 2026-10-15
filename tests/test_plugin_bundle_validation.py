@@ -171,7 +171,7 @@ def test_codex_mcp_command_is_workspace_preserving_and_root_independent() -> Non
     config = json.loads(
         (ROOT / "plugins/codex/hwpx-plugin/.mcp.json").read_text(encoding="utf-8")
     )
-    assert set(config["mcpServers"]) == {"hwpx"}
+    assert set(config["mcpServers"]) == {"hwpx", "hwpx_native_preview"}
     config = config["mcpServers"]["hwpx"]
     assert config["command"] == "bash"
     assert "cwd" not in config

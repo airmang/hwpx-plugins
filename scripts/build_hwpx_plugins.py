@@ -40,12 +40,41 @@ def codex_launcher_command(launcher: str) -> str:
     )
 
 
-def render_mcp_config(template: str, launcher: str) -> str:
+def native_preview_command(manifest: dict | None = None) -> str:
+    """Use the plugin's existing uv prerequisite, never a user-installed Node/Python."""
+    bootstrap = (ROOT / 'components/native-preview/bootstrap.py').read_text(encoding='utf-8')
+    if manifest is None:
+        manifest = json.loads((PACKAGING / 'native-preview-artifacts.json').read_text(encoding='utf-8'))
+    digest = hashlib.sha256(bootstrap.encode()).hexdigest()
+    return (
+        'set -eu\numask 077\n'
+        'cache="${XDG_CACHE_HOME:-$HOME/.cache}/hwpx-plugin"\n'
+        f'runner_dir="$cache/native-bootstrap/{digest}"\n'
+        'mkdir -p "$runner_dir"\n'
+        'runner="$runner_dir/bootstrap.py"\n'
+        'tmp="$(mktemp "$runner_dir/.bootstrap.XXXXXX")"\n'
+        'trap \'rm -f "$tmp"\' EXIT HUP INT TERM\n'
+        f"printf '%s' {shlex.quote(bootstrap)} > \"$tmp\"\n"
+        'mv -f "$tmp" "$runner"\n'
+        'trap - EXIT HUP INT TERM\n'
+        'exec uv run --no-project --no-config --python 3.12 --script "$runner" '
+        + shlex.quote(json.dumps(manifest, separators=(',', ':'))) + '\n'
+    )
+
+
+def render_mcp_config(template: str, launcher: str, native_manifest: dict | None = None) -> str:
     data = json.loads(template)
     server = data["mcpServers"]["hwpx"]
     if server.get("args") != ["-c", "__HWPX_MANAGED_LAUNCHER__"]:
         raise ValueError("Codex MCP template must select the canonical managed launcher")
     server["args"] = ["-c", codex_launcher_command(launcher), "hwpx-managed-launcher"]
+    # This is part of hwpx-plugin itself. The internal helper has no separate
+    # marketplace identity or user installation command.
+    data['mcpServers']['hwpx_native_preview'] = {
+        'command': 'bash',
+        'args': ['-c', native_preview_command(native_manifest), 'hwpx-native-preview'],
+        'startup_timeout_sec': 180,
+    }
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 

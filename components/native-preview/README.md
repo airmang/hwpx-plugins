@@ -1,8 +1,10 @@
-# Optional desktop HWPX file preview
+# Integrated desktop HWPX file preview
 
-This component provides the MCP Apps UI and `.hwpx` file entrypoint. The default
-HWPX skill/plugin bundles are unchanged. It is built as a separate, opt-in desktop
-component; browser/mobile code-execution skills do not acquire local file access.
+This component is an internal part of the default Codex `hwpx-plugin`. A user
+installs that plugin once; its second MCP server prepares the pinned OS helper
+automatically. There is no separate consumer preview plugin or Node/Python setup.
+The existing plugin prerequisite `uv` manages the bootstrap interpreter. Browser
+and mobile code-execution bundles do not acquire desktop file access.
 
 Ownership is split deliberately:
 
@@ -28,7 +30,7 @@ python build-runtime.py --output ./build-local --font-directory /absolute/licens
 pnpm install --frozen-lockfile
 pnpm build
 pnpm test
-node prepare-local.mjs /absolute/NEW-MARKETPLACE ./build-local/dist/HwpxPreview /absolute/node
+python ../../scripts/package_desktop_plugin.py --runtime ./build-local/dist/HwpxPreview --node /absolute/node --output /absolute/NEW-MARKETPLACE --version 2.5.0-dev.1
 ```
 
 `build-local` must be new. Build on the target OS and CPU architecture; a Windows
@@ -37,7 +39,8 @@ supplied font resources and their original notice; font files, runtime binaries,
 and build output are not committed to this repository. Supplied font terms still
 govern redistribution of any resulting bundle.
 
-Register the resulting local marketplace with the host's supported CLI. Confirm
+The generated local marketplace contains exactly one `hwpx-plugin` entry.
+Register it with the host's supported CLI. Confirm
 the live v7 UI resource and component version 0.1.9, then verify a real `.hwpx` click in the intended desktop
 app. A controlled browser bridge test is not evidence of native file selection.
 
@@ -46,8 +49,7 @@ product builds can be distinguished from the Windows/Mac 0.1.8 prototype.
 The v2–v6 resource aliases remain available for existing viewers.
 
 This source component derives from the Windows/Mac 0.1.8 prototype. Product-package
-relocation needs separate platform validation before publication. Existing
-production plugin versions, release coordinates and imported skills are preserved.
+relocation needs separate platform validation before publication. The integration source does not change published release coordinates.
 `qualityValidated` remains false for arbitrary documents. Linux, Intel Mac and
 public signed/notarized distribution are not claimed.
 
@@ -69,10 +71,32 @@ Before a coordinated public release:
    that released version; do not assume every existing 6.8.0 wheel has the scene.
 2. Release the automation runtime, then build this component on each target OS
    from the released wheel pair and record their exact versions and hashes.
-3. Rebuild the relocated runtime on Mac and verify native file-click/table
-   display, save refresh, cancellation and process cleanup there.
+3. Verify the integrated single-plugin package on both target platforms: native
+   file click/table display, save refresh, cancellation and process cleanup.
 4. Resolve font redistribution terms and platform signing/notarization before
    distributing platform binaries. This PR contains source only.
 
 Release coordination, including the unreleased core dependency floor, is recorded
 in [RELEASE.md](RELEASE.md).
+
+## Helper delivery and cache
+
+`scripts/package_desktop_plugin.py` assembles the normal plugin plus a private
+local-test archive. `prepare-local.mjs` is an internal assembly/smoke utility; its
+legacy standalone marketplace is not the consumer installation path.
+
+For a public build, publish target-native helper archives as product GitHub
+release assets and pin their archive SHA256 and `FILES.json` SHA256 in
+`packaging/native-preview-artifacts.json`. The bootstrap verifies every installed
+file before execution. It stages into a private directory and atomically commits
+a content-addressed cache generation; concurrent starts do not replace or delete
+another running version. Verified cache reuse requires no helper download.
+
+Cold starts may download the helper and a uv-managed Python interpreter. The
+preview server has its own 180-second startup budget. Unsupported targets or an
+unreleased matrix produce an explicit error; existing editing tools remain on
+their independent MCP server. No system Node or Python is required by users.
+
+Run `python scripts/validate_hwpx_plugin.py --release` before publishing. Empty
+platform coordinates and local file URLs cannot pass that gate. Source-only
+protocol CI does not constitute a Windows/Mac binary build or native click test.

@@ -11,8 +11,8 @@ import {runtimePath} from './platform.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sessions = new PreviewSessions(process.env.HWPX_PREVIEW_RUNTIME || runtimePath(root));
-const server = new McpServer({name: 'hwpx-file-preview', version: '0.1.8'});
-const uri = 'ui://hwpx-file-preview/viewer-v6.html';
+const server = new McpServer({name: 'hwpx-file-preview', version: '0.1.9'});
+const uri = 'ui://hwpx-file-preview/viewer-v7.html';
 // Keep the UI in memory while a running conversation still owns this server;
 // a plugin upgrade may remove its previous installation directory.
 const viewerHtml = await readFile(resolve(root, 'assets/viewer.html'), 'utf8');
@@ -25,7 +25,7 @@ const guarded = fn => async (args, context) => {
   catch (e) {return {isError: true, content: [{type: 'text', text: e.message}], structuredContent: {error: e.message}};}
 };
 
-for (const resourceUri of [uri, 'ui://hwpx-file-preview/viewer-v5.html', 'ui://hwpx-file-preview/viewer-v4.html', 'ui://hwpx-file-preview/viewer-v3.html', 'ui://hwpx-file-preview/viewer-v2.html']) {
+for (const resourceUri of [uri, 'ui://hwpx-file-preview/viewer-v6.html', 'ui://hwpx-file-preview/viewer-v5.html', 'ui://hwpx-file-preview/viewer-v4.html', 'ui://hwpx-file-preview/viewer-v3.html', 'ui://hwpx-file-preview/viewer-v2.html']) {
 registerAppResource(server, `HWPX 미리보기 ${resourceUri}`, resourceUri, {}, async () => ({contents: [{
   uri: resourceUri, mimeType: RESOURCE_MIME_TYPE, text: viewerHtml,
   _meta: {ui: {prefersBorder: false, csp: {connectDomains: [], resourceDomains: []}},

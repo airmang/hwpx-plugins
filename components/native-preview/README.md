@@ -38,8 +38,12 @@ and build output are not committed to this repository. Supplied font terms still
 govern redistribution of any resulting bundle.
 
 Register the resulting local marketplace with the host's supported CLI. Confirm
-the live v6 UI resource, then verify a real `.hwpx` click in the intended desktop
+the live v7 UI resource and component version 0.1.9, then verify a real `.hwpx` click in the intended desktop
 app. A controlled browser bridge test is not evidence of native file selection.
+
+Version 0.1.9 uses a distinct installation cache and primary v7 UI resource so
+product builds can be distinguished from the Windows/Mac 0.1.8 prototype.
+The v2–v6 resource aliases remain available for existing viewers.
 
 This source component derives from the Windows/Mac 0.1.8 prototype. Product-package
 relocation needs separate platform validation before publication. Existing
@@ -69,3 +73,6 @@ Before a coordinated public release:
    display, save refresh, cancellation and process cleanup there.
 4. Resolve font redistribution terms and platform signing/notarization before
    distributing platform binaries. This PR contains source only.
+
+Release coordination, including the unreleased core dependency floor, is recorded
+in [RELEASE.md](RELEASE.md).

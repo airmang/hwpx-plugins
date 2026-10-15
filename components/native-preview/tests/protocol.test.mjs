@@ -17,7 +17,7 @@ test('built stdio server advertises a real .hwpx file viewer and rejects unautho
     assert.equal(tools.tools.length, 7);
     const open = tools.tools.find(t => t.name === 'hwpx_open');
     assert.deepEqual(open._meta['openai/ui'].entrypoints, [{type: 'file', extensions: ['.hwpx']}]);
-    assert.equal(open._meta.ui.resourceUri, 'ui://hwpx-file-preview/viewer-v6.html');
+    assert.equal(open._meta.ui.resourceUri, 'ui://hwpx-file-preview/viewer-v7.html');
     assert.equal(open._meta.ui.visibility, undefined);
     for (const internal of tools.tools.filter(t => t.name !== 'hwpx_open')) {
       assert.deepEqual(internal._meta.ui.visibility, ['app']);
@@ -27,7 +27,7 @@ test('built stdio server advertises a real .hwpx file viewer and rejects unautho
     assert.match(resource.contents[0].text, /페이지 이동/);
     assert.match(resource.contents[0].text, /HWPX 미리보기/);
     new Script(resource.contents[0].text.match(/<script>([\s\S]*)<\/script>/)[1]);
-    for (const uri of ['ui://hwpx-file-preview/viewer-v5.html', 'ui://hwpx-file-preview/viewer-v2.html', 'ui://hwpx-file-preview/viewer-v3.html', 'ui://hwpx-file-preview/viewer-v4.html']) {
+    for (const uri of ['ui://hwpx-file-preview/viewer-v6.html', 'ui://hwpx-file-preview/viewer-v5.html', 'ui://hwpx-file-preview/viewer-v2.html', 'ui://hwpx-file-preview/viewer-v3.html', 'ui://hwpx-file-preview/viewer-v4.html']) {
       assert.equal((await client.readResource({uri})).contents[0].text, resource.contents[0].text);
     }
     const initial = await client.callTool({name: 'hwpx_open', arguments: {file: {name: '한글.hwpx', resourceUri: 'host-resource://opaque'}}});

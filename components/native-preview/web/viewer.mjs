@@ -1,7 +1,7 @@
 import {App, applyDocumentTheme, applyHostStyleVariables} from '@modelcontextprotocol/ext-apps';
 import {OpenAIExtensions, OpenAIFileEntrypointInputSchema} from '@openai/mcp-extensions/app';
 
-const app = new App({name: 'HWPX 미리보기', version: '0.1.8'}, {}, {autoResize: false});
+const app = new App({name: 'HWPX 미리보기', version: '0.1.9'}, {}, {autoResize: false});
 const extensions = new OpenAIExtensions(app);
 const $ = id => document.getElementById(id);
 let connected, file, session, revision, generation = 0, openVersion = 0, disposed = false, polling = false, observer, openingUri;

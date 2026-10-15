@@ -246,6 +246,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
             host_frontmatter(host, identity),
         ),
         encoding="utf-8",
+        newline="\n",
     )
     records.append(record(config["canonicalSkill"], canonical, skill_md, transformed=True))
 
@@ -349,6 +350,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
         )
         + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

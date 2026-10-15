@@ -72,6 +72,14 @@ def test_generated_plugin_bundles_validate() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_transformed_bundle_text_matches_git_line_ending_policy() -> None:
+    for receipt in ROOT.glob('plugins/**/plugin-sync.json'):
+        for entry in json.loads(receipt.read_text(encoding='utf-8'))['files']:
+            if entry['transformed']:
+                path = ROOT / entry['dest']
+                assert b'\r\n' not in path.read_bytes(), str(path)
+
+
 def test_markdown_link_validator_accepts_only_safe_existing_relative_targets(
     tmp_path: Path,
 ) -> None:

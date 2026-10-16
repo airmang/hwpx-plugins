@@ -1,0 +1,22 @@
+// A controlled MCP Apps host using the official AppBridge; never proof that a
+// Claude surface rendered the view natively.
+import {AppBridge, PostMessageTransport} from '@modelcontextprotocol/ext-apps/app-bridge';
+const iframe = document.querySelector('iframe');
+const {token, path} = document.body.dataset;
+async function rpc(name, args) {
+  const result = await fetch('/rpc', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Test-Token': token}, body: JSON.stringify({name, arguments: args})});
+  if (!result.ok) throw new Error('harness RPC failed'); return result.json();
+}
+const bridge = new AppBridge(null, {name: 'HWPX Claude profile bridge test', version: '1.0.0'}, {serverTools: {}, logging: {}}, {hostContext: {theme: 'light', displayMode: 'inline'}});
+bridge.oncalltool = params => rpc(params.name, params.arguments);
+bridge.oninitialized = async () => {
+  document.getElementById('host-state').textContent = '표준 MCP Apps 브리지 연결됨';
+  const args = {path};
+  await bridge.sendToolInput({arguments: args});
+  await bridge.sendToolResult(await rpc('hwpx_preview_open', args));
+};
+document.getElementById('teardown').onclick = async () => {
+  await bridge.teardownResource({}); iframe.remove(); document.getElementById('host-state').textContent = '뷰어 종료 확인';
+};
+await bridge.connect(new PostMessageTransport(iframe.contentWindow, iframe.contentWindow));
+iframe.src = '/widget';

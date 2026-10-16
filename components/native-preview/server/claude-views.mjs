@@ -55,14 +55,15 @@ export class ClaudeViews {
     for (const [id, view] of this.views) if (!this.sessions.sessions.has(view.session)) this.views.delete(id);
     for (const [ticket, entry] of this.tickets) if (entry.expires <= now || !this.views.has(entry.view)) this.tickets.delete(ticket);
   }
-  async open(path, {fontSubstitutions} = {}) {
-    const origin = await this.origin();
+  async open(path, {fontSubstitutions, ticket = true} = {}) {
+    const origin = ticket ? await this.origin() : null;
     this.prune();
     if (this.views.size >= this.maxViews) throw new Error('열린 미리보기가 너무 많습니다. 사용하지 않는 미리보기를 닫아 주세요.');
     const state = await this.sessions.start({path}, {fontSubstitutions});
     const view = {id: randomUUID(), session: state.session, path, secret: secret()};
     this.views.set(view.id, view);
-    return {view: view.id, url: this.ticket(view, origin), expiresInSeconds: this.ticketMs / 1000, state: {...state, session: undefined}};
+    const opened = {view: view.id, state: {...state, session: undefined}};
+    return ticket ? {...opened, url: this.ticket(view, origin), expiresInSeconds: this.ticketMs / 1000} : opened;
   }
   ticket(view, origin) {
     const ticket = secret();
@@ -83,6 +84,15 @@ export class ClaudeViews {
   async status(id) {
     const view = this.view(id);
     return {...await this.sessions.state(view.session, {path: view.path}), session: undefined, view: id};
+  }
+  async page(id, revision, index) {
+    const view = this.view(id);
+    return this.sessions.pageBytes(view.session, revision, index, {path: view.path});
+  }
+  async cancel(id) {
+    const view = this.view(id);
+    await this.sessions.cancel(view.session, {path: view.path});
+    return this.status(id);
   }
   async close(id) {
     const view = this.view(id);

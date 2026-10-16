@@ -135,28 +135,37 @@ What the Claude desktop app (Code tab) offers, as observed on Claude Code
   This profile does not depend on it.
 - Plugin MCP servers receive the session's working folders as MCP roots.
 
-So the profile exposes four model-visible tools (`hwpx_preview_open`, `_reopen`,
-`_status`, `_close`) and server instructions:
+The profile follows Claude's own UI standard, MCP Apps, and keeps a fallback
+for Claude surfaces that do not render it yet:
 
 1. `hwpx_preview_open(path)` accepts an absolute `.hwpx` path that lies inside one
    of the session's MCP roots (realpath, ≤32 MiB, regular file). Anything else is
-   refused. The original file is never written.
-2. The helper's loopback viewer returns a single-use `http://127.0.0.1:<port>/open/<ticket>`
-   URL (5-minute expiry). Claude opens it in the in-app Browser pane. The first
-   request exchanges the ticket for an HttpOnly, `SameSite=Strict` cookie scoped
-   to that view's path, so the URL the model saw cannot be replayed. The renderer
-   token, file path and page bytes are not model-visible.
-3. The page polls the view's status and loads `api/pages/<revision>/<i>.png`. A
-   save is picked up by the renderer's watcher and the page refreshes; a partial
-   save keeps the last accepted pages. Exact `Host` matching blocks DNS rebinding;
-   a CSP with a script hash blocks injected script.
-4. Leases expire 120 seconds after the page stops polling, which releases the
-   renderer worker. `hwpx_preview_close` releases it at once.
+   refused, and the original file is never written. The tool carries
+   `_meta.ui.resourceUri = ui://hwpx-native-preview/claude-viewer-v1.html`, a
+   standard `text/html;profile=mcp-app` view built from `web/claude-app.mjs`. It
+   contains no OpenAI extension.
+2. When the client advertises the `io.modelcontextprotocol/ui` extension (Claude
+   renders MCP Apps), the result carries only the view id. The in-conversation
+   view polls `hwpx_preview_status` and loads pages through the app-only
+   `hwpx_preview_page`, whose PNG bytes travel in `_meta`, never as model content.
+   It can also cancel through `hwpx_preview_cancel`. Closing the view calls
+   `hwpx_preview_close`.
+3. Otherwise (for example the Code tab while its MCP Apps flag is off), the
+   result adds a single-use `http://127.0.0.1:<port>/open/<ticket>` URL (5-minute
+   expiry) for the in-app Browser pane. The first request exchanges the ticket for
+   an HttpOnly, `SameSite=Strict` cookie scoped to that view's path, so the URL the
+   model saw cannot be replayed. The renderer token, file path and page bytes are
+   not model-visible. Exact `Host` matching blocks DNS rebinding; a CSP with a
+   script hash blocks injected script. `hwpx_preview_reopen` issues a new URL for
+   either kind of view.
+4. Saves are picked up by the renderer's watcher and both views refresh; a partial
+   save keeps the last accepted pages. Leases expire 120 seconds after a view
+   stops polling, which releases the renderer worker.
 
-This is in-app display through the Browser pane, after an explicit request to
-Claude (or an `@`-mention the model acts on). It is not a file-click viewer.
-Opening the URL in an external browser does not count as Claude in-app
-verification.
+Neither path is a file-click viewer. Opening the URL in an external browser does
+not count as Claude in-app verification. `tests/claude-browser-harness.mjs` hosts
+the MCP Apps view in the official AppBridge for local checks; that is a
+controlled test, not a native Claude surface.
 
 Assemble a Claude candidate with `--host claude`. For a machine that already has
 a synced `hwpx-plugin`, also pass `--test-namespace`. That flag renames the

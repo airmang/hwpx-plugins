@@ -8,6 +8,7 @@ import {readFile, writeFile, mkdtemp, rm, copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve, join, dirname, basename} from 'node:path';
 import {tmpdir} from 'node:os';
+import {Script} from 'node:vm';
 import {pathToFileURL} from 'node:url';
 import {ClaudeViews} from '../server/claude-views.mjs';
 
@@ -95,8 +96,15 @@ test('Claude profile authorizes files through MCP roots and serves real pages to
   try {
     assert.match(client.getInstructions(), /내장 브라우저/);
     const tools = (await client.listTools()).tools;
-    assert.deepEqual(tools.map(t => t.name).sort(), ['hwpx_preview_close', 'hwpx_preview_open', 'hwpx_preview_reopen', 'hwpx_preview_status']);
-    assert.ok(tools.every(t => t.annotations.readOnlyHint === true && !t._meta?.['openai/ui']));
+    assert.deepEqual(tools.map(t => t.name).sort(), ['hwpx_preview_cancel', 'hwpx_preview_close', 'hwpx_preview_open', 'hwpx_preview_page', 'hwpx_preview_reopen', 'hwpx_preview_status']);
+    assert.ok(tools.every(t => t.annotations.readOnlyHint === true && !t._meta?.['openai/ui'] && !t._meta?.['openai/outputTemplate']));
+    const open = tools.find(t => t.name === 'hwpx_preview_open');
+    assert.equal(open._meta.ui.resourceUri, 'ui://hwpx-native-preview/claude-viewer-v1.html');
+    for (const name of ['hwpx_preview_page', 'hwpx_preview_cancel']) assert.deepEqual(tools.find(t => t.name === name)._meta.ui.visibility, ['app']);
+    const resource = (await client.readResource({uri: open._meta.ui.resourceUri})).contents[0];
+    assert.equal(resource.mimeType, 'text/html;profile=mcp-app');
+    assert.doesNotMatch(resource.text, /openai/i);
+    new Script(resource.text.match(/<script>([\s\S]*)<\/script>/)[1]);
     await writeFile(join(outside, 'secret.hwpx'), 'x');
     await writeFile(join(root, 'note.txt'), 'x');
     for (const path of [join(outside, 'secret.hwpx'), 'relative.hwpx', join(root, 'note.txt'), join(root, 'missing.hwpx')]) {
@@ -150,5 +158,45 @@ test('Claude profile authorizes files through MCP roots and serves real pages to
   } finally {
     await client.close();
     for (const dir of [root, outside]) {assert.equal(dirname(resolve(dir)), resolve(tmpdir())); await rm(dir, {recursive: true, force: true});}
+  }
+});
+
+test('a Claude host that renders MCP Apps gets the in-conversation view instead of a Browser pane URL', {skip: !process.env.HWPX_TEST_FILE}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'hwpx-claude-apps-'));
+  const client = new Client({name: 'claude-apps-probe', version: '1.0.0'},
+    {capabilities: {roots: {}, extensions: {'io.modelcontextprotocol/ui': {mimeTypes: ['text/html;profile=mcp-app']}}}});
+  client.setRequestHandler(ListRootsRequestSchema, async () => ({roots: [{uri: pathToFileURL(root).href}]}));
+  const installed = process.env.HWPX_TEST_MCP_CONFIG
+    ? JSON.parse(await readFile(process.env.HWPX_TEST_MCP_CONFIG, 'utf8')).mcpServers.hwpx_native_preview
+    : {command: process.env.HWPX_TEST_SERVER_NODE || process.execPath, args: [resolve(process.env.HWPX_TEST_SERVER || 'dist/server/index.mjs')], env: {HWPX_PREVIEW_HOST: 'claude'}};
+  await client.connect(new StdioClientTransport({...installed, stderr: 'pipe', env: {...process.env, ...installed.env}}));
+  try {
+    const path = join(root, '앱 시험.hwpx');
+    await copyFile(resolve(process.env.HWPX_TEST_FILE), path);
+    const before = sha(await readFile(path));
+    const opened = await client.callTool({name: 'hwpx_preview_open', arguments: {path}}, undefined, {timeout: 60000});
+    assert.equal(opened.isError, undefined, JSON.stringify(opened.content));
+    assert.equal(opened.structuredContent.url, undefined);
+    assert.match(opened.content[0].text, /대화 안에/);
+    const {view} = opened.structuredContent;
+    let state, end = Date.now() + 140000;
+    while (Date.now() < end) {
+      state = (await client.callTool({name: 'hwpx_preview_status', arguments: {view}})).structuredContent;
+      if (state.state === 'ready' || state.state === 'error') break;
+      await new Promise(r => setTimeout(r, 250));
+    }
+    assert.equal(state.state, 'ready', JSON.stringify(state)); assert.equal(state.inputSha256, before);
+    const page = await client.callTool({name: 'hwpx_preview_page', arguments: {view, revision: state.revision, index: 0}});
+    assert.equal(page.isError, undefined); assert.equal(page.content.length, 0);
+    const png = Buffer.from(page._meta.page.data, 'base64');
+    assert.ok(png.length > 1000);
+    if (process.env.HWPX_TEST_EXPECTED_PNG_SHA256) assert.equal(sha(png), process.env.HWPX_TEST_EXPECTED_PNG_SHA256);
+    assert.equal((await client.callTool({name: 'hwpx_preview_page', arguments: {view, revision: state.revision + 5, index: 0}})).isError, true);
+    const reopened = await client.callTool({name: 'hwpx_preview_reopen', arguments: {view}});
+    assert.match(reopened.structuredContent.url, /^http:\/\/127\.0\.0\.1:\d+\/open\//);
+    assert.equal((await client.callTool({name: 'hwpx_preview_close', arguments: {view}})).structuredContent.closed, true);
+  } finally {
+    await client.close();
+    assert.equal(dirname(resolve(root)), resolve(tmpdir())); await rm(root, {recursive: true, force: true});
   }
 });

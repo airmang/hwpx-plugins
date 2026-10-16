@@ -11,6 +11,8 @@ import {tmpdir} from 'node:os';
 import {Script} from 'node:vm';
 import {pathToFileURL} from 'node:url';
 import {ClaudeViews} from '../server/claude-views.mjs';
+import {pagesToPdf, pngImage} from '../server/pdf.mjs';
+import {deflateSync} from 'node:zlib';
 
 const sha = data => createHash('sha256').update(data).digest('hex');
 const viewer = '<!doctype html><title>t</title><body><script>window.ok=1</script></body>';
@@ -96,8 +98,8 @@ test('Claude profile authorizes files through MCP roots and serves real pages to
   try {
     assert.match(client.getInstructions(), /내장 브라우저/);
     const tools = (await client.listTools()).tools;
-    assert.deepEqual(tools.map(t => t.name).sort(), ['hwpx_preview_cancel', 'hwpx_preview_close', 'hwpx_preview_open', 'hwpx_preview_page', 'hwpx_preview_reopen', 'hwpx_preview_status']);
-    assert.ok(tools.every(t => t.annotations.readOnlyHint === true && !t._meta?.['openai/ui'] && !t._meta?.['openai/outputTemplate']));
+    assert.deepEqual(tools.map(t => t.name).sort(), ['hwpx_preview_cancel', 'hwpx_preview_close', 'hwpx_preview_open', 'hwpx_preview_page', 'hwpx_preview_pdf', 'hwpx_preview_reopen', 'hwpx_preview_status']);
+    assert.ok(tools.every(t => t.annotations.destructiveHint === false && (t.name === 'hwpx_preview_pdf' || t.annotations.readOnlyHint === true) && !t._meta?.['openai/ui'] && !t._meta?.['openai/outputTemplate']));
     const open = tools.find(t => t.name === 'hwpx_preview_open');
     assert.equal(open._meta.ui.resourceUri, 'ui://hwpx-native-preview/claude-viewer-v1.html');
     for (const name of ['hwpx_preview_page', 'hwpx_preview_cancel']) assert.deepEqual(tools.find(t => t.name === name)._meta.ui.visibility, ['app']);
@@ -195,6 +197,62 @@ test('a Claude host that renders MCP Apps gets the in-conversation view instead 
     const reopened = await client.callTool({name: 'hwpx_preview_reopen', arguments: {view}});
     assert.match(reopened.structuredContent.url, /^http:\/\/127\.0\.0\.1:\d+\/open\//);
     assert.equal((await client.callTool({name: 'hwpx_preview_close', arguments: {view}})).structuredContent.closed, true);
+  } finally {
+    await client.close();
+    assert.equal(dirname(resolve(root)), resolve(tmpdir())); await rm(root, {recursive: true, force: true});
+  }
+});
+
+function png(width, height, colorType = 2) {
+  const chunk = (type, body) => {const b = Buffer.alloc(12 + body.length); b.writeUInt32BE(body.length, 0); b.write(type, 4, 'latin1'); body.copy(b, 8); return b;};
+  const header = Buffer.alloc(13); header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = colorType;
+  const row = 1 + width * (colorType === 2 ? 3 : 1), raw = Buffer.alloc(row * height, 0x80);
+  for (let y = 0; y < height; y++) raw[y * row] = 0;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
+test('page PNGs become a PDF whose images keep the page size at the render resolution', () => {
+  const pdf = pagesToPdf([png(2480, 3508), png(2480, 3508, 0)], {title: '한글 문서.hwpx'}).toString('latin1');
+  assert.ok(pdf.startsWith('%PDF-1.4')); assert.ok(pdf.trimEnd().endsWith('%%EOF'));
+  assert.match(pdf, /\/Type \/Pages \/Count 2/);
+  assert.equal((pdf.match(/\/MediaBox \[0 0 595\.200 841\.920\]/g) ?? []).length, 2);
+  assert.match(pdf, /\/DeviceRGB/); assert.match(pdf, /\/DeviceGray/); assert.match(pdf, /\/Predictor 15/);
+  const xref = Number(pdf.match(/startxref\n(\d+)/)[1]);
+  assert.ok(pdf.startsWith('xref', xref));
+  assert.throws(() => pngImage(png(4, 4, 6)));
+  assert.throws(() => pngImage(Buffer.from('not a png')));
+  assert.throws(() => pagesToPdf([]));
+});
+
+test('hwpx_preview_pdf exports the bytes on disk and refuses a document the renderer does not support', {skip: !process.env.HWPX_TEST_FILE}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'hwpx-claude-pdf-'));
+  const client = new Client({name: 'claude-pdf-probe', version: '1.0.0'}, {capabilities: {roots: {}}});
+  client.setRequestHandler(ListRootsRequestSchema, async () => ({roots: [{uri: pathToFileURL(root).href}]}));
+  const installed = process.env.HWPX_TEST_MCP_CONFIG
+    ? JSON.parse(await readFile(process.env.HWPX_TEST_MCP_CONFIG, 'utf8')).mcpServers.hwpx_native_preview
+    : {command: process.env.HWPX_TEST_SERVER_NODE || process.execPath, args: [resolve(process.env.HWPX_TEST_SERVER || 'dist/server/index.mjs')], env: {HWPX_PREVIEW_HOST: 'claude'}};
+  await client.connect(new StdioClientTransport({...installed, stderr: 'pipe', env: {...process.env, ...installed.env}}));
+  try {
+    const path = join(root, 'PDF 시험.hwpx');
+    await copyFile(resolve(process.env.HWPX_TEST_FILE), path);
+    const before = sha(await readFile(path));
+    const made = await client.callTool({name: 'hwpx_preview_pdf', arguments: {path}}, undefined, {timeout: 200000});
+    assert.equal(made.isError, undefined, JSON.stringify(made.content));
+    const {pdf, pages, inputSha256} = made.structuredContent;
+    assert.equal(inputSha256, before); assert.ok(pages > 0);
+    assert.equal(dirname(dirname(pdf)), join(tmpdir(), 'hwpx-preview-pdf'));
+    const bytes = await readFile(pdf);
+    assert.ok(bytes.subarray(0, 8).toString('latin1').startsWith('%PDF-'));
+    assert.ok(bytes.toString('latin1').includes(`/Type /Pages /Count ${pages} `));
+    assert.equal(sha(await readFile(path)), before);
+    if (process.env.HWPX_TEST_PDF_COPY) await copyFile(pdf, process.env.HWPX_TEST_PDF_COPY);
+    await rm(dirname(pdf), {recursive: true, force: true});
+    if (process.env.HWPX_TEST_UNSUPPORTED_FILE) {
+      const bad = join(root, '지원안됨.hwpx');
+      await copyFile(resolve(process.env.HWPX_TEST_UNSUPPORTED_FILE), bad);
+      const refused = await client.callTool({name: 'hwpx_preview_pdf', arguments: {path: bad}}, undefined, {timeout: 200000});
+      assert.equal(refused.isError, true); assert.match(refused.content[0].text, /PDF를 만들지 않았습니다/);
+    }
   } finally {
     await client.close();
     assert.equal(dirname(resolve(root)), resolve(tmpdir())); await rm(root, {recursive: true, force: true});

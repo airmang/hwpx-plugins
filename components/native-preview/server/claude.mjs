@@ -7,6 +7,7 @@ import {isAbsolute, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {PreviewSessions, checkedHwpx} from './sessions.mjs';
 import {ClaudeViews} from './claude-views.mjs';
+import {exportPdf, pruneOldPdfs} from './claude-pdf.mjs';
 import {runtimePath} from './platform.mjs';
 import viewerHtml from '../web/claude-viewer.html';
 
@@ -20,6 +21,8 @@ export const instructions = [
   'HWPX 페이지 미리보기: 사용자가 .hwpx 문서를 보거나 화면 모양을 확인하고 싶어 하면 hwpx_preview_open에 그 파일의 절대 경로를 넘긴다.',
   'MCP Apps를 표시하는 Claude 화면에서는 대화 안의 미리보기 창에 바로 나타난다. 결과에 url이 있으면(그 화면이 MCP Apps를 표시하지 않는 경우) Claude 앱의 내장 브라우저(Browser pane)에서 연다. 외부 브라우저나 사용자의 Chrome으로 열지 않는다.',
   'url은 한 번만 열 수 있고 몇 분 뒤 만료된다. 다시 보여 줄 때는 hwpx_preview_reopen을 호출한다. 문서를 저장하면 열린 미리보기가 자동으로 갱신된다.',
+  '사용자가 휴대폰이나 웹에서 보고 있어 내장 브라우저·미리보기 창을 볼 수 없거나 PDF를 원하면, 편집을 마친 뒤 hwpx_preview_pdf로 모든 쪽을 담은 PDF를 만들고 Claude의 파일 보내기 도구(SendUserFile 등, 가능하면 render 표시)로 그 PDF를 보낸다.',
+  '미리보기 엔진이 지원하지 않는 문자·서식이 있으면 페이지가 만들어지지 않는다. 그 사유를 사용자에게 그대로 알린다.',
   '현재 Claude 작업 폴더(roots) 안의 파일만 열 수 있다. 원본 파일은 수정하지 않는다.',
 ].join('\n');
 
@@ -52,6 +55,7 @@ export async function startClaude(root) {
   const server = new McpServer({name: 'hwpx-native-preview', version: '0.1.10'}, {instructions});
   const sessions = new PreviewSessions(process.env.HWPX_PREVIEW_RUNTIME || runtimePath(root), {authorize: meta => checkedHwpx(meta.path)});
   const views = new ClaudeViews(sessions, viewerHtml);
+  pruneOldPdfs().catch(() => {});
   const guarded = fn => async args => {
     try {return await fn(args);}
     catch (e) {return {isError: true, content: [{type: 'text', text: e.message}]};}
@@ -106,6 +110,15 @@ export async function startClaude(root) {
   }, guarded(async ({view}) => {
     const state = await views.status(view);
     return {content: [{type: 'text', text: `${describe(state)} · revision ${state.revision ?? '-'} · input ${state.inputSha256 ?? '-'}`}], structuredContent: state};
+  }));
+  server.registerTool('hwpx_preview_pdf', {
+    title: 'HWPX 미리보기 PDF 만들기',
+    description: '작업 폴더 안의 .hwpx 파일을 현재 저장된 내용 그대로 렌더링해 모든 쪽을 담은 PDF를 임시 폴더에 만들고 그 경로를 돌려줍니다. 원본 문서 폴더에는 쓰지 않습니다. 휴대폰·웹에서 보는 사용자에게 파일 보내기 도구로 전달할 때 씁니다.',
+    inputSchema: {path: z.string().min(1).max(4096).describe('PDF로 만들 .hwpx 파일의 절대 경로'), fontSubstitutions: fonts.optional()},
+    annotations: {readOnlyHint: false, destructiveHint: false, openWorldHint: false},
+  }, guarded(async ({path, fontSubstitutions}) => {
+    const result = await exportPdf(sessions, await rootedHwpx(server, path), {fontSubstitutions});
+    return {content: [{type: 'text', text: `PDF를 만들었습니다 (${result.pages}쪽, ${Math.round(result.bytes / 1024)} KiB): ${result.pdf}\n사용자가 휴대폰·웹에서 보고 있으면 이 파일을 파일 보내기 도구로 보내세요.`}], structuredContent: result};
   }));
   server.registerTool('hwpx_preview_close', {
     title: 'HWPX 미리보기 닫기',

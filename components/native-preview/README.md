@@ -162,6 +162,15 @@ for Claude surfaces that do not render it yet:
    save keeps the last accepted pages. Leases expire 120 seconds after a view
    stops polling, which releases the renderer worker.
 
+5. `hwpx_preview_pdf(path)` serves Claude's mobile and web clients of a desktop
+   session, which show neither the Browser pane nor an MCP App. It renders the
+   bytes currently on disk and writes every page to one PDF under the OS temp
+   folder (`hwpx-preview-pdf/<uuid>/<name>.preview.pdf`, pruned after 24 hours),
+   never next to the user's document. The page PNGs are embedded unchanged (Flate
+   with PNG predictors, A4 size at 300 dpi). Claude then sends that file with its
+   file-delivery tool. If the renderer does not support the current content, it
+   refuses with the reasons instead of exporting an older accepted revision.
+
 Neither path is a file-click viewer. Opening the URL in an external browser does
 not count as Claude in-app verification. `tests/claude-browser-harness.mjs` hosts
 the MCP Apps view in the official AppBridge for local checks; that is a

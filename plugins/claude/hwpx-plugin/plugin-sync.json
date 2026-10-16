@@ -12,9 +12,9 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "54c82fade66c4fde1be406a3ab9d0b35bd8754778dd6427112378549873ec192",
+      "sourceSha256": "57ddc88dd5ad8d8959dad2ca015cacc3928d0ee7a631904d893ac53953804ddc",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/README.md",
-      "destSha256": "54c82fade66c4fde1be406a3ab9d0b35bd8754778dd6427112378549873ec192",
+      "destSha256": "57ddc88dd5ad8d8959dad2ca015cacc3928d0ee7a631904d893ac53953804ddc",
       "transformed": false
     },
     {

@@ -194,6 +194,7 @@ Claude 쪽은 Claude의 앱 UI 표준인 MCP Apps를 따릅니다. Claude에게 
 요청하면 작업 폴더(MCP roots) 안의 파일을 렌더링해 대화 안의 미리보기 창에
 페이지를 표시하고, 저장하면 자동으로 갱신합니다. MCP Apps를 아직 표시하지 않는
 화면(예: 기능이 꺼진 Code 탭)에서는 앱의 내장 브라우저(Browser pane)에 같은
-페이지를 띄웁니다. Claude에는 확장자에 뷰어를 연결하는 기능이 없어서 `.hwpx`
+페이지를 띄웁니다. 휴대폰·웹에서 볼 때는 편집 결과를 여러 쪽 PDF로 만들어
+보내 드립니다. Claude에는 확장자에 뷰어를 연결하는 기능이 없어서 `.hwpx`
 파일 클릭으로는 열리지 않습니다. 자세한 동작은 저장소의
 `components/native-preview/README.md` 중 Claude host profile 절에 있습니다.

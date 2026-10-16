@@ -77,6 +77,20 @@ def native_preview_command(manifest: dict | None = None) -> dict:
     return uv_python_command(bootstrap, [json.dumps(manifest, separators=(',', ':'))])
 
 
+def render_claude_mcp_config(template: str, native_manifest: dict | None = None) -> str:
+    """Keep Claude's locked editing runtime; add the helper in its Claude host profile."""
+    data = json.loads(template)
+    data['mcpServers']['hwpx_native_preview'] = {
+        **native_preview_command(native_manifest),
+        # Claude has no file entrypoint or MCP Apps surface in the desktop Code
+        # tab: the helper authorizes through MCP roots and serves the in-app
+        # Browser pane instead of rendering an MCP Apps viewer.
+        'env': {'HWPX_PREVIEW_HOST': 'claude'},
+        'startupTimeoutSec': 180,
+    }
+    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+
+
 def render_mcp_config(template: str, launcher: str, native_manifest: dict | None = None) -> str:
     data = json.loads(template)
     server = data["mcpServers"]["hwpx"]
@@ -308,9 +322,11 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
             mcp_src.read_text(encoding="utf-8"),
             (PACKAGING / config["launcherTemplate"]).read_text(encoding="utf-8"),
         ), encoding="utf-8", newline="\n")
+    elif host["id"] == "claude":
+        mcp_dest.write_text(render_claude_mcp_config(mcp_src.read_text(encoding="utf-8")), encoding="utf-8", newline="\n")
     else:
         copy_file(mcp_src, mcp_dest)
-    records.append(record(f"packaging/{mcp['template']}", mcp_src, mcp_dest, transformed=host["id"] == "codex"))
+    records.append(record(f"packaging/{mcp['template']}", mcp_src, mcp_dest, transformed=host["id"] in {"codex", "claude"}))
 
     if host.get("bundleLauncher"):
         launcher_src = PACKAGING / config["launcherTemplate"]

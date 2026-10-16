@@ -779,7 +779,7 @@ def expected_transformed_sources(host: dict, config: dict) -> set[str]:
     expected = {config["canonicalSkill"]}
     for generated in host.get("generatedReferences", []):
         expected.update(f"packaging/{generated[key]}" for key in ("template", "workflows", "automationApi"))
-    if host["id"] == "codex":
+    if host["id"] in {"codex", "claude"}:
         expected.add(f"packaging/{host['mcp']['template']}")
     return expected
 
@@ -1106,7 +1106,7 @@ def validate_host(host: dict, config: dict, identity: dict) -> None:
         servers = mcp_data.get("mcpServers", {})
         require(
             isinstance(servers, dict)
-            and set(servers) == ({automation["hostConfigKey"], "hwpx_native_preview"} if host['id'] == 'codex' else {automation["hostConfigKey"]}),
+            and set(servers) == ({automation["hostConfigKey"], "hwpx_native_preview"} if host['id'] in {'codex', 'claude'} else {automation["hostConfigKey"]}),
             f"{host['id']}: .mcp.json must expose the canonical automation and supported host integrations",
         )
         server = servers.get(automation["hostConfigKey"])
@@ -1114,6 +1114,14 @@ def validate_host(host: dict, config: dict, identity: dict) -> None:
             isinstance(server, dict),
             f"{host['id']}: .mcp.json missing {automation['hostConfigKey']}",
         )
+        preview = servers.get("hwpx_native_preview")
+        if preview is not None:
+            profile = (preview.get("env") or {}).get("HWPX_PREVIEW_HOST")
+            require(preview.get("command") == "uv", f"{host['id']}: native preview must enter through uv")
+            require(
+                profile == ("claude" if host["id"] == "claude" else None),
+                f"{host['id']}: native preview host profile must match the bundle host",
+            )
         command = server.get("command", "")
         if host["id"] == "claude":
             # Claude plugin directory lints require every fetched package to be pinned

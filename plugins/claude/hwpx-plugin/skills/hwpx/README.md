@@ -178,7 +178,7 @@ canonical `SKILL.md`·`references/`·`examples/`·`scripts/`를 편집한 뒤
 
 Apache-2.0 ([LICENSE](https://github.com/airmang/hwpx-plugins/blob/main/LICENSE) · [NOTICE](https://github.com/airmang/hwpx-plugins/blob/main/NOTICE)) — **Kohkyuhyun** [@airmang](https://github.com/airmang) · [kokyuhyun@hotmail.com](mailto:kokyuhyun@hotmail.com)
 
-## Codex 데스크톱 파일 미리보기 (개발 중)
+## Codex·Claude 데스크톱 파일 미리보기 (개발 중)
 
 이 브랜치는 HWPX 미리보기를 기본 `hwpx-plugin`에 통합합니다. 사용자는 기존
 플러그인만 설치하며, 처음 실행할 때 플러그인이 해당 OS의 미리보기 실행물을
@@ -189,3 +189,10 @@ Apache-2.0 ([LICENSE](https://github.com/airmang/hwpx-plugins/blob/main/LICENSE)
 배포와 해시 고정, 통합 패키지 검증 후 정식 버전에서 제공할 예정입니다.
 개발 빌드의 배포 좌표가 비어 있으면 미리보기 서버는 미출시 상태를 명시하고
 종료합니다. 문서 편집 도구는 독립된 서버에서 계속 제공됩니다.
+
+Claude 데스크톱 앱에는 확장자에 뷰어를 연결하는 플러그인 기능이 없습니다.
+그래서 `.hwpx` 파일을 클릭해도 미리보기가 열리지 않습니다. Claude에게 미리보기를
+요청하면 작업 폴더 안의 파일을 렌더링하고, 앱의 내장 브라우저(Browser pane)에
+페이지를 띄웁니다. 저장하면 자동으로 갱신됩니다. 자세한 동작은
+저장소의 `components/native-preview/README.md` 중 Claude host profile 절에
+있습니다.

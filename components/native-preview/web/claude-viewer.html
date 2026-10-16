@@ -1,0 +1,71 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HWPX 미리보기</title>
+<style>
+:root{color-scheme:light dark;--bg:#eef0f3;--panel:#fff;--text:#20252b;--muted:#5d6670;--line:#d9dde2;--warn:#943921}
+@media (prefers-color-scheme:dark){:root{--bg:#1d2024;--panel:#2a2e33;--text:#e7e9ec;--muted:#a3abb4;--line:#3b4047;--warn:#f0a58f}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+h1{font-size:16px;margin:0 0 6px;overflow-wrap:anywhere}.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px}button:disabled,select:disabled{opacity:.5}
+#status{color:var(--muted)}#notice{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--warn);margin:8px 0 0}#notice:empty{display:none}
+main{max-width:1000px;margin:0 auto;padding:16px}figure{margin:0 0 24px}figcaption{font-size:12px;color:var(--muted);margin:0 0 6px}
+img{display:block;width:100%;height:auto;background:#fff;box-shadow:0 2px 10px #0003}.placeholder{aspect-ratio:210/297;display:grid;place-items:center;background:#fff;color:#5d6670}
+details{margin-top:6px;color:var(--muted);font-size:12px}code{overflow-wrap:anywhere}
+</style></head><body data-state="starting"><header><h1 id="name">HWPX 미리보기</h1><div class="bar"><span id="status" role="status" aria-live="polite">문서에 연결하는 중…</span><button id="cancel" type="button" disabled>처리 취소</button><label>이동 <select id="jump" disabled aria-label="페이지 이동"></select></label></div><p id="notice" role="alert"></p><details><summary>문서 정보</summary>표시 중인 입력 SHA256: <code id="sha">-</code><br>원본 파일은 수정하지 않습니다. 저장하면 자동으로 갱신됩니다.</details></header><main id="pages"></main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const words = {starting: '준비 중', queued: '처리 대기', running: '렌더링 중', ready: '완료', cancelled: '취소됨', error: '처리 오류', superseded: '갱신 중'};
+  let revision = null, pages = 0, ended = false;
+  function end(message) {
+    ended = true; clearInterval(timer); document.body.dataset.state = 'ended';
+    $('status').textContent = '미리보기가 끝났습니다.'; $('notice').textContent = message; $('cancel').disabled = true;
+  }
+  function figure(index, count, rev) {
+    const item = document.createElement('figure'); item.id = `page-${index}`;
+    const caption = document.createElement('figcaption'); caption.textContent = `${index + 1} / ${count}`;
+    const image = document.createElement('img'); image.alt = `${index + 1}쪽`; image.loading = index < 2 ? 'eager' : 'lazy'; image.decoding = 'async';
+    image.onerror = () => {
+      const failed = document.createElement('div'); failed.className = 'placeholder';
+      failed.textContent = rev === revision ? '페이지를 표시하지 못했습니다.' : '새 버전으로 갱신 중…';
+      image.replaceWith(failed);
+    };
+    image.src = `api/pages/${rev}/${index}.png`;
+    item.append(caption, image); return item;
+  }
+  function render(state) {
+    const busy = ['starting', 'queued', 'running'].includes(state.state);
+    document.body.dataset.state = state.state; document.body.dataset.revision = state.revision ?? '';
+    document.body.dataset.pages = state.pages; document.body.dataset.inputSha256 = state.inputSha256 ?? '';
+    $('name').textContent = state.label; document.title = `${state.label} — HWPX 미리보기`;
+    $('status').textContent = `${words[state.state] || state.state} · ${state.pages}쪽 · 저장하면 자동 갱신`;
+    $('cancel').disabled = !busy; $('sha').textContent = state.inputSha256 || '-';
+    const reasons = [...(state.unsupported || []), ...(state.errors || [])].map(x => typeof x === 'string' ? x : JSON.stringify(x));
+    $('notice').textContent = state.error || (state.sourceStatus === 'unsupported' ? '이 문서의 서식은 아직 지원하지 않습니다.\n' + reasons.join('\n') : reasons.join('\n'));
+    if (state.revision == null || (state.revision === revision && state.pages === pages)) return;
+    revision = state.revision; pages = state.pages;
+    const list = []; const options = [];
+    for (let i = 0; i < pages; i++) {
+      list.push(figure(i, pages, revision));
+      const option = document.createElement('option'); option.value = i; option.textContent = `${i + 1}쪽`; options.push(option);
+    }
+    $('pages').replaceChildren(...list); $('jump').replaceChildren(...options); $('jump').disabled = !pages;
+  }
+  async function poll() {
+    if (ended) return;
+    try {
+      const response = await fetch('api/status', {cache: 'no-store'});
+      const body = await response.json();
+      if (response.status === 410 || response.status === 403) return end(body.error || 'Claude에게 HWPX 미리보기를 다시 열어 달라고 하세요.');
+      if (!response.ok) throw new Error(body.error || '미리보기 상태를 읽지 못했습니다.');
+      render(body);
+    } catch (e) {$('notice').textContent = e.message;}
+  }
+  $('cancel').onclick = async () => {
+    try {const response = await fetch('api/cancel', {method: 'POST'}); const body = await response.json(); if (response.ok) render(body); else $('notice').textContent = body.error;}
+    catch (e) {$('notice').textContent = e.message;}
+  };
+  $('jump').onchange = () => $(`page-${$('jump').value}`)?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  const timer = setInterval(poll, 1500);
+  poll();
+})();
+</script></body></html>

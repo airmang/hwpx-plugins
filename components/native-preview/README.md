@@ -1,6 +1,7 @@
 # Integrated desktop HWPX file preview
 
-This component is an internal part of the default Codex `hwpx-plugin`. A user
+This component is an internal part of the default Codex and Claude `hwpx-plugin`
+bundles (see [Claude host profile](#claude-host-profile)). A user
 installs that plugin once; its second MCP server prepares the pinned OS helper
 automatically. There is no separate consumer preview plugin or Node/Python setup.
 The existing plugin prerequisite `uv` manages the bootstrap interpreter. Browser
@@ -115,3 +116,58 @@ also normalizes the frozen font-resource path; use the coordinated development
 automation branch when rebuilding. Hidden editing children explicitly inherit
 MCP stdin/stdout/stderr. Do not change system long-path policy to work around a
 package relocation failure.
+
+## Claude host profile
+
+The Claude bundle starts the same pinned helper with `HWPX_PREVIEW_HOST=claude`.
+One helper archive serves both hosts; each profile uses the file access and UI
+surface its host actually provides. Codex-only file entrypoint metadata
+(`openai/ui`, `openai/resource`) is not applied to Claude.
+
+What the Claude desktop app (Code tab) offers, as observed on Claude Code
+2.1.295 / desktop 2.37337.1:
+
+- No plugin API binds a file extension to a viewer. Clicking a path in the
+  conversation opens the app's file pane; HTML, PDF, images and videos open in
+  the in-app Browser pane. A `.hwpx` click therefore cannot start this preview.
+- MCP Apps (`_meta.ui.resourceUri`) rendering in the Code tab is gated off by
+  the host, and Claude Code then does not advertise the extension to servers.
+  This profile does not depend on it.
+- Plugin MCP servers receive the session's working folders as MCP roots.
+
+So the profile exposes four model-visible tools (`hwpx_preview_open`, `_reopen`,
+`_status`, `_close`) and server instructions:
+
+1. `hwpx_preview_open(path)` accepts an absolute `.hwpx` path that lies inside one
+   of the session's MCP roots (realpath, ≤32 MiB, regular file). Anything else is
+   refused. The original file is never written.
+2. The helper's loopback viewer returns a single-use `http://127.0.0.1:<port>/open/<ticket>`
+   URL (5-minute expiry). Claude opens it in the in-app Browser pane. The first
+   request exchanges the ticket for an HttpOnly, `SameSite=Strict` cookie scoped
+   to that view's path, so the URL the model saw cannot be replayed. The renderer
+   token, file path and page bytes are not model-visible.
+3. The page polls the view's status and loads `api/pages/<revision>/<i>.png`. A
+   save is picked up by the renderer's watcher and the page refreshes; a partial
+   save keeps the last accepted pages. Exact `Host` matching blocks DNS rebinding;
+   a CSP with a script hash blocks injected script.
+4. Leases expire 120 seconds after the page stops polling, which releases the
+   renderer worker. `hwpx_preview_close` releases it at once.
+
+This is in-app display through the Browser pane, after an explicit request to
+Claude (or an `@`-mention the model acts on). It is not a file-click viewer.
+Opening the URL in an external browser does not count as Claude in-app
+verification.
+
+Assemble a Claude candidate with `--host claude`. For a machine that already has
+a synced `hwpx-plugin`, also pass `--test-namespace`. That flag renames the
+local candidate to `hwpx-plugin-check`, because Claude loads one plugin per name
+and the synced one takes precedence. The release identity stays `hwpx-plugin`:
+
+```sh
+python ../../scripts/package_desktop_plugin.py --host claude --runtime ./build-local/dist/HwpxPreview --node /absolute/node --output /absolute/NEW-MARKETPLACE --version 2.5.0-dev.claude.1 --test-namespace
+claude plugin marketplace add /absolute/NEW-MARKETPLACE
+claude plugin install hwpx-plugin-check@hwpx-claude-local
+```
+
+Start a new Code session after installing; running sessions do not reload
+plugins on their own.

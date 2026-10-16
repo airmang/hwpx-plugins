@@ -10,5 +10,5 @@ const html = template.replace('/* WIDGET_BUNDLE */', () => widget.outputFiles[0]
 // Parse the actual embedded script, not only esbuild's pre-insertion output.
 new Script(html.match(/<script>([\s\S]*)<\/script>/)[1], {filename: 'embedded-viewer.js'});
 await writeFile('dist/assets/viewer.html', html);
-await build({entryPoints: ['server/index.mjs'], bundle: true, outfile: 'dist/server/index.mjs', format: 'esm', platform: 'node', target: 'node24', packages: 'bundle',
+await build({entryPoints: ['server/index.mjs'], bundle: true, outfile: 'dist/server/index.mjs', format: 'esm', platform: 'node', target: 'node24', packages: 'bundle', loader: {'.html': 'text'},
   banner: {js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);"}});

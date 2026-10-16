@@ -209,7 +209,16 @@ def test_claude_mcp_command_runs_the_locked_runtime() -> None:
     config = json.loads(
         (ROOT / "plugins/claude/hwpx-plugin/.mcp.json").read_text(encoding="utf-8")
     )
-    assert set(config["mcpServers"]) == {"hwpx"}
+    assert set(config["mcpServers"]) == {"hwpx", "hwpx_native_preview"}
+    preview = config["mcpServers"]["hwpx_native_preview"]
+    # The Claude profile authorizes through MCP roots and serves the in-app
+    # Browser pane; it fetches no packages (only uv's interpreter) and pins the
+    # helper archive in the embedded bootstrap manifest.
+    assert preview["command"] == "uv" and preview["args"][:4] == ["run", "--isolated", "--no-project", "--no-config"]
+    assert preview["env"] == {"HWPX_PREVIEW_HOST": "claude"}
+    source, arguments = json.loads(zlib.decompress(base64.b64decode(preview["args"][-1])))
+    assert source == (ROOT / "components/native-preview/bootstrap.py").read_text(encoding="utf-8")
+    assert json.loads(arguments[0]) == json.loads((ROOT / "packaging/native-preview-artifacts.json").read_text(encoding="utf-8"))
     config = config["mcpServers"]["hwpx"]
     assert config["command"] == "uv"
     assert config["args"] == ["run", "--frozen", "--project", "${CLAUDE_PLUGIN_ROOT}/server", "hwpx-automation-mcp"]

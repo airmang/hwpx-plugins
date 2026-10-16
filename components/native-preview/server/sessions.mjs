@@ -14,6 +14,12 @@ export async function authorizedFile(meta) {
   // Convert only this unambiguous drive form, never names or opaque URIs.
   if (process.platform === 'win32' && /^[\\/][A-Za-z]:[\\/]/.test(supplied ?? '')) supplied = supplied.slice(1);
   if (!supplied || !isAbsolute(supplied)) throw new Error('앱에서 연 파일의 접근 권한을 받지 못했습니다. HWPX 파일을 다시 열어 주세요.');
+  return checkedHwpx(supplied);
+}
+
+// Shared validation once a host profile has decided which absolute path it
+// authorizes; the profile, not this check, owns that authorization decision.
+export async function checkedHwpx(supplied) {
   const path = await realpath(supplied);
   if (extname(path).toLowerCase() !== '.hwpx') throw new Error('HWPX 파일만 미리볼 수 있습니다.');
   const info = await stat(path);
@@ -46,8 +52,8 @@ export function publicState(raw, session) {
 }
 
 export class PreviewSessions {
-  constructor(runtime, {idleMs = 120000, maxSessions = 2} = {}) {
-    this.runtime = resolve(runtime); this.sessions = new Map(); this.leases = new Map();
+  constructor(runtime, {idleMs = 120000, maxSessions = 2, authorize = authorizedFile} = {}) {
+    this.runtime = resolve(runtime); this.sessions = new Map(); this.leases = new Map(); this.authorize = authorize;
     this.workers = new Map(); this.pendingWorkers = new Map(); this.idleMs = idleMs; this.maxSessions = maxSessions;
     this.rootPromise = mkdtemp(join(tmpdir(), 'hwpx-file-plugin-'));
     this.timer = setInterval(() => this.reap().catch(e => console.error(e.message)), 15000);
@@ -55,7 +61,7 @@ export class PreviewSessions {
   }
   async start(meta, {fontSubstitutions = {}, dpi = 300} = {}) {
     if (this.closing) throw new Error('미리보기 실행기가 종료 중입니다.');
-    const path = await authorizedFile(meta);
+    const path = await this.authorize(meta);
     if (this.closing) throw new Error('미리보기 실행기가 종료 중입니다.');
     const key = JSON.stringify([fileKey(path), dpi, Object.entries(fontSubstitutions).sort(([a], [b]) => a.localeCompare(b))]);
     let entry = this.workers.get(key);
@@ -109,7 +115,7 @@ export class PreviewSessions {
   async lookup(id, meta) {
     const entry = this.sessions.get(id);
     if (!entry || entry.disposed) throw new Error('미리보기 세션이 끝났습니다. 파일을 다시 열어 주세요.');
-    if (fileKey(await authorizedFile(meta)) !== fileKey(entry.path)) throw new Error('현재 열린 파일과 미리보기 세션이 다릅니다.');
+    if (fileKey(await this.authorize(meta)) !== fileKey(entry.path)) throw new Error('현재 열린 파일과 미리보기 세션이 다릅니다.');
     this.leases.set(id, Date.now()); return entry;
   }
   async api(entry, route, {method = 'GET', body, headers = {}} = {}) {
@@ -121,6 +127,10 @@ export class PreviewSessions {
   }
   async state(id, meta) {const e = await this.lookup(id, meta); return publicState(await (await this.api(e, '/api/status')).json(), id);}
   async page(id, revision, index, meta) {
+    const data = await this.pageBytes(id, revision, index, meta);
+    return {session: id, revision, index, mimeType: 'image/png', data: data.toString('base64')};
+  }
+  async pageBytes(id, revision, index, meta) {
     const e = await this.lookup(id, meta), raw = await (await this.api(e, '/api/status')).json();
     if (revision !== raw.displayed || !Number.isInteger(index) || index < 0 || index >= (raw.displayedJob?.result?.pages ?? 0)) {
       throw new Error('페이지가 갱신되었습니다. 최신 미리보기를 기다려 주세요.');
@@ -130,7 +140,7 @@ export class PreviewSessions {
     if (data.length > 4 * 1024 * 1024 || !data.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) {
       throw new Error('페이지 이미지가 크기 한도를 넘었거나 올바르지 않습니다.');
     }
-    return {session: id, revision, index, mimeType: 'image/png', data: data.toString('base64')};
+    return data;
   }
   async rerender(id, meta, mapping) {
     const e = await this.lookup(id, meta);

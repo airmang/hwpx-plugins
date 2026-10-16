@@ -31,7 +31,7 @@ installed product. Report vulnerabilities through [SECURITY.md](SECURITY.md).
 ## Integrated desktop preview
 
 The [native preview implementation](components/native-preview/README.md) belongs
-to the default Codex `hwpx-plugin`. Its internal renderer archive has no separate
+to the default Codex and Claude `hwpx-plugin` bundles. Its internal renderer archive has no separate
 consumer marketplace identity. Core/automation development dependencies and
 target-native build tools are for maintainers only. Other host bundles retain
 their existing tool/skill integration.

@@ -341,9 +341,9 @@
     },
     {
       "source": "scripts/fix_namespaces.py",
-      "sourceSha256": "438a3e3a749b779afafef4d8b2ae627b78957bc313b9aaff23981668470b9596",
+      "sourceSha256": "b0c306a130e4bb65265cc49f5a0c859558ce99bc055e8f68ea88572c1129a352",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/fix_namespaces.py",
-      "destSha256": "438a3e3a749b779afafef4d8b2ae627b78957bc313b9aaff23981668470b9596",
+      "destSha256": "b0c306a130e4bb65265cc49f5a0c859558ce99bc055e8f68ea88572c1129a352",
       "transformed": false
     },
     {
@@ -383,9 +383,9 @@
     },
     {
       "source": "scripts/zip_replace_all.py",
-      "sourceSha256": "8d13e53c09b4a6351179fb833f8bb8b899833448afe721797024c30e536481d4",
+      "sourceSha256": "19c88f6fc9f7106b698876506d55b0d429743ae6a0e82c96e43ae1bbb77cd64d",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
-      "destSha256": "8d13e53c09b4a6351179fb833f8bb8b899833448afe721797024c30e536481d4",
+      "destSha256": "19c88f6fc9f7106b698876506d55b0d429743ae6a0e82c96e43ae1bbb77cd64d",
       "transformed": false
     },
     {

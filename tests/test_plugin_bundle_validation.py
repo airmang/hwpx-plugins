@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
+import base64
+import zlib
 import importlib.util
 import json
 import os
@@ -68,6 +70,14 @@ def test_generated_plugin_bundles_validate() -> None:
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_transformed_bundle_text_matches_git_line_ending_policy() -> None:
+    for receipt in ROOT.glob('plugins/**/plugin-sync.json'):
+        for entry in json.loads(receipt.read_text(encoding='utf-8'))['files']:
+            if entry['transformed']:
+                path = ROOT / entry['dest']
+                assert b'\r\n' not in path.read_bytes(), str(path)
 
 
 def test_markdown_link_validator_accepts_only_safe_existing_relative_targets(
@@ -171,9 +181,9 @@ def test_codex_mcp_command_is_workspace_preserving_and_root_independent() -> Non
     config = json.loads(
         (ROOT / "plugins/codex/hwpx-plugin/.mcp.json").read_text(encoding="utf-8")
     )
-    assert set(config["mcpServers"]) == {"hwpx"}
+    assert set(config["mcpServers"]) == {"hwpx", "hwpx_native_preview"}
     config = config["mcpServers"]["hwpx"]
-    assert config["command"] == "bash"
+    assert config["command"] == "uv"
     assert "cwd" not in config
     assert "HWPX_AUTOMATION_ADVANCED" not in config["env"]
     assert "HWPX_AUTOMATION_ADVANCED" in config["env_vars"]
@@ -183,8 +193,12 @@ def test_codex_bundle_embeds_the_common_managed_launcher() -> None:
     config = json.loads((ROOT / "plugins" / "codex" / "hwpx-plugin" / ".mcp.json").read_text(encoding="utf-8"))
     server = config["mcpServers"]["hwpx"]
     identity = _identity()
-    script = server["args"][1]
-    assert server["command"] == "bash" and server["args"][0] == "-c"
+    source, embedded = json.loads(zlib.decompress(base64.b64decode(server["args"][-1])))
+    coordinates = json.loads(embedded[0])
+    script = coordinates['posix']
+    assert server["command"] == "uv" and server["args"][0] == "run"
+    assert 'windows-generations-v1' in source
+    assert coordinates['floor'] == [identity['installConstraint']['automation'], identity['installConstraint']['core']]
     assert identity["installConstraint"]["automation"] in script and identity["installConstraint"]["core"] in script
     assert "_verify_generation" in script and "_run_refresh" in script
     assert script.rstrip().endswith('exec bash "$runner" "$@"')
@@ -449,6 +463,9 @@ def test_product_identity_validator_supports_the_full_release_lifecycle(
             ".pytest_cache",
             "__pycache__",
             "examples/out",
+            "node_modules",
+            "dist",
+            "build-local",
         ),
     )
     identity_path = checkout / "packaging" / "product-identity.json"

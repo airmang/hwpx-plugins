@@ -115,23 +115,34 @@ def main(argv: list[str] | None = None) -> int:
         write_outputs(summary)
         return 0
 
-    text = PYPROJECT.read_text(encoding="utf-8")
-    text = PIN_RE.sub(lambda m: f'"{m.group("dist")}[{m.group("extras")}]=={target[m.group("dist")]}"', text)
-    PYPROJECT.write_text(text, encoding="utf-8")
-    lock = subprocess.run(["uv", "lock", "--project", str(RUNTIME)], capture_output=True, text=True)
-    if lock.returncode != 0:
-        subprocess.run(["git", "checkout", "--", str(PYPROJECT)], cwd=ROOT, check=False)
-        raise SystemExit(f"uv lock failed for {target}; pins restored:\n{lock.stderr[-2000:]}")
+    # Keep the caller's bytes, not HEAD: a rejected candidate must not leave
+    # new pins/lock paired with the old engine or discard local pin edits.
+    tracked = [PYPROJECT, RUNTIME / "uv.lock", MANIFEST]
+    snapshots = {path: path.read_bytes() if path.exists() else None for path in tracked}
+    try:
+        text = PYPROJECT.read_text(encoding="utf-8")
+        text = PIN_RE.sub(lambda m: f'"{m.group("dist")}[{m.group("extras")}]=={target[m.group("dist")]}"', text)
+        PYPROJECT.write_text(text, encoding="utf-8")
+        lock = subprocess.run(["uv", "lock", "--project", str(RUNTIME)], capture_output=True, text=True)
+        if lock.returncode != 0:
+            raise SystemExit(f"uv lock failed for {target}; refresh aborted:\n{lock.stderr[-2000:]}")
 
-    # The skill's vendored engine (claude.ai chat, no MCP) must move with the server runtime.
-    vendored = subprocess.run([sys.executable, str(ROOT / "scripts" / "vendor_claude_engine.py")],
-                              capture_output=True, text=True)
-    if vendored.returncode != 0:
-        raise SystemExit(f"vendoring the engine for {target} failed:\n{(vendored.stdout + vendored.stderr)[-2000:]}")
+        # The skill's vendored engine (claude.ai chat, no MCP) must move with the server runtime.
+        vendored = subprocess.run([sys.executable, str(ROOT / "scripts" / "vendor_claude_engine.py")],
+                                  capture_output=True, text=True)
+        if vendored.returncode != 0:
+            raise SystemExit(f"vendoring the engine for {target} failed:\n{(vendored.stdout + vendored.stderr)[-2000:]}")
 
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    manifest["version"] = version
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        manifest["version"] = version
+        MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    except BaseException:
+        for path, data in snapshots.items():
+            if data is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_bytes(data)
+        raise
     write_outputs(summary)
     return 0
 

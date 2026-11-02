@@ -27,3 +27,16 @@ commit local virtual environments, private benchmark routing, real user document
 credentials, workstation paths, generated evidence, or output documents. Keep
 fixtures synthetic and repository-only unless they are explicitly part of the
 installed product. Report vulnerabilities through [SECURITY.md](SECURITY.md).
+
+## Integrated desktop preview
+
+The [native preview implementation](components/native-preview/README.md) belongs
+to the default Codex `hwpx-plugin`. Its internal renderer archive has no separate
+consumer marketplace identity. Core/automation development dependencies and
+target-native build tools are for maintainers only. Other host bundles retain
+their existing tool/skill integration.
+
+Before publishing the coordinated plugin, run
+`python scripts/validate_hwpx_plugin.py --release`. It rejects unreleased, local
+or incomplete platform asset coordinates. The ordinary validator permits the
+explicitly unreleased source matrix for development. Never publish that matrix.

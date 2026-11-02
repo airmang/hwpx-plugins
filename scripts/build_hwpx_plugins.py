@@ -2,6 +2,8 @@
 """Build per-host HWPX plugin bundles from the canonical skill source."""
 from __future__ import annotations
 
+import base64
+import zlib
 import hashlib
 import json
 import shlex
@@ -40,12 +42,55 @@ def codex_launcher_command(launcher: str) -> str:
     )
 
 
-def render_mcp_config(template: str, launcher: str) -> str:
+def uv_python_command(source: str, arguments: list[str]) -> dict:
+    """One uv prerequisite on every OS, bounded below Windows' argv limit."""
+    payload = base64.b64encode(zlib.compress(json.dumps([source, arguments]).encode())).decode()
+    frontdoor = """import base64,hashlib,json,os,sys,tempfile,zlib
+from pathlib import Path
+source,arguments=json.loads(zlib.decompress(base64.b64decode(sys.argv[1])))
+code=source.encode('utf-8')
+base=Path(os.environ.get('LOCALAPPDATA',str(Path.home()/'.cache'))) if os.name=='nt' else Path(os.environ.get('XDG_CACHE_HOME',str(Path.home()/'.cache')))
+if os.name=='nt':base=Path('\\\\\\\\?\\\\'+os.path.abspath(base))
+root=base/'hwpx-plugin'/'python-launchers'/hashlib.sha256(code).hexdigest()
+root.mkdir(parents=True,exist_ok=True)
+script=root/'launcher.py'
+if not script.exists():
+    fd,name=tempfile.mkstemp(prefix='.launcher-',dir=root)
+    try:
+        with os.fdopen(fd,'wb') as output:output.write(code)
+        os.replace(name,script)
+    finally:
+        if os.path.exists(name):os.unlink(name)
+if script.is_symlink() or script.read_bytes()!=code:raise ValueError('HWPX launcher source verification failed')
+sys.argv=[str(script),*arguments,*sys.argv[2:]]
+exec(compile(code,str(script),'exec'),{'__name__':'__main__','__file__':str(script)})
+"""
+    return {'command': 'uv', 'args': ['run', '--isolated', '--no-project', '--no-config',
+            '--no-env-file', '--python', '3.12', 'python', '-I', '-c', frontdoor, payload]}
+
+
+def native_preview_command(manifest: dict | None = None) -> dict:
+    """Prepare the pinned helper without Bash or a user-installed Node/Python."""
+    bootstrap = (ROOT / 'components/native-preview/bootstrap.py').read_text(encoding='utf-8')
+    if manifest is None:
+        manifest = json.loads((PACKAGING / 'native-preview-artifacts.json').read_text(encoding='utf-8'))
+    return uv_python_command(bootstrap, [json.dumps(manifest, separators=(',', ':'))])
+
+
+def render_mcp_config(template: str, launcher: str, native_manifest: dict | None = None) -> str:
     data = json.loads(template)
     server = data["mcpServers"]["hwpx"]
     if server.get("args") != ["-c", "__HWPX_MANAGED_LAUNCHER__"]:
         raise ValueError("Codex MCP template must select the canonical managed launcher")
-    server["args"] = ["-c", codex_launcher_command(launcher), "hwpx-managed-launcher"]
+    identity = json.loads((PACKAGING / 'product-identity.json').read_text(encoding='utf-8'))
+    coordinates = {'floor': [identity['installConstraint']['automation'], identity['installConstraint']['core']],
+                   'verified': [f"python-hwpx-automation[mcp,oracle]=={identity['components']['automation']['currentVersion']}",
+                                f"python-hwpx[preview]=={identity['components']['core']['currentVersion']}"],
+                   'posix': codex_launcher_command(launcher)}
+    source = (PACKAGING / 'templates/codex_runtime.py').read_text(encoding='utf-8')
+    server.update(uv_python_command(source, [json.dumps(coordinates)]))
+    server['startup_timeout_sec'] = 180
+    data['mcpServers']['hwpx_native_preview'] = {**native_preview_command(native_manifest), 'startup_timeout_sec': 180}
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -201,6 +246,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
             host_frontmatter(host, identity),
         ),
         encoding="utf-8",
+        newline="\n",
     )
     records.append(record(config["canonicalSkill"], canonical, skill_md, transformed=True))
 
@@ -232,7 +278,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
                 raise SystemExit(f"missing generated-reference source: {src.relative_to(ROOT)}")
         dest = skill_dir / generated["dest"]
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(render_chat_engine(*(src.read_text(encoding="utf-8") for src in sources)), encoding="utf-8")
+        dest.write_text(render_chat_engine(*(src.read_text(encoding="utf-8") for src in sources)), encoding="utf-8", newline="\n")
         for src in sources:
             records.append(record(src.relative_to(ROOT).as_posix(), src, dest, transformed=True))
 
@@ -261,7 +307,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
         mcp_dest.write_text(render_mcp_config(
             mcp_src.read_text(encoding="utf-8"),
             (PACKAGING / config["launcherTemplate"]).read_text(encoding="utf-8"),
-        ), encoding="utf-8")
+        ), encoding="utf-8", newline="\n")
     else:
         copy_file(mcp_src, mcp_dest)
     records.append(record(f"packaging/{mcp['template']}", mcp_src, mcp_dest, transformed=host["id"] == "codex"))
@@ -304,6 +350,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
         )
         + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

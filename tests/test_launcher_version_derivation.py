@@ -12,6 +12,7 @@ and per-start ``uvx`` wiring must not refresh exact pins (hwpx-plugins #23).
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -56,6 +57,7 @@ def _default(name: str, text: str) -> str:
         ("python-hwpx>=6.3.0,<7", ""),
     ],
 )
+@pytest.mark.skipif(os.name == 'nt', reason='POSIX shell function; Windows uses portable runtime pin tests')
 def test_pinned_version_reads_exact_pins_and_wheel_paths(spec: str, expected: str) -> None:
     assert _pinned_version(spec) == expected
 
@@ -84,6 +86,8 @@ def test_verified_and_constraint_literals_derive_from_product_identity() -> None
     assert _default("CONSTRAINT_CORE_PACKAGE", text) == identity["installConstraint"]["core"]
     assert _default("CONSTRAINT_SERVER_PACKAGE", text) == identity["installConstraint"]["automation"]
     assert identity["installConstraint"]["core"] == f"python-hwpx[preview]>={core},<{int(core.split('.')[0]) + 1}"
+    if os.name == 'nt':
+        return
     assert _pinned_version(_default("VERIFIED_CORE_PACKAGE", text)) == core
     assert _pinned_version(_default("VERIFIED_SERVER_PACKAGE", text)) == automation
     assert _pinned_version(_default("CONSTRAINT_CORE_PACKAGE", text)) == ""

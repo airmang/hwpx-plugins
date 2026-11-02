@@ -1,0 +1,55 @@
+name: Native preview component
+
+on:
+  pull_request:
+    paths:
+      - 'components/native-preview/**'
+      - 'packaging/native-preview-artifacts.json'
+      - 'scripts/*native_preview*'
+      - 'tests/test_native_preview*'
+      - 'tests/test_codex_portable_runtime.py'
+      - 'packaging/templates/codex_runtime.py'
+      - 'scripts/build_hwpx_plugins.py'
+      - 'scripts/package_desktop_plugin.py'
+      - '.github/workflows/native-preview.yml'
+  push:
+    paths:
+      - 'components/native-preview/**'
+      - 'packaging/native-preview-artifacts.json'
+      - 'scripts/*native_preview*'
+      - 'tests/test_native_preview*'
+      - 'tests/test_codex_portable_runtime.py'
+      - 'packaging/templates/codex_runtime.py'
+      - 'scripts/build_hwpx_plugins.py'
+      - 'scripts/package_desktop_plugin.py'
+      - '.github/workflows/native-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  protocol:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
+        working-directory: components/native-preview
+      - run: pnpm build
+        working-directory: components/native-preview
+      - run: pnpm test
+        working-directory: components/native-preview
+      - run: python components/native-preview/build-runtime.py --help
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pytest
+      - run: python -m pytest -q tests/test_native_preview_bootstrap.py tests/test_native_preview_release.py tests/test_codex_portable_runtime.py
+      - run: python scripts/validate_native_preview_assets.py

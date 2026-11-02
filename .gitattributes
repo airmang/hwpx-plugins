@@ -1,0 +1,6 @@
+# Reproducible source and generated-manifest hashes on every OS.
+* text=auto eol=lf
+
+# Vendored wheel bytes are verified against VENDOR.json. Checkout conversion
+# would alter their hashes on Windows even though the Git blobs are unchanged.
+plugins/claude/hwpx-plugin/skills/hwpx/engine/** -text

@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import re
+import argparse
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from urllib.parse import unquote, urlsplit
 
@@ -1105,8 +1106,8 @@ def validate_host(host: dict, config: dict, identity: dict) -> None:
         servers = mcp_data.get("mcpServers", {})
         require(
             isinstance(servers, dict)
-            and set(servers) == {automation["hostConfigKey"]},
-            f"{host['id']}: .mcp.json must expose only the canonical host key",
+            and set(servers) == ({automation["hostConfigKey"], "hwpx_native_preview"} if host['id'] == 'codex' else {automation["hostConfigKey"]}),
+            f"{host['id']}: .mcp.json must expose the canonical automation and supported host integrations",
         )
         server = servers.get(automation["hostConfigKey"])
         require(
@@ -1134,7 +1135,7 @@ def validate_host(host: dict, config: dict, identity: dict) -> None:
             validate_claude_locked_runtime(out, identity)
         if host["id"] == "codex":
             args = server.get("args", [])
-            require(command == "bash" and args[:1] == ["-c"], "codex must execute the managed launcher bootstrap")
+            require(command == "uv" and args[:1] == ["run"], "codex must execute the portable managed launcher bootstrap")
             require("cwd" not in server, "codex must preserve the thread workspace cwd")
             module_spec = importlib.util.spec_from_file_location("hwpx_bundle_builder", ROOT / "scripts/build_hwpx_plugins.py")
             builder = importlib.util.module_from_spec(module_spec)
@@ -1212,6 +1213,17 @@ def validate_marketplace(config: dict, identity: dict) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--release', action='store_true', help='also require published, pinned native helper assets')
+    args = parser.parse_args()
+    # Load by path as tests also import this validator without scripts on sys.path.
+    asset_spec = importlib.util.spec_from_file_location('native_asset_gate', ROOT / 'scripts/validate_native_preview_assets.py')
+    asset_gate = importlib.util.module_from_spec(asset_spec)
+    asset_spec.loader.exec_module(asset_gate)
+    try:
+        asset_gate.validate(load_json(PACKAGING / 'native-preview-artifacts.json'), release=args.release)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     config = load_json(CONFIG)
     identity_path = PACKAGING / config["identityFile"]
     require_file(identity_path)

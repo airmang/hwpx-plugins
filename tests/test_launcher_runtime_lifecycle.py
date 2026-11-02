@@ -18,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.skipif(os.name == 'nt', reason='POSIX shell harness; Windows uses the portable runtime tests')
 TEMPLATE = ROOT / "packaging" / "templates" / "hwpx-automation-mcp"
 HARNESS_BIN = ROOT / "tests" / "launcher_harness" / "bin"
 IDENTITY = json.loads((ROOT / "packaging" / "product-identity.json").read_text(encoding="utf-8"))
@@ -40,7 +41,10 @@ LAUNCH_COMMAND = ["bash", str(TEMPLATE)]
 def launcher_host(request, monkeypatch):
     if request.param == "codex":
         config = json.loads((ROOT / "plugins/codex/hwpx-plugin/.mcp.json").read_text())["mcpServers"]["hwpx"]
-        monkeypatch.setattr(sys.modules[__name__], "LAUNCH_COMMAND", [config["command"], *config["args"]])
+        # The offline uv double models package operations, not Python bootstrap.
+        # Run the exact Python payload that real uv starts on the product path.
+        python_args = config['args'][config['args'].index('-I'):]
+        monkeypatch.setattr(sys.modules[__name__], "LAUNCH_COMMAND", [sys.executable, *python_args])
 
 
 def _env(tmp_path: Path, index: dict | None = None, **extra: str) -> dict[str, str]:

@@ -45,7 +45,9 @@ CORE_REPOSITORY = "airmang/python-hwpx"
 CORE_DOCS = {"docs/_extra/llms.txt": "docs/llms.txt", "docs/stable-api.md": "docs/stable-api.md"}
 # Installer bookkeeping that importlib.metadata does not need.
 SKIPPED_METADATA = {"RECORD", "WHEEL", "entry_points.txt"}
-# Claude plugin directory limits: larger files are not inspected.
+# Conservative plugin-directory inspection policy (not a Python runtime limit).
+# Keep source readable to review tooling; a separate ZIP upload limit does not
+# justify relaxing these bounds. See packaging/claude-inspection-policy.md.
 MAX_FILE_BYTES = 256 * 1024
 MAX_PLUGIN_FILES = 512
 # Windows without long-path support stops at 260 characters; the host's plugin cache
@@ -112,6 +114,32 @@ def wheel_members(data: bytes) -> dict[str, bytes]:
     return files
 
 
+def candidate_problems(files: dict[str, bytes]) -> list[str]:
+    """Check the complete prospective bundle without deleting the old engine."""
+    engine_prefix = ENGINE.relative_to(BUNDLE)
+    prospective = {
+        path.relative_to(BUNDLE).as_posix(): path.stat().st_size
+        for path in BUNDLE.rglob("*")
+        if path.is_file() and not path.is_relative_to(ENGINE)
+        and "__pycache__" not in path.parts and "examples/out" not in path.as_posix()
+    }
+    problems = []
+    for name, data in files.items():
+        rel = Path(name)
+        if rel.is_absolute() or ".." in rel.parts:
+            problems.append(f"unsafe candidate member: {name}")
+            continue
+        prospective[(engine_prefix / rel).as_posix()] = len(data)
+    if len(prospective) > MAX_PLUGIN_FILES:
+        problems.append(f"Claude bundle has {len(prospective)} files; inspection policy allows at most {MAX_PLUGIN_FILES}")
+    for rel, size in sorted(prospective.items()):
+        if len(rel) > MAX_RELATIVE_PATH:
+            problems.append(f"{rel} is {len(rel)} characters; keep bundle paths within {MAX_RELATIVE_PATH} for Windows")
+        if size > MAX_FILE_BYTES:
+            problems.append(f"{rel} is {size} bytes; inspection policy allows at most {MAX_FILE_BYTES}")
+    return problems
+
+
 def vendor() -> dict:
     wheels = locked_wheels()
     core = next(w for w in wheels if w["distribution"] == "python-hwpx")
@@ -125,6 +153,18 @@ def vendor() -> dict:
         files[dest] = data
         docs.append({"source": source, "tag": f"v{core['version']}", "url": url, "dest": dest, "sha256": sha256_bytes(data)})
 
+    manifest = {
+        "schemaVersion": SCHEMA,
+        "wheels": wheels,
+        "coreDocs": docs,
+        "files": {rel: sha256_bytes(data) for rel, data in sorted(files.items())},
+    }
+    manifest_bytes = (json.dumps(manifest, ensure_ascii=False, indent=1) + "\n").encode("utf-8")
+    # Fail before touching the installed engine. Previously a rejected refresh
+    # left oversized/unusable files in place of the last known-good bundle.
+    problems = candidate_problems({**files, MANIFEST.name: manifest_bytes})
+    if problems:
+        raise SystemExit("candidate engine rejected before replacement:\n" + "\n".join(problems))
     if ENGINE.exists():
         if not MANIFEST.is_file():
             raise SystemExit(f"refusing to replace {ENGINE} without {MANIFEST.name}")
@@ -133,13 +173,7 @@ def vendor() -> dict:
         path = ENGINE / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
-    manifest = {
-        "schemaVersion": SCHEMA,
-        "wheels": wheels,
-        "coreDocs": docs,
-        "files": {rel: sha256_bytes(data) for rel, data in sorted(files.items())},
-    }
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    MANIFEST.write_bytes(manifest_bytes)
     return manifest
 
 
@@ -172,13 +206,13 @@ def check() -> list[str]:
     bundle_files = [p for p in BUNDLE.rglob("*") if p.is_file() and "__pycache__" not in p.parts
                     and "examples/out" not in p.as_posix()]
     if len(bundle_files) > MAX_PLUGIN_FILES:
-        problems.append(f"Claude bundle has {len(bundle_files)} files; the directory reads at most {MAX_PLUGIN_FILES}")
+        problems.append(f"Claude bundle has {len(bundle_files)} files; inspection policy allows at most {MAX_PLUGIN_FILES}")
     for path in bundle_files:
         rel = path.relative_to(BUNDLE).as_posix()
         if len(rel) > MAX_RELATIVE_PATH:
             problems.append(f"{rel} is {len(rel)} characters; keep bundle paths within {MAX_RELATIVE_PATH} for Windows")
         if path.stat().st_size > MAX_FILE_BYTES:
-            problems.append(f"{path.relative_to(BUNDLE)} is {path.stat().st_size} bytes; the directory reads at most {MAX_FILE_BYTES}")
+            problems.append(f"{path.relative_to(BUNDLE)} is {path.stat().st_size} bytes; inspection policy allows at most {MAX_FILE_BYTES}")
     return problems
 
 

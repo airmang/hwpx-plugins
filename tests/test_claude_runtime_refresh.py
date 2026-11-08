@@ -90,3 +90,30 @@ def test_refresh_workflow_only_fast_forwards_after_the_tests_run_passes() -> Non
     push_step = text.index("git push origin HEAD:main")
     assert tests_step < push_step
     assert "merge-base --is-ancestor origin/main HEAD" in text
+
+
+@pytest.mark.parametrize("failed_stage", ["lock", "vendor"])
+def test_failed_refresh_restores_original_pin_and_lock_bytes(tmp_path, monkeypatch, failed_stage):
+    from types import SimpleNamespace
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    pyproject = runtime / "pyproject.toml"
+    lock = runtime / "uv.lock"
+    manifest = tmp_path / "plugin.json"
+    pyproject.write_text('dependencies = ["python-hwpx[cli]==6.8.0", "python-hwpx-automation[mcp]==7.3.4"]\n# caller edit\n')
+    lock.write_bytes(b"original lock\n")
+    manifest.write_text('{"version":"old"}')
+    originals = {p: p.read_bytes() for p in (pyproject, lock, manifest)}
+    monkeypatch.setattr(refresh, "RUNTIME", runtime)
+    monkeypatch.setattr(refresh, "PYPROJECT", pyproject)
+    monkeypatch.setattr(refresh, "MANIFEST", manifest)
+    monkeypatch.setattr(refresh, "pypi_releases", lambda name: {"6.10.0" if name == "python-hwpx" else "7.4.1": _file()})
+    def run(cmd, **kwargs):
+        if cmd[0] == "uv":
+            lock.write_bytes(b"new lock")
+            return SimpleNamespace(returncode=1 if failed_stage == "lock" else 0, stdout="", stderr="test lock failure")
+        return SimpleNamespace(returncode=1, stdout="candidate size rejected", stderr="")
+    monkeypatch.setattr(refresh.subprocess, "run", run)
+    with pytest.raises(SystemExit):
+        refresh.main([])
+    assert {p: p.read_bytes() for p in originals} == originals

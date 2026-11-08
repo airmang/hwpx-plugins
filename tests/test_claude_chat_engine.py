@@ -91,3 +91,63 @@ def test_claude_bundle_text_never_pipes_a_download_into_a_shell() -> None:
         and fetch_exec.search(path.read_text(encoding="utf-8", errors="ignore"))
     ]
     assert offenders == []
+
+
+def test_candidate_gate_counts_manifest_and_keeps_old_engine_on_rejection(tmp_path, monkeypatch):
+    vendor = _load("vendor_claude_engine")
+    bundle = tmp_path / "plugin"
+    engine = bundle / "skills" / "hwpx" / "engine"
+    engine.mkdir(parents=True)
+    manifest = engine / "VENDOR.json"
+    manifest.write_text('{"old": true}')
+    sentinel = engine / "old.py"
+    sentinel.write_text("LAST_GOOD = True\n")
+    monkeypatch.setattr(vendor, "BUNDLE", bundle)
+    monkeypatch.setattr(vendor, "ENGINE", engine)
+    monkeypatch.setattr(vendor, "MANIFEST", manifest)
+    wheel = {"distribution": "python-hwpx", "version": "0.0.0", "url": "https://example.invalid", "sha256": "x"}
+    monkeypatch.setattr(vendor, "locked_wheels", lambda: [wheel])
+    monkeypatch.setattr(vendor, "cached", lambda *_: b"fixture")
+    monkeypatch.setattr(vendor, "wheel_members", lambda _: {"large.py": b"x" * (vendor.MAX_FILE_BYTES + 1)})
+    monkeypatch.setattr(vendor, "CORE_DOCS", {})
+    import pytest
+    with pytest.raises(SystemExit, match="before replacement"):
+        vendor.vendor()
+    assert sentinel.read_text() == "LAST_GOOD = True\n"
+    assert manifest.read_text() == '{"old": true}'
+    assert not (engine / "large.py").exists()
+    monkeypatch.setattr(vendor, "MAX_PLUGIN_FILES", 1)
+    assert any("2 files" in p for p in vendor.candidate_problems({"small.py": b"", "VENDOR.json": b"{}"}))
+
+
+def test_candidate_gate_includes_nonengine_files_and_rejects_traversal(tmp_path, monkeypatch):
+    vendor = _load("vendor_claude_engine")
+    bundle = tmp_path / "plugin"
+    bundle.mkdir()
+    (bundle / "guide.md").write_bytes(b"x" * (vendor.MAX_FILE_BYTES + 1))
+    monkeypatch.setattr(vendor, "BUNDLE", bundle)
+    monkeypatch.setattr(vendor, "ENGINE", bundle / "engine")
+    problems = vendor.candidate_problems({"../escape.py": b"x"})
+    assert any("unsafe candidate" in p for p in problems)
+    assert any("guide.md" in p for p in problems)
+
+
+def test_accepted_candidate_replaces_old_engine_and_passes_hash_check(tmp_path, monkeypatch):
+    vendor = _load("vendor_claude_engine")
+    bundle = tmp_path / "plugin"
+    engine = bundle / "engine"
+    engine.mkdir(parents=True)
+    (engine / "VENDOR.json").write_text("{}")
+    (engine / "old.py").write_text("old")
+    monkeypatch.setattr(vendor, "BUNDLE", bundle)
+    monkeypatch.setattr(vendor, "ENGINE", engine)
+    monkeypatch.setattr(vendor, "MANIFEST", engine / "VENDOR.json")
+    wheel = {"distribution": "python-hwpx", "version": "0.0.0", "url": "https://example.invalid", "sha256": "x"}
+    monkeypatch.setattr(vendor, "locked_wheels", lambda: [wheel])
+    monkeypatch.setattr(vendor, "cached", lambda *_: b"fixture")
+    monkeypatch.setattr(vendor, "wheel_members", lambda _: {"new.py": b"VALUE = 1\n"})
+    monkeypatch.setattr(vendor, "CORE_DOCS", {})
+    vendor.vendor()
+    assert not (engine / "old.py").exists()
+    assert (engine / "new.py").read_bytes() == b"VALUE = 1\n"
+    assert vendor.check() == []

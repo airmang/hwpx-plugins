@@ -1,0 +1,21 @@
+{
+  "name": "hwpx-file-preview",
+  "version": "0.1.9",
+  "description": "Mac·Windows 로컬 렌더러를 사용하는 앱 내 HWPX 파일 미리보기",
+  "author": {
+    "name": "HWPX Preview contributors"
+  },
+  "license": "Apache-2.0",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "HWPX 미리보기",
+    "shortDescription": "HWPX 파일을 앱 안에서 미리보기",
+    "longDescription": "앱에서 HWPX 파일을 열어 페이지를 확인하는 비공개 로컬 평가용 뷰어입니다.",
+    "developerName": "HWPX Preview contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Interactive"
+    ]
+  }
+}

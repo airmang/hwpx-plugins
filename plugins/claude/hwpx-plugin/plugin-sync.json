@@ -19,9 +19,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "b5562d4662dff9fb4e34e41f9eb281857bdb5a53f15ff3394adc1665825c5980",
+      "sourceSha256": "6660d75a25d1a990b72e7fd6ba225880cc758f8ee8c6d9dc2d107c4d2c1b5a3b",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "b5562d4662dff9fb4e34e41f9eb281857bdb5a53f15ff3394adc1665825c5980",
+      "destSha256": "6660d75a25d1a990b72e7fd6ba225880cc758f8ee8c6d9dc2d107c4d2c1b5a3b",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "7dad73d6a2106fa0dae3e48f8559ae9d2801e2d1e6301816d12bdea4d4e9c7f6",
+      "sourceSha256": "1cc3b3f8900f9b1b31d36cb817f473533c6708efedead97b1343c18e3206957c",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "7dad73d6a2106fa0dae3e48f8559ae9d2801e2d1e6301816d12bdea4d4e9c7f6",
+      "destSha256": "1cc3b3f8900f9b1b31d36cb817f473533c6708efedead97b1343c18e3206957c",
       "transformed": false
     },
     {
@@ -159,9 +159,9 @@
     },
     {
       "source": "references/workflows-editing.md",
-      "sourceSha256": "d1876ddcf12dc228d8ddd78e79fe33e4338eaa6bf807e7b63a8b611d884e503d",
+      "sourceSha256": "f076bc1131ec0efef02cdabdd1e4313a74387f2502aee4d92c79a745e6835395",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-editing.md",
-      "destSha256": "d1876ddcf12dc228d8ddd78e79fe33e4338eaa6bf807e7b63a8b611d884e503d",
+      "destSha256": "f076bc1131ec0efef02cdabdd1e4313a74387f2502aee4d92c79a745e6835395",
       "transformed": false
     },
     {
@@ -383,9 +383,9 @@
     },
     {
       "source": "scripts/zip_replace_all.py",
-      "sourceSha256": "dffbd6ed04fe5647d601cf968caa584ab98d2a922e19757c949f03ffacc9049d",
+      "sourceSha256": "174c3971b418ec3f40016ad93bd437e09980cf5d6bb2214b6869a8da33f67f01",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
-      "destSha256": "dffbd6ed04fe5647d601cf968caa584ab98d2a922e19757c949f03ffacc9049d",
+      "destSha256": "174c3971b418ec3f40016ad93bd437e09980cf5d6bb2214b6869a8da33f67f01",
       "transformed": false
     },
     {

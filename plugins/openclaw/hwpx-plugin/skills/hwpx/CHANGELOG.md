@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- `scripts/zip_replace_all.py`가 XML 원문 전체가 아니라 글(텍스트 노드)만 바꿉니다. 전에는 `100=999` 같은 키가 글자 크기
+  `height="1000"`을, `바탕=기반`이 글꼴 이름 `함초롬바탕`을 바꿨습니다. 값의 `&`·`<`·`>`는 이스케이프하고, 값의 줄바꿈은
+  문단 글(`hp:t`) 안에서 `hp:lineBreak`가 됩니다. 설치된 python-hwpx에 `hwpx.patch.replace_package_text`(6.10.0 이상)가
+  있으면 그것에 맡기고, 없으면(Claude 번들의 6.8.0) 스크립트 안의 같은 방식 구현을 씁니다. 맞는 글이 없으면 경고합니다.
+
 - 저장소에 `.gitattributes`(`* text=auto eol=lf`)를 두고 빌드 스크립트가 생성 파일을 LF로 씁니다. Windows 체크아웃에서도
   번들 해시(`plugin-sync.json`, `engine/VENDOR.json`)가 맞습니다. README에 Codex 번들이 Windows에서 `bash`를 요구한다는
   조건을 적었습니다.

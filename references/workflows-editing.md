@@ -296,6 +296,6 @@ run_edit_plan(plan, dry_run=False)
   `doc.save_to_path(path)`. 시그니처는 [`api.md`](api.md).
 - 런 수준 치환: `doc.replace_text_in_runs(...)`. 표 셀 포함 전역 치환:
   `python3 scripts/zip_replace_all.py input.hwpx output.hwpx --replace "키=값" [--auto-fix-ns]`
-  (open-safety 통과 시에만 대상 교체).
+  (텍스트 노드만 치환, 속성 값·글꼴 이름은 그대로. open-safety 통과 시에만 대상 교체).
 - ZIP-level 수정 후 네임스페이스 정리: `python3 scripts/fix_namespaces.py input.hwpx --inplace --backup`.
 - 저장 후에는 항상 `validate_editor_open_safety(path).ok == True`를 확인한다.

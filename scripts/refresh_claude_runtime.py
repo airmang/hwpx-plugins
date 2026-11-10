@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
 
     text = PYPROJECT.read_text(encoding="utf-8")
     text = PIN_RE.sub(lambda m: f'"{m.group("dist")}[{m.group("extras")}]=={target[m.group("dist")]}"', text)
-    PYPROJECT.write_text(text, encoding="utf-8")
+    PYPROJECT.write_text(text, encoding="utf-8", newline="\n")
     lock = subprocess.run(["uv", "lock", "--project", str(RUNTIME)], capture_output=True, text=True)
     if lock.returncode != 0:
         subprocess.run(["git", "checkout", "--", str(PYPROJECT)], cwd=ROOT, check=False)
@@ -131,7 +131,7 @@ def main(argv: list[str] | None = None) -> int:
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     manifest["version"] = version
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     write_outputs(summary)
     return 0
 

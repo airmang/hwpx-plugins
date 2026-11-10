@@ -201,6 +201,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
             host_frontmatter(host, identity),
         ),
         encoding="utf-8",
+        newline="\n",
     )
     records.append(record(config["canonicalSkill"], canonical, skill_md, transformed=True))
 
@@ -232,7 +233,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
                 raise SystemExit(f"missing generated-reference source: {src.relative_to(ROOT)}")
         dest = skill_dir / generated["dest"]
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(render_chat_engine(*(src.read_text(encoding="utf-8") for src in sources)), encoding="utf-8")
+        dest.write_text(render_chat_engine(*(src.read_text(encoding="utf-8") for src in sources)), encoding="utf-8", newline="\n")
         for src in sources:
             records.append(record(src.relative_to(ROOT).as_posix(), src, dest, transformed=True))
 
@@ -261,7 +262,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
         mcp_dest.write_text(render_mcp_config(
             mcp_src.read_text(encoding="utf-8"),
             (PACKAGING / config["launcherTemplate"]).read_text(encoding="utf-8"),
-        ), encoding="utf-8")
+        ), encoding="utf-8", newline="\n")
     else:
         copy_file(mcp_src, mcp_dest)
     records.append(record(f"packaging/{mcp['template']}", mcp_src, mcp_dest, transformed=host["id"] == "codex"))
@@ -304,6 +305,7 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
         )
         + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

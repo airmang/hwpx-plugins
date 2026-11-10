@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- 저장소에 `.gitattributes`(`* text=auto eol=lf`)를 두고 빌드 스크립트가 생성 파일을 LF로 씁니다. Windows 체크아웃에서도
+  번들 해시(`plugin-sync.json`, `engine/VENDOR.json`)가 맞습니다. README에 Codex 번들이 Windows에서 `bash`를 요구한다는
+  조건을 적었습니다.
+
 - 스킬의 `.hwp` 안내를 automation 7.3.3에 맞춥니다. MCP 도구가 `.hwp`를 직접 열고 같은 형식으로 저장하며, 표·본문 바이트를 고치는
   도구가 `HWPX_PACKAGE_REQUIRED`를 돌려주면 `copy_document`로 `.hwpx` 사본을 거칩니다. 그 이전 서버에서는 Python 경로를 씁니다.
 

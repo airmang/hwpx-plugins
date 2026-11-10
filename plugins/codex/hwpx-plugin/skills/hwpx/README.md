@@ -53,7 +53,8 @@ codex plugin add hwpx-plugin@hwpx
 Claude Code는 런타임(`python-hwpx`·`python-hwpx-automation`)을 번들의 `server/uv.lock`에 고정한 검증 좌표로
 `uv run --frozen`으로 실행합니다. **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)가 설치되어 있어야** MCP 서버가 시작됩니다(Windows: `winget install --id=astral-sh.uv -e`). 새 엔진은 CI 봇이 검증한 뒤 플러그인 업데이트로 전달합니다.
 Codex에서는 설치 뒤 번들 런처가 런타임을 하루 1회 같은 메이저 안의 최신으로 스스로 갱신합니다. 끄려면 `HWPX_STACK_AUTO_UPDATE=0`, 검증 좌표에 고정하려면
-`HWPX_STACK_CHANNEL=verified`를 MCP 서버 환경에 둡니다. 스킬 번들 자체의 갱신은 호스트가 맡습니다 —
+`HWPX_STACK_CHANNEL=verified`를 MCP 서버 환경에 둡니다. Codex 번들의 MCP 서버는 `bash`로 런처를 실행하므로,
+**Windows에서는 `bash`(Git for Windows의 Git Bash 또는 WSL)가 `PATH`에 있어야** 시작됩니다. `bash`가 없으면 서버가 뜨지 않습니다. 스킬 번들 자체의 갱신은 호스트가 맡습니다 —
 Claude Code는 `/plugin` → Marketplaces → `hwpx`에서 자동 업데이트를 켜거나
 `claude plugin marketplace update hwpx && claude plugin update hwpx-plugin@hwpx`, Codex는
 `codex plugin marketplace upgrade && codex plugin add hwpx-plugin@hwpx`를 실행합니다.

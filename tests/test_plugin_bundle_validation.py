@@ -396,9 +396,9 @@ def test_product_identity_is_the_name_version_and_maturity_authority() -> None:
         assert release.get("publicationEvidence") is None
     assert identity["currentPublicStack"]["plugin"]["version"] == release["currentPublic"]["plugin"]
     assert components["core"]["currentVersion"] == release["candidate"]["pythonHwpx"]
-    assert components["core"]["minimumCompatibleVersion"] == json.loads((ROOT / "references/tool-contract.generated.json").read_text())["minPythonHwpx"]
+    assert components["core"]["minimumCompatibleVersion"] == json.loads((ROOT / "references/tool-contract.generated.json").read_text(encoding="utf-8"))["minPythonHwpx"]
     assert components["automation"]["currentVersion"] == identity["releaseState"]["candidate"]["canonicalAutomation"]
-    assert components["automation"]["minimumCompatibleVersion"] == json.loads((ROOT / "references/tool-contract.generated.json").read_text())["minAutomationVersion"]
+    assert components["automation"]["minimumCompatibleVersion"] == json.loads((ROOT / "references/tool-contract.generated.json").read_text(encoding="utf-8"))["minAutomationVersion"]
     assert components["automation"]["mcpConsole"] == "hwpx-automation-mcp"
     assert components["automation"]["hostConfigKey"] == "hwpx"
     assert components["automation"]["hostConfigKeyKind"] == "local-alias"
@@ -464,9 +464,9 @@ def test_product_identity_validator_supports_the_full_release_lifecycle(
     readme_path = checkout / "README.md"
     api_path = checkout / "references" / "api.md"
     cross_readme_path = checkout / "packaging" / "s080-cross-repo-readme-wording.md"
-    readme = readme_path.read_text().replace(previous_status, status)
-    api = api_path.read_text().replace(previous_status, status)
-    cross_readme = cross_readme_path.read_text().replace(previous_status, status)
+    readme = readme_path.read_text(encoding="utf-8").replace(previous_status, status)
+    api = api_path.read_text(encoding="utf-8").replace(previous_status, status)
+    cross_readme = cross_readme_path.read_text(encoding="utf-8").replace(previous_status, status)
     if status != "released":
         public = identity["releaseState"]["currentPublic"]
         # A released source checkout no longer describes the previous train.
@@ -789,7 +789,7 @@ def test_released_state_requires_observed_publication_evidence():
     identity = _identity()
     identity["releaseState"]["status"] = "released"
     identity["releaseState"]["publicationEvidence"] = None
-    config = json.loads((ROOT / "packaging/hosts.json").read_text())
+    config = json.loads((ROOT / "packaging/hosts.json").read_text(encoding="utf-8"))
     with pytest.raises(SystemExit, match="publicationEvidence"):
         validator.validate_product_identity(config, identity)
 

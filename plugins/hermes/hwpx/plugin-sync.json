@@ -12,16 +12,16 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "d55f5ba302e9c63803d65d24eda5e980d67033128022a721226394d736a19c02",
+      "sourceSha256": "e8233fafa967659f3b5ad161316520755b596f1eb8fcc81c5c1c05589df8acac",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "d55f5ba302e9c63803d65d24eda5e980d67033128022a721226394d736a19c02",
+      "destSha256": "e8233fafa967659f3b5ad161316520755b596f1eb8fcc81c5c1c05589df8acac",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "10402f0207247c3f3cd71ead351612902426523d2f6e515d527fb192f6a0056f",
+      "sourceSha256": "b5562d4662dff9fb4e34e41f9eb281857bdb5a53f15ff3394adc1665825c5980",
       "dest": "plugins/hermes/hwpx/CHANGELOG.md",
-      "destSha256": "10402f0207247c3f3cd71ead351612902426523d2f6e515d527fb192f6a0056f",
+      "destSha256": "b5562d4662dff9fb4e34e41f9eb281857bdb5a53f15ff3394adc1665825c5980",
       "transformed": false
     },
     {

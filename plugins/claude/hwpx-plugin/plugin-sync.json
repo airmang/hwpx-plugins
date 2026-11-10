@@ -26,9 +26,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "b52196f9b7d1b98c864244c04832ccccbba0ee4804dbc9f55ed5070afe021a3d",
+      "sourceSha256": "ca851b7b0ced2717fdc7bcadd8cd16051a4c8d3ed1b6f096c9b53d4c328ab076",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "b52196f9b7d1b98c864244c04832ccccbba0ee4804dbc9f55ed5070afe021a3d",
+      "destSha256": "ca851b7b0ced2717fdc7bcadd8cd16051a4c8d3ed1b6f096c9b53d4c328ab076",
       "transformed": false
     },
     {
@@ -47,9 +47,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "2a7a6ccd7f750a36b09ea555b95c003f18e31d7945d0e7dd4a75b0f283872a51",
+      "sourceSha256": "ed3fbc268806a0aabc006b27f8bc92c3b4f3f9f2ebb5b1f43336902525a6dd38",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "2a7a6ccd7f750a36b09ea555b95c003f18e31d7945d0e7dd4a75b0f283872a51",
+      "destSha256": "ed3fbc268806a0aabc006b27f8bc92c3b4f3f9f2ebb5b1f43336902525a6dd38",
       "transformed": false
     },
     {
@@ -166,9 +166,9 @@
     },
     {
       "source": "references/workflows-editing.md",
-      "sourceSha256": "f076bc1131ec0efef02cdabdd1e4313a74387f2502aee4d92c79a745e6835395",
+      "sourceSha256": "690205bfd0952e2e2bba5f6efb174df9d7a055bb6f1fc581ac537bd2cde1c150",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/workflows-editing.md",
-      "destSha256": "f076bc1131ec0efef02cdabdd1e4313a74387f2502aee4d92c79a745e6835395",
+      "destSha256": "690205bfd0952e2e2bba5f6efb174df9d7a055bb6f1fc581ac537bd2cde1c150",
       "transformed": false
     },
     {
@@ -393,34 +393,6 @@
       "sourceSha256": "174c3971b418ec3f40016ad93bd437e09980cf5d6bb2214b6869a8da33f67f01",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/scripts/zip_replace_all.py",
       "destSha256": "174c3971b418ec3f40016ad93bd437e09980cf5d6bb2214b6869a8da33f67f01",
-      "transformed": false
-    },
-    {
-      "source": "references/release-2026-09-07-managed-runtime.md",
-      "sourceSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-07-managed-runtime.md",
-      "destSha256": "33ad523615067ce1f008cd05363d71be9ad97e462c9a7ec14639b02b61a7ff70",
-      "transformed": false
-    },
-    {
-      "source": "references/release-2026-09-09-existing-edit-stack.md",
-      "sourceSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-09-existing-edit-stack.md",
-      "destSha256": "febb3c3f1f548f0abbaecfb2a80d508787d2c177d780da3071cede81f9453cb2",
-      "transformed": false
-    },
-    {
-      "source": "references/release-2026-09-22-trustworthy-edit-engine.md",
-      "sourceSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-22-trustworthy-edit-engine.md",
-      "destSha256": "244996fff6c6b3dda7b82c2d6b4620f7965a1283e52c001f3a81f027bad965e2",
-      "transformed": false
-    },
-    {
-      "source": "references/release-2026-09-28-render-pdf-hwp5-stack.md",
-      "sourceSha256": "b9beb1cceea1a94540dde75ada37c536ce366fd8c807a3bb5f353eb1def8f52b",
-      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/release-2026-09-28-render-pdf-hwp5-stack.md",
-      "destSha256": "b9beb1cceea1a94540dde75ada37c536ce366fd8c807a3bb5f353eb1def8f52b",
       "transformed": false
     },
     {

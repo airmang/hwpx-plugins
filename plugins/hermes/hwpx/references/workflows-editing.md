@@ -1,7 +1,7 @@
 # 편집 워크플로 (트랜잭션·서식·그림·패치·프리뷰)
 
-기존 HWPX를 수정하는 주요 경로의 상세 계약. 정확한 후보 시그니처와 응답 키는
-`tool-contract.generated.json`을 정본으로 삼는다. 이전 공개 릴리스의 이름이나
+기존 HWPX를 수정하는 주요 경로의 상세 계약. 도구 이름·프로필·수명주기는
+[`tool-contract.generated.md`](tool-contract.generated.md)가 정본이고, 정확한 인자 스키마는 MCP 서버가 알려 주는 도구 스키마를 따른다. 이전 공개 릴리스의 이름이나
 버전을 이 문서의 현재 계약으로 사용하지 않는다.
 
 ## 1. 호환 트랜잭션 편집 루프 (`apply_edits`, compatibility facade)

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- Codex·OpenClaw·Hermes 번들에서도 런타임과 스킬이 읽지 않는 개발용 파일을 뺍니다: `references/tool-contract.generated.json`
+  (694 KB), `scripts/task_eval_harness.py`, `examples/eval_tasks/`, `examples/12_task_eval_replay.md`. 참조 문서는 그 JSON 대신
+  `tool-contract.generated.md`와 MCP 서버의 도구 스키마를 가리킵니다. 이 파일들은 저장소에는 그대로 있습니다.
+  Claude 번들에서는 어디서도 가리키지 않는 지난 릴리스 영수증 넷(`references/release-2026-*.md`)도 빼 파일 수가 499에서 495가 됩니다(한도 512).
+
 - Claude 런타임 갱신 봇이 테스트 통과만으로 `main`에 밀어 넣지 않고 PR을 열어 유지보수자 승인을 기다립니다.
   갱신 때 `uv lock --upgrade`로 전이 의존성(pillow, certifi 등)도 올리고, Dependabot이 Claude 런타임 잠금 파일을 봅니다.
   잠금 파일 자체는 이번에 다시 만들지 않았습니다.

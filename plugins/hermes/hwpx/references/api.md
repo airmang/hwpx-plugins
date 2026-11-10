@@ -595,7 +595,7 @@ MCP 응답에서 확인할 필드:
 6.7.1 후보 `python-hwpx-automation`의 트랜잭션·서식·그림·비교·생성기·문서 지도 도구 요약이다.
 사용 절차는 `workflows-agent-document.md` / `workflows-editing.md` /
 `workflows-bulk-compare.md`를 본다. 지원 인자와 응답 증거는 도구별로 다르며 아래 표와
-`tool-contract.generated.json`의 실제 스키마를 따른다.
+MCP 서버가 알려 주는 도구 스키마를 따른다(도구 목록·프로필은 [`tool-contract.generated.md`](tool-contract.generated.md)).
 
 | 도구 | 시그니처 (주요 인자) | 핵심 응답 키 |
 |---|---|---|

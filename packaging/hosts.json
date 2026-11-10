@@ -94,6 +94,7 @@
       "outputDir": "plugins/claude/hwpx-plugin",
       "skillSubdir": "skills/hwpx",
       "frontmatterExtra": "",
+      "skillNotice": "templates/claude-skill-notice.md",
       "excludeSharedAssets": [
         "references/tool-contract.generated.json",
         "examples/12_task_eval_replay.md",

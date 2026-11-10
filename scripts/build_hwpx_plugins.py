@@ -57,7 +57,14 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def render_skill_md(canonical_text: str, extra_frontmatter: str) -> str:
+def render_skill_md(canonical_text: str, extra_frontmatter: str, notice: str = "") -> str:
+    """Host SKILL.md: canonical body, host frontmatter, and an optional host-only notice.
+
+    *notice* (``skillNotice`` in hosts.json) is placed right under the first
+    heading. It carries guidance that holds for one host bundle only, such as a
+    limitation of the engine version that bundle pins, so removing the notice
+    file and its hosts.json key is all it takes to retire it.
+    """
     if not canonical_text.startswith("---\n"):
         raise SystemExit("canonical SKILL.md is missing YAML frontmatter")
     fence = canonical_text.index("\n---\n", 4)
@@ -65,7 +72,25 @@ def render_skill_md(canonical_text: str, extra_frontmatter: str) -> str:
     body = canonical_text[fence + len("\n---\n"):]
     if extra_frontmatter.strip():
         frontmatter = frontmatter.rstrip("\n") + "\n" + extra_frontmatter.rstrip("\n")
+    if notice.strip():
+        lines = body.split("\n")
+        heading = next((index for index, line in enumerate(lines) if line.startswith("# ")), None)
+        if heading is None:
+            raise SystemExit("canonical SKILL.md has no top-level heading to place the host notice under")
+        lines[heading + 1:heading + 1] = ["", *notice.strip("\n").split("\n")]
+        body = "\n".join(lines)
     return "---\n" + frontmatter + "\n---\n" + body
+
+
+def host_skill_notice(host: dict) -> tuple[Path | None, str]:
+    """The host-only SKILL.md notice template and its text, if the host declares one."""
+    template = host.get("skillNotice")
+    if not template:
+        return None, ""
+    path = PACKAGING / template
+    if not path.is_file():
+        raise SystemExit(f"missing skill notice template: {template}")
+    return path, path.read_text(encoding="utf-8")
 
 
 CHAT_ENGINE_REWRITES = [
@@ -195,15 +220,19 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
 
     canonical = ROOT / config["canonicalSkill"]
     skill_md = skill_dir / "SKILL.md"
+    notice_path, notice = host_skill_notice(host)
     skill_md.write_text(
         render_skill_md(
             canonical.read_text(encoding="utf-8"),
             host_frontmatter(host, identity),
+            notice,
         ),
         encoding="utf-8",
         newline="\n",
     )
     records.append(record(config["canonicalSkill"], canonical, skill_md, transformed=True))
+    if notice_path is not None:
+        records.append(record(notice_path.relative_to(ROOT).as_posix(), notice_path, skill_md, transformed=True))
 
     excluded = set(host.get("excludeSharedAssets", []))
     for rel in config["sharedAssets"]:

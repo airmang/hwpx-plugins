@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Claude 번들의 `SKILL.md`에 중첩 표 안내를 넣습니다. 이 번들의 엔진(python-hwpx 6.8.0)은 표 안에 표가 있는 문서에서 요청한
+  칸이 아닌 칸을 채울 수 있어, 칸 채움 결과를 다시 읽어 확인하고 다르면 쓰지 않도록 안내합니다. 안내문은
+  `packaging/templates/claude-skill-notice.md` 한 곳에 있고, 엔진이 6.11.0 이상으로 올라가면 뺍니다.
+
 - `scripts/zip_replace_all.py`가 XML 원문 전체가 아니라 글(텍스트 노드)만 바꿉니다. 전에는 `100=999` 같은 키가 글자 크기
   `height="1000"`을, `바탕=기반`이 글꼴 이름 `함초롬바탕`을 바꿨습니다. 값의 `&`·`<`·`>`는 이스케이프하고, 값의 줄바꿈은
   문단 글(`hp:t`) 안에서 `hp:lineBreak`가 됩니다. 설치된 python-hwpx에 `hwpx.patch.replace_package_text`(6.10.0 이상)가

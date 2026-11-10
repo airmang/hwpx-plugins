@@ -776,6 +776,8 @@ def expected_transformed_sources(host: dict, config: dict) -> set[str]:
     byte-identity invariant by flipping the flag (hwpx-plugins #21).
     """
     expected = {config["canonicalSkill"]}
+    if host.get("skillNotice"):
+        expected.add(f"packaging/{host['skillNotice']}")
     for generated in host.get("generatedReferences", []):
         expected.update(f"packaging/{generated[key]}" for key in ("template", "workflows", "automationApi"))
     if host["id"] == "codex":

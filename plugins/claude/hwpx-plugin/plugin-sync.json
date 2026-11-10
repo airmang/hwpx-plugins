@@ -26,9 +26,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "ca851b7b0ced2717fdc7bcadd8cd16051a4c8d3ed1b6f096c9b53d4c328ab076",
+      "sourceSha256": "2ca4f7e02666474321a24aff0804fbf5b5b46d1d666d9f3c05db6183cd7a304a",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "ca851b7b0ced2717fdc7bcadd8cd16051a4c8d3ed1b6f096c9b53d4c328ab076",
+      "destSha256": "2ca4f7e02666474321a24aff0804fbf5b5b46d1d666d9f3c05db6183cd7a304a",
       "transformed": false
     },
     {
@@ -404,23 +404,23 @@
     },
     {
       "source": "packaging/templates/claude-chat-engine.md",
-      "sourceSha256": "dd90f0c299895b9a99e5f3e0bca7b0f60ce5fe1a2876cc122e98bb29fdf18e83",
+      "sourceSha256": "c384985da5af3cbad1c9c6e176f1cb6cda5d141e6eb210ac4197e867b33e0a56",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
+      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/web-workflows.md",
       "sourceSha256": "081e3f3e93443ef6c38cfdf220c9509ebf20f587d41259a3e365b14730e972fa",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
+      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/automation-python-api.md",
       "sourceSha256": "8f3d25553248f81826cf6113f64cd29b0418abafdd4228595d9f24c95b405840",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "3b8a22cfe598c01eb50d0920b8789f3ca09a395290af4a006f351bc920e9f43d",
+      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
       "transformed": true
     },
     {

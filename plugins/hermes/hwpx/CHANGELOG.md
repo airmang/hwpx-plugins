@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- MCP 없는 채팅 경로(`chat-engine.md`)의 시작 블록이 바이트코드를 끄지 않고 `sys.pycache_prefix`를 사용자 전용 임시 폴더로
+  잡습니다. 스킬 폴더에는 쓰지 않으면서 둘째 실행부터 엔진을 다시 컴파일하지 않습니다. 임시 폴더를 만들 수 없거나 다른
+  사용자가 쓸 수 있으면 전처럼 바이트코드를 끕니다.
+
 - Codex·OpenClaw·Hermes 번들에서도 런타임과 스킬이 읽지 않는 개발용 파일을 뺍니다: `references/tool-contract.generated.json`
   (694 KB), `scripts/task_eval_harness.py`, `examples/eval_tasks/`, `examples/12_task_eval_replay.md`. 참조 문서는 그 JSON 대신
   `tool-contract.generated.md`와 MCP 서버의 도구 스키마를 가리킵니다. 이 파일들은 저장소에는 그대로 있습니다.

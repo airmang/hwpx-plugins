@@ -50,8 +50,9 @@ codex plugin marketplace add airmang/hwpx-plugins
 codex plugin add hwpx-plugin@hwpx
 ```
 
-Claude Code는 런타임(`python-hwpx`·`python-hwpx-automation`)을 번들의 `server/uv.lock`에 고정한 검증 좌표로
-`uv run --frozen`으로 실행합니다. **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)가 설치되어 있어야** MCP 서버가 시작됩니다(Windows: `winget install --id=astral-sh.uv -e`). 새 엔진은 CI 봇이 검증한 뒤 플러그인 업데이트로 전달합니다.
+Claude Code는 런타임(`python-hwpx`·`python-hwpx-automation`)을 번들의 `server/uv.lock`에 잠긴 정확한 버전으로
+`uv run --frozen`으로 실행합니다. 잠긴 버전은 아래 표의 검증 좌표가 아니라 설치 제약 창 안에서 갱신 절차가 마지막으로 올린 조합이며,
+값은 번들의 `server/pyproject.toml`에 적혀 있습니다. **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)가 설치되어 있어야** MCP 서버가 시작됩니다(Windows: `winget install --id=astral-sh.uv -e`). 새 엔진은 CI 봇이 검증한 뒤 플러그인 업데이트로 전달합니다.
 Codex에서는 설치 뒤 번들 런처가 런타임을 하루 1회 같은 메이저 안의 최신으로 스스로 갱신합니다. 끄려면 `HWPX_STACK_AUTO_UPDATE=0`, 검증 좌표에 고정하려면
 `HWPX_STACK_CHANNEL=verified`를 MCP 서버 환경에 둡니다. Codex 번들의 MCP 서버는 `bash`로 런처를 실행하므로,
 **Windows에서는 `bash`(Git for Windows의 Git Bash 또는 WSL)가 `PATH`에 있어야** 시작됩니다. `bash`가 없으면 서버가 뜨지 않습니다. 스킬 번들 자체의 갱신은 호스트가 맡습니다 —
@@ -119,7 +120,7 @@ skill 이름 `hwpx`를 혼동하지 마세요.
 | 완전한 공개 트레인 | 현재 공개 릴리스 — 실제 설치까지 관찰한 조합 | `python-hwpx 6.6.0` · `python-hwpx-automation 7.3.1` · `hwpx-plugin 2.4.0` |
 | 최소 호환 버전 | 이 릴리스의 지원 플로어 | `python-hwpx >= 6.5.0` · `python-hwpx-automation >= 7.2.0` · skill `>= 2.0.0` |
 | 검증 좌표 | 이 플러그인 릴리스가 함께 검증한 정확 조합. `HWPX_STACK_CHANNEL=verified`를 주면 이 조합만 설치하고 갱신하지 않음 | `python-hwpx 6.6.0` · `python-hwpx-automation 7.3.1` |
-| 플러그인 설치 제약 | Codex 번들 런처가 설치하고 하루 1회 자동 갱신하는 창 — 같은 메이저 안의 최신. Claude Code는 검증 좌표를 `uv.lock`으로 고정 | `python-hwpx[preview]>=6.6.0,<7` · `python-hwpx-automation[mcp,oracle]>=7.3.1,<8` |
+| 플러그인 설치 제약 | Codex 번들 런처가 설치하고 하루 1회 자동 갱신하는 창 — 같은 메이저 안의 최신. Claude Code는 이 창 안의 한 조합을 `uv.lock`으로 고정(검증 좌표와 다를 수 있음. 값은 번들 `server/pyproject.toml`) | `python-hwpx[preview]>=6.6.0,<7` · `python-hwpx-automation[mcp,oracle]>=7.3.1,<8` |
 
 - 코어 성숙도: 검증 좌표 `python-hwpx 6.6.0`의 패키지 분류는 `Development Status :: 3 - Alpha`이고, 6.10.0부터는
   `Development Status :: 4 - Beta`입니다(설치 제약 창 안에서 새로 설치하면 Beta 분류 판을 받습니다). Python 기준은 3.10 이상입니다.

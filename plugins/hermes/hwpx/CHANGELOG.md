@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- README와 Claude 런타임 `pyproject.toml` 주석이 "Claude는 검증 좌표를 고정한다"고 적던 것을 사실에 맞춥니다. 잠긴 값은
+  설치 제약 창 안에서 갱신 절차가 올린 조합이며 검증 좌표와 다를 수 있습니다(좌표는 바꾸지 않았습니다).
+
 - OpenClaw·Hermes 설치 안내(`INSTALL-mcp.md`)의 좌표와 릴리스 문구를 `packaging/product-identity.json`에서 채웁니다.
   전에는 손으로 적은 "unpublished candidate"와 세 트레인 전 공개 좌표(4.2.0/5.1.0/0.8.0)가 그대로 실려 나갔습니다.
   검증기가 템플릿의 손으로 적은 버전과 낡은 문구를 거부합니다.

@@ -12,16 +12,16 @@
     },
     {
       "source": "README.md",
-      "sourceSha256": "e8233fafa967659f3b5ad161316520755b596f1eb8fcc81c5c1c05589df8acac",
+      "sourceSha256": "b0e6a912c74471909374965d4f107036b9cc1914595668bcfa174ed51b078fce",
       "dest": "plugins/hermes/hwpx/README.md",
-      "destSha256": "e8233fafa967659f3b5ad161316520755b596f1eb8fcc81c5c1c05589df8acac",
+      "destSha256": "b0e6a912c74471909374965d4f107036b9cc1914595668bcfa174ed51b078fce",
       "transformed": false
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "42dbfbc71f6f1d26a8ea77cb469954a1efc45ca266a2832040985f925bc7594d",
+      "sourceSha256": "644cbceefbdc81a4b74c9730f7f4d0af6dbf2b52eea4ca36f7ccddf585b702b3",
       "dest": "plugins/hermes/hwpx/CHANGELOG.md",
-      "destSha256": "42dbfbc71f6f1d26a8ea77cb469954a1efc45ca266a2832040985f925bc7594d",
+      "destSha256": "644cbceefbdc81a4b74c9730f7f4d0af6dbf2b52eea4ca36f7ccddf585b702b3",
       "transformed": false
     },
     {
@@ -40,9 +40,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "1cc3b3f8900f9b1b31d36cb817f473533c6708efedead97b1343c18e3206957c",
+      "sourceSha256": "2a7a6ccd7f750a36b09ea555b95c003f18e31d7945d0e7dd4a75b0f283872a51",
       "dest": "plugins/hermes/hwpx/references/api.md",
-      "destSha256": "1cc3b3f8900f9b1b31d36cb817f473533c6708efedead97b1343c18e3206957c",
+      "destSha256": "2a7a6ccd7f750a36b09ea555b95c003f18e31d7945d0e7dd4a75b0f283872a51",
       "transformed": false
     },
     {
@@ -117,9 +117,9 @@
     },
     {
       "source": "references/workflows-authoring.md",
-      "sourceSha256": "61ab9db6392542e21e074301e15c979ec0dccff2555fb02c7dab3a44e835d9f0",
+      "sourceSha256": "00bb9113d68d7fe77bce10bfca9ee19d3c72ed599ce8af0459e5b1458bf8a184",
       "dest": "plugins/hermes/hwpx/references/workflows-authoring.md",
-      "destSha256": "61ab9db6392542e21e074301e15c979ec0dccff2555fb02c7dab3a44e835d9f0",
+      "destSha256": "00bb9113d68d7fe77bce10bfca9ee19d3c72ed599ce8af0459e5b1458bf8a184",
       "transformed": false
     },
     {
@@ -152,16 +152,16 @@
     },
     {
       "source": "references/workflows-redline.md",
-      "sourceSha256": "8c69fd52d23ee948c65adab4025f034a85ba1e324a420e381683f3ce72069540",
+      "sourceSha256": "f39da04fb2020c266e220ba62240a9d6617e2ac3013f90525979b4a0f69427ac",
       "dest": "plugins/hermes/hwpx/references/workflows-redline.md",
-      "destSha256": "8c69fd52d23ee948c65adab4025f034a85ba1e324a420e381683f3ce72069540",
+      "destSha256": "f39da04fb2020c266e220ba62240a9d6617e2ac3013f90525979b4a0f69427ac",
       "transformed": false
     },
     {
       "source": "references/workflows-pii.md",
-      "sourceSha256": "be50015b5d627f8c21abef5d090139550a1063ffa7d88e7d70e2650c6e4482c9",
+      "sourceSha256": "5fab6a1d1a4ddeeced830b1f3a852382dded066c0313e3994beaff7046649b47",
       "dest": "plugins/hermes/hwpx/references/workflows-pii.md",
-      "destSha256": "be50015b5d627f8c21abef5d090139550a1063ffa7d88e7d70e2650c6e4482c9",
+      "destSha256": "5fab6a1d1a4ddeeced830b1f3a852382dded066c0313e3994beaff7046649b47",
       "transformed": false
     },
     {
@@ -173,9 +173,9 @@
     },
     {
       "source": "references/workflows-exam.md",
-      "sourceSha256": "8550ab04eb5f95bb3f67c072bb8a9f9aa51cf4ceed1a9c793492bad37e20893e",
+      "sourceSha256": "ec6e4a2de7bd00cde4b964a248365038515ceea4d1fd20f554e0c13fdcf9a58f",
       "dest": "plugins/hermes/hwpx/references/workflows-exam.md",
-      "destSha256": "8550ab04eb5f95bb3f67c072bb8a9f9aa51cf4ceed1a9c793492bad37e20893e",
+      "destSha256": "ec6e4a2de7bd00cde4b964a248365038515ceea4d1fd20f554e0c13fdcf9a58f",
       "transformed": false
     },
     {
@@ -502,10 +502,10 @@
     },
     {
       "source": "packaging/templates/hermes.mcp-install.md",
-      "sourceSha256": "2cc415884e8ed25a2325d5625ae723845863a7c004a5ae1a44111fce40446d1d",
+      "sourceSha256": "aa7d2a31581797f44564efdf8d9db6e9ab1d6eb39029ea947798d4c3bbcc9850",
       "dest": "plugins/hermes/hwpx/INSTALL-mcp.md",
-      "destSha256": "2cc415884e8ed25a2325d5625ae723845863a7c004a5ae1a44111fce40446d1d",
-      "transformed": false
+      "destSha256": "8f622eed071680ccfc392e281e8916e7786017effce09b9c74a6d2b5c0f2efef",
+      "transformed": true
     }
   ]
 }

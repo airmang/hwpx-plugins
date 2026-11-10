@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shlex
 import shutil
 from pathlib import Path
@@ -47,6 +48,61 @@ def render_mcp_config(template: str, launcher: str) -> str:
         raise ValueError("Codex MCP template must select the canonical managed launcher")
     server["args"] = ["-c", codex_launcher_command(launcher), "hwpx-managed-launcher"]
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+
+
+INSTALL_GUIDE_TOKEN = "{{HWPX_"
+
+
+def install_guide_values(identity: dict) -> dict[str, str]:
+    """Coordinates the direct-host install guides print, all from product-identity.json."""
+    constraint = identity["installConstraint"]
+    public = identity["currentPublicStack"]
+    components = identity["components"]
+    public_stack = (
+        f"`{public['core']['distribution']} {public['core']['version']}` / "
+        f"`{public['application']['distribution']} {public['application']['version']}` / "
+        f"`{public['plugin']['installedPluginId']} {public['plugin']['version']}`"
+    )
+    status = identity["releaseState"]["status"]
+    if status == "released":
+        release_note = (
+            f"The coordinates below belong to the current public release: {public_stack}. "
+            "The install window follows newer engine releases inside the same major."
+        )
+    else:
+        candidate = (
+            f"`{components['core']['distribution']} {components['core']['currentVersion']}` / "
+            f"`{components['automation']['distribution']} {components['automation']['currentVersion']}` / "
+            f"`{components['plugin']['installedPluginId']} {components['plugin']['currentVersion']}`"
+        )
+        release_note = (
+            f"Release state `{status}`: the coordinates below ({candidate}) are carried for "
+            f"pre-release verification and are not yet the public release. The current public release is {public_stack}."
+        )
+    return {
+        "{{HWPX_CORE_CONSTRAINT}}": constraint["core"],
+        "{{HWPX_AUTOMATION_CONSTRAINT}}": constraint["automation"],
+        "{{HWPX_CORE_RANGE}}": constraint["core"].split("]", 1)[1],
+        "{{HWPX_AUTOMATION_RANGE}}": constraint["automation"].split("]", 1)[1],
+        "{{HWPX_PLUGIN_VERSION}}": components["plugin"]["currentVersion"],
+        "{{HWPX_RELEASE_NOTE}}": release_note,
+    }
+
+
+def render_install_guide(template: str, identity: dict) -> str:
+    """Fill a direct-host INSTALL-mcp.md template from product-identity.json.
+
+    The guides used to carry hand-typed coordinates and a release sentence that
+    nobody advanced: they still said "unpublished candidate" and named a public
+    stack three trains old after the release (audit ARC-11).
+    """
+    text = template
+    for token, value in install_guide_values(identity).items():
+        text = text.replace(token, value)
+    if INSTALL_GUIDE_TOKEN in text:
+        leftover = sorted(set(re.findall(r"\{\{HWPX_[A-Za-z_]*", text)))
+        raise SystemExit(f"install guide template has unknown tokens: {leftover}")
+    return text
 
 
 def sha256(path: Path) -> str:
@@ -292,9 +348,23 @@ def build_host(host: dict, config: dict, identity: dict) -> None:
             mcp_src.read_text(encoding="utf-8"),
             (PACKAGING / config["launcherTemplate"]).read_text(encoding="utf-8"),
         ), encoding="utf-8", newline="\n")
+    elif mcp.get("strategy") == "config-doc":
+        mcp_dest.parent.mkdir(parents=True, exist_ok=True)
+        mcp_dest.write_text(
+            render_install_guide(mcp_src.read_text(encoding="utf-8"), identity),
+            encoding="utf-8",
+            newline="\n",
+        )
     else:
         copy_file(mcp_src, mcp_dest)
-    records.append(record(f"packaging/{mcp['template']}", mcp_src, mcp_dest, transformed=host["id"] == "codex"))
+    records.append(
+        record(
+            f"packaging/{mcp['template']}",
+            mcp_src,
+            mcp_dest,
+            transformed=host["id"] == "codex" or mcp.get("strategy") == "config-doc",
+        )
+    )
 
     if host.get("bundleLauncher"):
         launcher_src = PACKAGING / config["launcherTemplate"]

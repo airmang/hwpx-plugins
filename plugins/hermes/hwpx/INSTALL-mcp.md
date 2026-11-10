@@ -4,10 +4,11 @@ This directory is a publishable Hermes skill (`SKILL.md` plus `scripts/` and `re
 Hermes loads MCP servers from `config.yaml`, not from the skill, so register the HWPX MCP
 server there.
 
-## Candidate publishing command (do not run before release approval)
+## Release coordinates
 
-The `2.4.0 / 7.3.1 / 6.6.0` coordinates below are an unpublished candidate; public installation requires its later release.
+The coordinates below belong to the current public release: `python-hwpx 6.6.0` / `python-hwpx-automation 7.3.1` / `hwpx-plugin 2.4.0`. The install window follows newer engine releases inside the same major.
 
+## Publishing command (maintainers only; never before release approval)
 
 ```bash
 hermes skills publish plugins/hermes/hwpx --to github --repo airmang/hwpx-plugins

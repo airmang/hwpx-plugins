@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- OpenClaw·Hermes 설치 안내(`INSTALL-mcp.md`)의 좌표와 릴리스 문구를 `packaging/product-identity.json`에서 채웁니다.
+  전에는 손으로 적은 "unpublished candidate"와 세 트레인 전 공개 좌표(4.2.0/5.1.0/0.8.0)가 그대로 실려 나갔습니다.
+  검증기가 템플릿의 손으로 적은 버전과 낡은 문구를 거부합니다.
+- 문서 오류를 고칩니다: README의 없는 Cursor 규칙 파일(`.cursor/rules/hwpx.mdc`) 안내, `references/api.md` 메일머지 예제의
+  없는 함수 호출(`mail_merge` → `build_mail_merge`), 없는 `demo/` 디렉터리 참조 넷, 코어 분류 문구(6.10.0부터 Beta).
+
 - Claude 번들의 `SKILL.md`에 중첩 표 안내를 넣습니다. 이 번들의 엔진(python-hwpx 6.8.0)은 표 안에 표가 있는 문서에서 요청한
   칸이 아닌 칸을 채울 수 있어, 칸 채움 결과를 다시 읽어 확인하고 다르면 쓰지 않도록 안내합니다. 안내문은
   `packaging/templates/claude-skill-notice.md` 한 곳에 있고, 엔진이 6.11.0 이상으로 올라가면 뺍니다.

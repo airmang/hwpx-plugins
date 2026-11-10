@@ -909,7 +909,8 @@ def test_host_install_guides_register_the_current_skill_version(template: str) -
     validator = _validator_module()
     version = _identity()["components"]["plugin"]["currentVersion"]
     path = ROOT / "packaging" / "templates" / template
-    text = path.read_text(encoding="utf-8")
+    # The template takes its coordinates from product-identity.json at build time.
+    text = validator._bundle_builder().render_install_guide(path.read_text(encoding="utf-8"), _identity())
     validator.validate_host_install_skill_version(text, path, version)
 
     stale = re.sub(

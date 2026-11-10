@@ -15,7 +15,7 @@
 | 플러그인 설치 제약 | 번들 런처가 설치·자동 갱신하는 창 | `python-hwpx[preview]>=6.6.0,<7` · `python-hwpx-automation[mcp,oracle]>=7.3.1,<8` |
 
 - import 이름은 `hwpx`다.
-- 코어의 공개 성숙도는 `Development Status :: 3 - Alpha`이고 MCP/플러그인의 성숙도는
+- 코어의 공개 성숙도는 검증 좌표 6.6.0 기준 `Development Status :: 3 - Alpha`(6.10.0부터 `4 - Beta`)이고 MCP/플러그인의 성숙도는
   아직 선언하지 않았다. 공개 릴리스나 호환성 숫자를 성숙도 주장으로 바꾸지 않는다.
 - 최종 산출물을 만들 때는 `validate_editor_open_safety(path).ok == True` 또는 MCP 응답의 `openSafety.ok == true` / `verification.openSafety.ok == true`를 handoff evidence로 남긴다.
 
@@ -355,7 +355,7 @@ from hwpx_automation.office.document_ops import build_mail_merge
 placeholders = inspect_mail_merge_placeholders("template.hwpx")
 assert "student" in placeholders["keys"]
 
-report = mail_merge(
+report = build_mail_merge(
     "template.hwpx",
     [{"student": "김하나", "class_name": "1-1", "teacher": "이교사"}],
     output_dir="out/notices",

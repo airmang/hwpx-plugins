@@ -3,11 +3,9 @@
 OpenClaw plugins do not bundle MCP servers in `openclaw.plugin.json`; the HWPX MCP
 server is registered through your OpenClaw MCP configuration.
 
-## Unpublished candidate wiring
+## Release coordinates
 
-The source checkout carries the exact `6.6.0 / 7.3.1 / 2.4.0` candidate coordinates
-below for pre-release verification. They are not the current public marketplace
-release.
+The coordinates below belong to the current public release: `python-hwpx 6.6.0` / `python-hwpx-automation 7.3.1` / `hwpx-plugin 2.4.0`. The install window follows newer engine releases inside the same major.
 
 ## Install the server once
 
@@ -35,9 +33,6 @@ Then register it:
   }
 }
 ```
-
-The current public stack remains `python-hwpx 4.2.0` /
-`hwpx-mcp-server 5.1.0` / `hwpx-plugin 0.8.0`.
 
 ## Update and clean up
 

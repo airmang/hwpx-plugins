@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Claude 런타임 갱신 봇이 테스트 통과만으로 `main`에 밀어 넣지 않고 PR을 열어 유지보수자 승인을 기다립니다.
+  갱신 때 `uv lock --upgrade`로 전이 의존성(pillow, certifi 등)도 올리고, Dependabot이 Claude 런타임 잠금 파일을 봅니다.
+  잠금 파일 자체는 이번에 다시 만들지 않았습니다.
+
 - README와 Claude 런타임 `pyproject.toml` 주석이 "Claude는 검증 좌표를 고정한다"고 적던 것을 사실에 맞춥니다. 잠긴 값은
   설치 제약 창 안에서 갱신 절차가 올린 조합이며 검증 좌표와 다를 수 있습니다(좌표는 바꾸지 않았습니다).
 

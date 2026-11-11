@@ -5,9 +5,11 @@ The structured contract covers the safe-write and preservation path, the
 moved-surface guidance, and the failures documented on an individual API: those
 raise a :class:`HwpxError` (or a subclass). It is not a blanket wrapper around
 every call. Operating-system and container-level failures keep the exception
-Python already raises — ``FileNotFoundError`` for a missing path,
-:class:`zipfile.BadZipFile` for a payload that is not an HWPX package — and the
-support matrix documents them in that form.
+Python already raises — ``FileNotFoundError`` for a missing path. A damaged
+package raises a :class:`hwpx.opc.package.HwpxStructureError` subclass that is
+also the exception Python or lxml raised (:class:`zipfile.BadZipFile`,
+``zlib.error``, ``lxml.etree.XMLSyntaxError``); that family does not derive
+from :class:`HwpxError`.
 
 The base carries three machine-readable fields on top of the human-readable
 message, so a caller can branch on a stable ``code``, read the measured
@@ -150,11 +152,13 @@ ERROR_CODE_DOMAINS = frozenset(
         "cell",
         "contract",
         "document",
+        "equation",
         "field",
         "header",
         "heading",
         "hwp5",
         "hwpx",
+        "ingest",
         "master",
         "media",
         "note",
@@ -166,6 +170,7 @@ ERROR_CODE_DOMAINS = frozenset(
         "plan",
         "preservation",
         "quality",
+        "recover",
         "ref",
         "save",
         "section",
@@ -174,6 +179,7 @@ ERROR_CODE_DOMAINS = frozenset(
         "style",
         "table",
         "text",
+        "toc",
         "track",
     }
 )
@@ -252,12 +258,14 @@ ERROR_CODES: dict[str, str] = {
     "cell-margin-value": "셀 여백 값이 0 이상 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부).",
     "cell-border-edit-unsupported": "셀 테두리 편집 대상 스타일이 없거나 모호하거나 네 변이 온전하지 않다(또는 색·선 종류가 잘못됐다).",
     "table-position-missing": "표에 hp:pos 가 없어 글자처럼 취급을 바꿀 수 없다.",
+    "table-width-value": "새 표 폭(width)이 0 초과 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부).",
     "table-cell-zone-grid-mismatch": "셀 영역(hp:cellzone)이 새 열 격자에서 같은 셀들을 덮을 수 없어 열 너비를 바꾸지 않았다.",
     # -- 머리말·꼬리말 story ------------------------------------------------
     "story-ambiguous": "그 쪽 종류·id 에 맞는 머리말/꼬리말 story 가 여럿이거나 식별이 모호하다.",
     "story-linkage": "기존 머리말/꼬리말 컨트롤과 구역 적용 정보가 서로 맞지 않는다.",
     # -- 문서 파트(doc.parts) ----------------------------------------------
     "parts-no-header-part": "문서에 header.xml 파트가 없다(doc.parts 경로).",
+    "package-text-replacement-key-empty": "치환할 텍스트(키)가 비어 있다.",
     "parts-auto-spacing-unknown-para-pr": "그 id 의 hh:paraPr 를 문서에서 찾지 못했다.",
     "header-compat-empty-target-program": "target_program 값이 비어 있다.",
     "header-compat-empty-flag-name": "layout compatibility 플래그 이름이 비어 있다.",
@@ -276,9 +284,10 @@ ERROR_CODES: dict[str, str] = {
     "style-ambiguous": "같은 이름을 쓰는 스타일이 둘 이상이다(후보 동봉).",
     "style-argument-conflict": "style 과 style_id_ref 를 동시에 지정했다.",
     "style-list-continue-conflict": "continue_list 와 number_format·start 를 함께 주었다(이어 붙이는 목록은 앞 목록의 번호 모양을 쓴다).",
-    "style-list-level-invalid": "글머리표/번호 수준은 1 이상이어야 한다.",
+    "style-list-level-invalid": "글머리표/번호 수준이 1 이상 10 이하의 int 가 아니다(bool 도 거부, 한/글 목록은 10수준까지다).",
     "style-list-property-failed": "번호 문단모양을 만들지 못했다.",
     "style-font-face-empty": "face 값이 비어 있다.",
+    "style-run-font-by-lang-invalid": "font_by_lang 이 언어 이름 → 글꼴 이름 매핑이 아니다(문자열 아닌 키·값, 같은 언어 두 번).",
     "style-font-lang-invalid": "lang 값이 OWPML 어휘(HANGUL/LATIN/HANJA/JAPANESE/OTHER/SYMBOL/USER) 밖이다.",
     "style-font-type-invalid": "font_type/subst_type 값이 OWPML 어휘(REP/TTF/HFT) 밖이다.",
     "style-font-substitute-incomplete": "대체 글꼴 인자가 일부만 주어졌다(subst_face 가 필요하다).",
@@ -299,6 +308,8 @@ ERROR_CODES: dict[str, str] = {
     "style-number-format-invalid": "번호 형식이 한컴 번호 모양 밖이다(목록·개요 머리와 쪽 번호는 hc:NumberType1 15개, 각주·미주 번호는 hc:NumberType2 19개).",
     "style-line-width-invalid": "선 굵기가 0보다 큰 mm 값이 아니다(목록 밖 값은 가장 가까운 한컴 선 굵기로 쓴다).",
     "style-run-outline-type-invalid": "ensure_run 의 outline 값이 OWPML 어휘(hc:LineType1: NONE/SOLID/DOT/THICK/DASH/DASH_DOT/DASH_DOT_DOT) 밖이다.",
+    "style-list-start-value": "목록 시작 번호(start)가 0 이상 65535 이하의 int 가 아니다(bool 도 거부, 한/글은 16비트로 둔다).",
+    "style-run-size-value": "글자 크기(size, pt)가 0 이상의 수가 아니거나 너무 크다(음수는 0으로 쓰였다).",
     "heading-level-invalid": "개요 수준이 정수가 아니다.",
     "heading-level-out-of-range": "개요 수준이 1~10 밖이다.",
     "heading-style-missing": "이 문서에 해당 수준의 개요 스타일이 없다.",
@@ -307,10 +318,17 @@ ERROR_CODES: dict[str, str] = {
     "page-argument-missing": "text 또는 content 중 하나는 있어야 한다.",
     "page-kind-invalid": "kind 는 'header' 또는 'footer' 여야 한다.",
     "page-columns-invalid": "단 수는 1 이상이어야 한다.",
+    "page-column-gap-value": "같은 폭 단의 간격(same_gap)이 0 이상 32767 이하의 int(HWPUNIT)가 아니다(bool 도 거부).",
+    "page-column-widths-value": "단 너비(column_widths)가 0 이상의 int 로 된 (너비, 간격) 쌍이 아니거나 모두 0이다.",
     "page-orientation-unsupported": "지원하지 않는 용지 방향이다.",
     "page-paper-size-unsupported": "지원하지 않는 용지 규격이다.",
     "page-new-num-kind-invalid": "쪽번호 재시작 kind 값이 OWPML 어휘(hp:AutoNumNewNumType/@numType) 밖이다.",
+    "page-new-num-value": "새 번호(hp:newNum/@num)가 0 이상 65535 이하가 아니다.",
     "page-text-direction-unsupported": "글자 방향 값이 OWPML 어휘(hp:secPr/@textDirection: HORIZONTAL/VERTICAL/VERTICALALL) 밖이다.",
+    "page-size-value": "쪽 크기·여백이 0 이상 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부, 음수는 0으로 쓰였다).",
+    "page-gutter-type-invalid": "제본 방식(gutter_type)이 OWPML 어휘(LEFT_ONLY/LEFT_RIGHT/TOP_BOTTOM) 밖이다(한/글은 LEFT_ONLY 로 읽는다).",
+    "page-number-value": "줄 번호(시작·간격·거리·재시작)나 구역 시작 번호가 한/글이 두는 범위(16비트 번호, 32비트 거리) 밖이다.",
+    "page-border-fill-invalid": "쪽 테두리 page_type·fill_area 가 OWPML 어휘 밖이거나, 오프셋이 0 이상 32767 이하의 int 가 아니다.",
     # -- 양식개체 --------------------------------------------------------
     "field-name-empty": "누름틀 이름이 비어 있다.",
     "field-not-found": "그 선택자로 누름틀을 찾지 못했다.",
@@ -342,14 +360,23 @@ ERROR_CODES: dict[str, str] = {
     "shape-chart-anchor-detached": "만든 차트 앵커가 자기 파트를 가리키지 않는다.",
     "shape-chart-not-created": "만든 차트를 표준 스캔이 다시 찾지 못했다.",
     "shape-caption-side-invalid": "캡션 side 값이 OWPML 어휘(LEFT/RIGHT/TOP/BOTTOM) 밖이다.",
+    "shape-caption-gap-value": "캡션 간격(gap)이 -32768 이상 32767 이하의 int(HWPUNIT)가 아니다(bool 도 거부).",
     "shape-draw-text-vert-align": "도형 글상자 vert_align 값이 OWPML 어휘(hp:subList/@vertAlign, TOP/CENTER/BOTTOM) 밖이다.",
     "shape-original-size-invalid": "add_rectangle/add_ellipse 의 original_size 가 양의 정수 두 개(HWPUNIT)가 아니다.",
+    "shape-size-value": "도형·그림·수식 크기가 0 이상 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부).",
+    "shape-picture-image-value": "그림의 밝기·대비(-100~100)·투명도(alpha, 0~255)가 범위 밖의 int 이거나(bool 도 거부) 효과가 REAL_PIC/GRAY_SCALE/BLACK_WHITE 밖이다.",
+    "shape-picture-effect-value": "그림 그림자·빛남 값이 범위 밖이다(투명도 0~1, 그림자 방향 0~359도 int, 흐림·거리·반경·부드러운 가장자리 0 이상 int, 색 #RRGGBB, 반사 크기 0 초과 1 이하, shadow/glow/reflection 은 PictureShadow/PictureGlow/PictureReflection).",
+    "shape-picture-crop-value": "그림 자르기(crop)가 0 이상의 int 네 개(왼쪽·위·오른쪽·아래, HWPUNIT)가 아니거나 그림을 다 잘라 낸다.",
+    "shape-picture-border-value": "그림 테두리 굵기(line_width)가 0 이상 2**31 미만의 int(HWPUNIT)가 아니다(bool 도 거부).",
+    "shape-rect-ratio-value": "사각형 모서리 곡률(ratio)이 0 이상 2**31 미만의 int(%)가 아니다(bool 도 거부).",
+    "shape-equation-base-unit-value": "수식 기준 크기(base_unit)가 1 이상 2**31 미만의 int(1/100 pt)가 아니다(bool 도 거부).",
     "shape-position-value": "도형 오프셋이 signed 32-bit 정수(HWPUNIT)가 아니다.",
     "shape-position-unsupported": "위치를 바꿀 도형이 떠 있는 개체가 아니거나 hp:pos 가 없다.",
     "shape-position-frame": "도형 기준 프레임·정렬 값이 OWPML 어휘(hp:pos 의 vertRelTo/horzRelTo/vertAlign/horzAlign) 밖이다.",
     "shape-arc-corner-invalid": "add_arc 의 corner 인자가 지원하는 모서리(TOP_LEFT 등) 밖이다.",
     "shape-arc-type-invalid": "add_arc 의 arc_type 인자가 OWPML 어휘(NORMAL/PIE/CHORD) 밖이다.",
     "shape-container-no-members": "add_container 에 부재를 하나도 안 줬다.",
+    "shape-container-picture-image": "그룹의 그림 부재(ContainerMember.picture)에 그림 이진 항목을 안 줬다.",
     "shape-polygon-too-few-points": "add_polygon 에 꼭짓점을 3개 미만으로 줬다.",
     "shape-curve-too-few-points": "add_curve 에 앵커를 2개(닫으면 3개) 미만으로 줬다.",
     "shape-connector-target-inline": "연결선을 이으려는 도형이 글자처럼 놓였거나 instid 가 없다.",
@@ -380,6 +407,9 @@ ERROR_CODES: dict[str, str] = {
     "text-highlight-match-not-found": "문단에서 형광펜으로 감쌀 문자열을 찾지 못했다.",
     "text-highlight-match-crosses-markup": "찾은 구간이 인라인 마크업을 가로질러 안전하게 감쌀 수 없다.",
     "text-highlight-color-invalid": "형광펜 색이 #RRGGBB 6자리 16진 형식이 아니다.",
+    "text-markdown-style-invalid": "MarkdownStyle 의 제목·본문 글자 크기가 양수가 아니거나 제목 크기가 네 개가 아니다.",
+    "text-outline-budget": "outline 의 글자·항목 예산이 1보다 작다.",
+    "text-block-unknown": "outline 의 after 에 준 글 덩어리 id 가 문서에 없다.",
     # -- 저장·패키지 -----------------------------------------------------
     "save-failed": "저장 경로가 아무것도 쓰기 전에 fail-closed 했다.",
     "save-package-contract-violated": "package.save(None) 이 bytes 를 돌려주지 않았다.",
@@ -396,6 +426,14 @@ ERROR_CODES: dict[str, str] = {
     "hwp5-version-unsupported": "FileHeader의 주 버전이 5가 아니다.",
     "hwp5-limit-exceeded": "HWP 5.0 입력이 파싱 상한(스트림 크기·레코드 수·디렉터리 수)을 넘는다.",
     "hwp5-write-unsupported": "HWP 5.0 작성기가 표현할 수 없는 내용이다.",
+    # -- 수식·ingest·복구·차례 (기존 builtin 부모를 유지한 채 편입) ------
+    "equation-conversion": "한글 수식 스크립트와 LaTeX 사이의 변환에 실패했다.",
+    "equation-latex-unsupported": "LaTeX 조각이 검증된 명령 집합 밖의 명령을 쓴다.",
+    "equation-mathml-unavailable": "MathML 변환에 필요한 latex2mathml이 설치돼 있지 않다.",
+    "ingest-failed": "문서를 Markdown으로 들여오지 못했다(시도한 변환기는 attempts).",
+    "ingest-format-unsupported": "이 입력을 받는 변환기가 등록돼 있지 않다.",
+    "recover-unsafe": "로컬 헤더 항목이 있지만 안전하게 복구할 수 없다.",
+    "toc-word-box-extractor-required": "PDF에서 글자 상자를 읽을 방법 없이 차례 쪽 대조를 불렀다.",
     # -- 계획 실행기 -----------------------------------------------------
     "plan-invalid": "편집 계획이 v1 계약을 위반한다.",
 }

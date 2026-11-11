@@ -100,6 +100,7 @@ from .shape_xml import (
     LINE_STYLE,
     OLE_TYPE,
     OUTLINE_STYLE,
+    PICTURE_REVERSE,
     ROTATE_IMAGE,
     SHADOW,
     SHADOW_STYLE,
@@ -119,8 +120,6 @@ _SECTION_DIRECTION = {"HORIZONTAL": 0, "VERTICAL": 2, "VERTICALALL": 4}
 _FIELD_TEXT_ID = {kind: text_id for text_id, kind in FIELD_TYPES.items() if kind != "UNKNOWN"}
 #: Field types whose control record is headed ``%unk`` while the text keeps the real id.
 _FIELD_HEAD_UNKNOWN = frozenset({"MEMO", "PROOFREADING_MARKS_DELETE", "PROOFREADING_MARKS_SIGN"})
-#: Field types written with property bit 1 set.
-_FIELD_PROPS_BIT1 = frozenset({"MAILMERGE", "CROSSREF"})
 #: ``hp:ctrl`` children written as one control: the control character code and id.
 _MARKERS = {
     "pageNum": (21, "pgnp"),
@@ -1145,6 +1144,7 @@ class SectionRecords:
         flags |= ROTATE_IMAGE if _flag(rotation, "rotateimage") else 0
         flags |= _FLAG_TEXT_BOX if draw_text is not None else 0
         flags |= _FLAG_PICTURE if kind == "$pic" else 0
+        flags |= PICTURE_REVERSE if kind == "$pic" and _flag(element, "reverse") else 0
         flags |= _FLAG_OLE if kind == "$ole" else 0
         flags |= _FLAG_GROUP if kind == "$con" or not top else 0
         flags |= _FLAG_GROUP_MEMBER if not top and kind != "$con" else 0
@@ -1375,11 +1375,11 @@ class SectionRecords:
             max(-128, min(127, _int(image, "contrast"))),
             index_of(IMAGE_EFFECT_CODES, image.get("effect") if image is not None else None, 0),
             self.bin_ids.get(ref, 0),
-            _int(image, "alpha") & 0xFF,
+            0,
             _int(element, "instid") & 0xFFFFFFFF,
             effects.flags if effects is not None else 0,
             (_int(dim, "dimwidth"), _int(dim, "dimheight")),
-            bytes(1),
+            bytes([_int(image, "alpha") & 0xFF]),
             effects,
         ).encode()
 
@@ -1566,7 +1566,8 @@ class SectionRecords:
             params.setdefault(item.get("name", ""), item.text or "")
         extra = _number(params.get("Prop")) & 0xFF
         props = _flag(element, "editable") | _flag(element, "dirty") << 15
-        props |= 2 if kind in _FIELD_PROPS_BIT1 else 0
+        # Hancom keeps the parameter "Fiexde" (its spelling) as property bit 1.
+        props |= 2 if params.get("Fiexde", "").strip().lower() in ("1", "true") else 0
         try:
             instance_id = int(begin_id) & 0xFFFFFFFF
         except ValueError:

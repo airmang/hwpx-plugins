@@ -3,8 +3,8 @@
 
 Given a genuine ``.hwpx`` it writes, under ``profiles/<id>/``:
 
-* ``template.hwpx`` — a **body-stripped skeleton**: the real document with its
-  section body reduced to a single ``secPr``-carrying paragraph. ``header.xml``
+* ``template.hwpx`` — a **body-stripped skeleton**: the real document reduced to
+  its first section, whose body is a single ``secPr``-carrying paragraph. ``header.xml``
   (every style/font/borderFill) and the page setup survive untouched, so the
   committed artifact is small and carries no document content (no PII), yet is
   genuinely Hancom-derived — never imagined XML.
@@ -26,6 +26,7 @@ from pathlib import Path
 from lxml import etree  # pyright: ignore[reportAttributeAccessIssue]
 
 from hwpx.document import HwpxDocument
+from hwpx.oxml.namespaces import OPF_NS
 
 import hwpx_automation.office.authoring.design._support as S
 
@@ -160,6 +161,9 @@ def _subList(tc: etree._Element):
 
 def _build_skeleton(source: Path, out_path: Path) -> dict:
     doc = HwpxDocument.open(source)
+    # Only the first section's page setup is reused; later sections would ride
+    # into every composed document with the source's text.
+    _drop_later_sections(doc)
     section = doc.sections[0]
     secpr = S.find_secpr(section.element)
     if secpr is None:
@@ -199,6 +203,26 @@ def _build_skeleton(source: Path, out_path: Path) -> dict:
     }
 
 
+def _drop_later_sections(doc) -> None:
+    """Remove every section after the first, part and manifest item included.
+
+    Older cores remove the section from the document tree but keep its part,
+    which would still be saved with the source text in it.
+    """
+
+    dropped = [section.part_name for section in doc.sections[1:]]
+    for extra in reversed(doc.sections[1:]):
+        doc.remove_section(extra)
+    package = doc.package
+    for item in list(package.manifest_tree().findall(f"./{{{OPF_NS}}}manifest/{{{OPF_NS}}}item")):
+        href = item.get("href", "") or ""
+        if any(name.endswith(href) for name in dropped if href) and item.get("id"):
+            package.remove_manifest_item(item.get("id"))
+    for name in dropped:
+        if package.has_part(name):
+            package.delete(name)
+
+
 def _strip_binaries(doc) -> list[str]:
     """Drop embedded images + the source preview (size + PII) from the skeleton.
 
@@ -207,10 +231,14 @@ def _strip_binaries(doc) -> list[str]:
     skeleton small and content-free while leaving every style in header.xml.
     """
 
-    package = doc._package
+    package = doc.package
     removed: list[str] = []
+    # Image fills defined in header.xml (borderFill imgBrush) are styles, not
+    # body content: dropping their binaries would leave dangling references.
+    kept_ids = _header_binary_refs(package)
+    kept_parts: set[str] = set()
 
-    for item in list(package._manifest_items()):
+    for item in list(package.manifest_tree().findall(f"./{{{OPF_NS}}}manifest/{{{OPF_NS}}}item")):
         href = item.get("href", "") or ""
         media = item.get("media-type", "") or ""
         base = href.rsplit("/", 1)[-1]
@@ -220,10 +248,15 @@ def _strip_binaries(doc) -> list[str]:
             or media.lower().startswith("image/")
         ):
             item_id = item.get("id")
+            if item_id in kept_ids:
+                kept_parts.add(href)
+                continue
             if item_id:
                 package.remove_manifest_item(item_id)
 
     for name in list(package.part_names()):
+        if any(name.endswith(href) for href in kept_parts):
+            continue
         if name.startswith("BinData/") or name.startswith("Preview/PrvImage"):
             try:
                 package.delete(name)
@@ -234,6 +267,16 @@ def _strip_binaries(doc) -> list[str]:
     if package.has_part("Preview/PrvText.txt"):
         package.set_part("Preview/PrvText.txt", b"")  # clear source text (PII)
     return removed
+
+
+def _header_binary_refs(package) -> set[str]:
+    refs: set[str] = set()
+    for path in package.header_paths():
+        for node in package.get_xml(path).iter():
+            for key, value in node.attrib.items():
+                if S.ln(key) == "binaryItemIDRef":
+                    refs.add(value)
+    return refs
 
 
 # Manifest (content.hpf) metadata that carries source PII — author, the person who
@@ -248,7 +291,7 @@ _SCRUB_META_NAMES = {
 def _scrub_metadata(doc) -> None:
     """Blank source-identifying OPF metadata in Contents/content.hpf (PII)."""
 
-    package = doc._package
+    package = doc.package
     try:
         tree = package.manifest_tree()
     except Exception:  # pragma: no cover - defensive

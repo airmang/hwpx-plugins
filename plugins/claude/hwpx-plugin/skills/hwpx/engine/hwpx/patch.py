@@ -14,6 +14,7 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile
 
 from .opc.security import guard_zip_file, read_member, read_zip_members
 from .mutation_report import MutationReport, project_byte_splice, visual_value_from_status
+from .oxml.namespaces import NAMESPACE_URIS
 from .quality import QualityPolicy, SavePipeline
 from .quality.report import VisualCompleteReport
 
@@ -379,11 +380,6 @@ def _patch_section_xml(
     skipped: list[PatchSkipped] = []
 
     for patch in patches:
-        if "\n" in patch.text or "\r" in patch.text:
-            skipped.append(
-                PatchSkipped(section_path, patch.paragraph_index, "line break insertion is unsupported")
-            )
-            continue
         span = spans.get(patch.paragraph_index)
         if span is None:
             skipped.append(PatchSkipped(section_path, patch.paragraph_index, "paragraph index not found"))
@@ -418,15 +414,23 @@ def _patch_section_xml(
     return _apply_edits(section_xml, edits), applied, skipped
 
 
+#: A tab, or a line break typed as "\n", "\r\n" or "\r".
+_TEXT_MARK_SPLIT_RE = re.compile(r"(\t|\r\n|\r|\n)")
+
+
 def _escaped_text(text: str, prefix: bytes) -> bytes:
-    """*text* escaped for ``hp:t``, each tab written as an ``hp:tab`` element.
+    """*text* escaped for ``hp:t``, each tab written as an ``hp:tab`` element and
+    each line break as an ``hp:lineBreak``, the way Hancom writes them.
 
     Hancom reads a tab only as that element; a raw tab character inside
     ``hp:t`` keeps it laying the paragraph out forever.
     """
 
-    tab = b"<" + prefix + b"tab/>"
-    return tab.join(html.escape(part, quote=False).encode("utf-8") for part in text.split("\t"))
+    tab, line_break = b"<" + prefix + b"tab/>", b"<" + prefix + b"lineBreak/>"
+    return b"".join(
+        (tab if part == "\t" else line_break) if index % 2 else html.escape(part, quote=False).encode("utf-8")
+        for index, part in enumerate(_TEXT_MARK_SPLIT_RE.split(text))
+    )
 
 
 def _text_edit_for_paragraph(paragraph: bytes, replacement_text: str) -> tuple[int, int, bytes, str] | None:
@@ -528,6 +532,319 @@ def rewrite_package_parts(
     """
 
     return _rewrite_zip_entries(source, replacements)
+
+
+#: Markup between XML character data: comments, CDATA, processing instructions,
+#: declarations and tags. A quoted attribute value may hold ``>``.
+_MARKUP_RE = re.compile(
+    r"<!--.*?-->|<!\[CDATA\[.*?\]\]>|<\?.*?\?>|<![^>]*>|<(?:[^>\"']|\"[^\"]*\"|'[^']*')*>",
+    re.DOTALL,
+)
+_XML_REFERENCE_RE = re.compile(r"&(#x[0-9A-Fa-f]+|#[0-9]+|lt|gt|amp|quot|apos);")
+_XML_ENTITIES = {"lt": "<", "gt": ">", "amp": "&", "quot": '"', "apos": "'"}
+_TAG_NAME_RE = re.compile(r"<(/?)([^\s/>]+)")
+#: One attribute of a start tag. Walking a tag attribute by attribute keeps an
+#: ``xmlns`` that only appears inside another attribute's value from counting.
+_ATTRIBUTE_RE = re.compile(r"""\s+([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
+_PARAGRAPH_NAMESPACES = frozenset(NAMESPACE_URIS["paragraph"].values())
+
+
+@dataclass(frozen=True)
+class PackageTextReplaceResult:
+    """What :func:`replace_package_text` changed, and whether the output may be written."""
+
+    data: bytes
+    #: Every ZIP entry of the package, in order.
+    entries: tuple[str, ...]
+    scanned_parts: tuple[str, ...]
+    changed_parts: tuple[str, ...]
+    #: Scanned parts left untouched because they are not UTF-8.
+    undecodable_parts: tuple[str, ...]
+    replacements: int
+    layout_caches_removed: int
+    byte_identical: bool
+    zip_method: str
+    open_safety: dict[str, Any]
+    visual_complete: VisualCompleteReport | None = None
+    #: Where the output was written; ``None`` when no path was given or the gate failed.
+    output_path: str | None = None
+
+    @property
+    def ok(self) -> bool:
+        return bool(self.open_safety.get("ok"))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "entries": list(self.entries),
+            "scannedParts": list(self.scanned_parts),
+            "changedParts": list(self.changed_parts),
+            "undecodableParts": list(self.undecodable_parts),
+            "replacements": self.replacements,
+            "layoutCachesRemoved": self.layout_caches_removed,
+            "byteIdentical": self.byte_identical,
+            "zipMethod": self.zip_method,
+            "openSafety": self.open_safety,
+            "visualComplete": (
+                None if self.visual_complete is None else self.visual_complete.to_dict()
+            ),
+            "outputPath": self.output_path,
+        }
+
+    def as_mutation_report(self, *, source: bytes | str | Path | None = None) -> MutationReport:
+        """Project this result onto the ``hwpx.mutation-report/v1`` spine, as
+        :meth:`BytePreservingPatchResult.as_mutation_report` does.
+
+        Pass the original *source* to get real changed-part ranges and a
+        measured preservation summary; without it ranges are ``None``.
+        """
+
+        visual = (
+            visual_value_from_status(self.visual_complete.visual_complete_status)
+            if self.visual_complete is not None
+            else "not_performed"
+        )
+        return project_byte_splice(
+            data=self.data,
+            changed_part_names=self.changed_parts,
+            byte_identical=self.byte_identical,
+            open_safety=self.open_safety,
+            visual=visual,
+            source=source,
+        )
+
+
+def _unescape_xml_text(text: str) -> str:
+    def resolve(match: re.Match[str]) -> str:
+        name = match.group(1)
+        if name.startswith("#x"):
+            return chr(int(name[2:], 16))
+        if name.startswith("#"):
+            return chr(int(name[1:]))
+        return _XML_ENTITIES[name]
+
+    return _XML_REFERENCE_RE.sub(resolve, text)
+
+
+def _escape_xml_text(text: str) -> str:
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _replace_in_text_nodes(xml: str, replacements: Mapping[str, str]) -> tuple[str, int]:
+    """Replace inside character data only; tags, attributes, comments and CDATA stay as they are."""
+
+    pieces: list[str] = []
+    count = 0
+    cursor = 0
+    for markup in (*_MARKUP_RE.finditer(xml), None):
+        end = len(xml) if markup is None else markup.start()
+        segment = xml[cursor:end]
+        if segment:
+            text = _unescape_xml_text(segment)
+            replaced = text
+            for old, new in replacements.items():
+                hits = replaced.count(old)
+                if hits:
+                    replaced = replaced.replace(old, new)
+                    count += hits
+            pieces.append(segment if replaced == text else _escape_xml_text(replaced))
+        if markup is None:
+            break
+        pieces.append(markup.group(0))
+        cursor = markup.end()
+    return "".join(pieces), count
+
+
+def _namespace_declarations(tag: str, start: int) -> dict[str, str]:
+    """The ``xmlns`` / ``xmlns:prefix`` attributes of a start *tag*, read from *start*."""
+
+    declared: dict[str, str] = {}
+    attribute = _ATTRIBUTE_RE.match(tag, start)
+    while attribute is not None:
+        name, double, single = attribute.groups()
+        if name == "xmlns" or name.startswith("xmlns:"):
+            declared[name[6:]] = _unescape_xml_text(double if double is not None else single)
+        attribute = _ATTRIBUTE_RE.match(tag, attribute.end())
+    return declared
+
+
+def _strip_layout_caches(xml: str) -> tuple[str, int]:
+    """Cut every paragraph-namespace ``linesegarray`` element out of *xml*.
+
+    Walks the same markup tokens as :func:`_replace_in_text_nodes`, so text
+    that only looks like the element — inside CDATA, a comment, a processing
+    instruction or an attribute value — is never matched. Prefixes resolve
+    through the ``xmlns`` declarations in scope. Bytes outside the removed
+    elements stay as they are; an element that never closes is left alone.
+    """
+
+    spans: list[tuple[int, int]] = []
+    # One entry per open element: the namespace declarations it adds.
+    scopes: list[dict[str, str]] = []
+    cut_start: int | None = None
+    cut_depth = 0
+    for markup in _MARKUP_RE.finditer(xml):
+        token = markup.group(0)
+        name = _TAG_NAME_RE.match(token)
+        if name is None or token.startswith(("<!", "<?")):
+            continue
+        if name.group(1):
+            if scopes:
+                scopes.pop()
+            if cut_start is not None and len(scopes) == cut_depth:
+                spans.append((cut_start, markup.end()))
+                cut_start = None
+            continue
+        declared = _namespace_declarations(token, name.end())
+        self_closing = token.endswith("/>")
+        if cut_start is None:
+            prefix, _, local = name.group(2).rpartition(":")
+            uri = declared.get(prefix)
+            if uri is None:
+                uri = next((scope[prefix] for scope in reversed(scopes) if prefix in scope), None)
+            if local.lower() == "linesegarray" and uri in _PARAGRAPH_NAMESPACES:
+                if self_closing:
+                    spans.append((markup.start(), markup.end()))
+                    continue
+                cut_start, cut_depth = markup.start(), len(scopes)
+        if not self_closing:
+            scopes.append(declared)
+
+    if not spans:
+        return xml, 0
+    pieces: list[str] = []
+    cursor = 0
+    for start, end in spans:
+        pieces.append(xml[cursor:start])
+        cursor = end
+    pieces.append(xml[cursor:])
+    return "".join(pieces), len(spans)
+
+
+def _gate_and_publish(
+    payload: bytes,
+    output_path: str | Path | None,
+    *,
+    source: str | Path | bytes,
+    source_label: str,
+) -> tuple[dict[str, Any], VisualCompleteReport | None]:
+    """Run the open-safety gate and write *output_path* only when it passes.
+
+    A package the gate cannot even parse counts as failing it: nothing is
+    written and the reason is the open-safety summary.
+    """
+
+    try:
+        report = SavePipeline().run(
+            payload,
+            output_path=output_path,
+            quality=QualityPolicy.transparent(),
+            before=source if isinstance(source, (str, Path)) else None,
+            publish="on_pass",
+            source_label=source_label,
+        )
+    except ValueError as exc:
+        return {"ok": False, "summary": str(exc)}, None
+    open_safety = report.open_safety.detail or {
+        "ok": report.open_safety.ok,
+        "summary": report.open_safety.summary,
+    }
+    if not report.ok:
+        open_safety = {**open_safety, "ok": False}
+    return open_safety, report
+
+
+def replace_package_text(
+    source: str | Path | bytes,
+    replacements: Mapping[str, str],
+    *,
+    output_path: str | Path | None = None,
+    part_suffixes: Sequence[str] = (".xml", ".hpf"),
+) -> PackageTextReplaceResult:
+    """Replace plain text in the character data of the XML parts of a package.
+
+    For template placeholders that may sit anywhere in the package: body,
+    table cells, headers and footers, and ``content.hpf`` metadata. Each part
+    whose name ends with one of *part_suffixes* (case-insensitive) is read as
+    UTF-8 and only its character data is searched — element and attribute
+    names, attribute values, comments and CDATA are not. Keys and values are
+    plain text: ``&`` or ``<`` in them is escaped on the way in. A key split
+    across elements (two runs, say) is not found. *replacements* apply in
+    order, each to the text the previous one left.
+
+    A part that changes loses every ``hp:linesegarray`` layout cache it holds
+    (elements in the paragraph namespace; look-alike text in CDATA, comments,
+    processing instructions or attribute values stays), so Hangul lays out the
+    new text again instead of drawing it into stale line slots. Other parts and ZIP entries keep their bytes. The output goes
+    through the open-safety gate; *output_path* is written atomically only
+    when the gate passes (``ok``), and otherwise left as it was.
+    """
+
+    if any(not old for old in replacements):
+        from .errors import HwpxValueError
+
+        raise HwpxValueError(
+            "replacement key must not be empty",
+            code="package-text-replacement-key-empty",
+            suggestion="Drop the empty key; every key is text to find.",
+        )
+    source_bytes = _read_source_bytes(source)
+    suffixes = tuple(suffix.lower() for suffix in part_suffixes)
+    with ZipFile(io.BytesIO(source_bytes), "r") as archive:
+        guard_zip_file(archive)
+        entries = tuple(info.filename for info in archive.infolist())
+        names = [
+            info.filename
+            for info in archive.infolist()
+            if not info.is_dir() and info.filename.lower().endswith(suffixes)
+        ]
+        parts = read_zip_members(archive, names=names)
+
+    changed: dict[str, bytes] = {}
+    undecodable: list[str] = []
+    total = 0
+    caches_removed = 0
+    for name in names:
+        try:
+            xml = parts[name].decode("utf-8")
+        except UnicodeDecodeError:
+            undecodable.append(name)
+            continue
+        replaced, count = _replace_in_text_nodes(xml, replacements)
+        if not count or replaced == xml:
+            continue
+        replaced, removed = _strip_layout_caches(replaced)
+        changed[name] = replaced.encode("utf-8")
+        total += count
+        caches_removed += removed
+
+    if changed:
+        try:
+            output = _patch_zip_entries(source_bytes, changed)
+            zip_method = "partial-local-record-copy"
+        except ValueError:
+            output = _rewrite_zip_entries(source_bytes, changed)
+            zip_method = "zipfile-rewrite-fallback"
+    else:
+        output, zip_method = source_bytes, "none"
+
+    open_safety, report = _gate_and_publish(
+        output, output_path, source=source, source_label="patch.replace_package_text"
+    )
+    return PackageTextReplaceResult(
+        data=output,
+        entries=entries,
+        scanned_parts=tuple(names),
+        changed_parts=tuple(changed),
+        undecodable_parts=tuple(undecodable),
+        replacements=total,
+        layout_caches_removed=caches_removed,
+        byte_identical=output == source_bytes,
+        zip_method=zip_method,
+        open_safety=open_safety,
+        visual_complete=report,
+        output_path=None if report is None else report.output_path,
+    )
 
 
 def _find_eocd(source: bytes) -> tuple[int, bytes]:
@@ -796,10 +1113,12 @@ def _eocd_with_offsets(eocd: bytes, *, cd_size: int, cd_offset: int) -> bytes:
 
 __all__ = [
     "BytePreservingPatchResult",
+    "PackageTextReplaceResult",
     "ParagraphTextPatch",
     "PatchApplied",
     "PatchSkipped",
     "paragraph_chunks",
     "paragraph_patch",
+    "replace_package_text",
     "rewrite_package_parts",
 ]

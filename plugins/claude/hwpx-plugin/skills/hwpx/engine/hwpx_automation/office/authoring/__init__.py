@@ -8,7 +8,7 @@ import re
 from ast import literal_eval as _literal
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, Mapping, cast, overload
+from typing import Any, Literal, Mapping, Sequence, cast, overload
 
 from hwpx.document import HwpxDocument
 from hwpx.oxml.namespaces import HP as _HP
@@ -108,6 +108,7 @@ _BOOLEAN_QUALITY_GATES = frozenset(
 _INTEGER_QUALITY_GATES = frozenset({"minNonEmptyParagraphs", "minTableCount"})
 _LIST_QUALITY_GATES = frozenset({"requiredText"})
 _COMPUTED_FIELD_RE = re.compile(r"\{\{\s*(.*?)\s*\}\}")
+_PLAN_HEX_COLOR_RE = re.compile(r"#?([0-9A-Fa-f]{6})")
 _COMPUTED_CALL_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*)\)$", re.DOTALL)
 
 
@@ -1082,13 +1083,32 @@ def _bridge_to_design_plan(plan: Mapping[str, Any], profile_id: str):
     and bullet items -> ``body``; tables -> an ``info`` table block. 결문 메타
     fields are appended as trailing ``body`` blocks in canonical order (P0 proved
     these survive a Hancom render).
+
+    Every supported block type is carried (audit ENG-18): ``page_break`` makes
+    the next block start a new page, and ``memo`` keeps its body text as a
+    ``body`` paragraph; the memo itself is attached after composition (see
+    :func:`_attach_profile_memos`). A block type this path cannot place raises
+    instead of disappearing from a document reported as created.
+
+    Returns ``(design_plan, memos)`` where *memos* is the ordered list of
+    ``(anchor text, memo text)`` pairs still to attach.
     """
 
     from .design.plan import Block as _Block
     from .design.plan import DocumentPlan as _DesignPlan
 
     blocks: list = []
-    for raw in plan.get("blocks") or []:
+    memos: list[tuple[str, str]] = []
+    pending_break = False
+
+    def emit(block: Any) -> None:
+        nonlocal pending_break
+        if pending_break:
+            block.page_break_before = True
+            pending_break = False
+        blocks.append(block)
+
+    for index, raw in enumerate(plan.get("blocks") or []):
         if not isinstance(raw, Mapping):
             continue
         block_type = str(raw.get("type") or "paragraph")
@@ -1097,36 +1117,119 @@ def _bridge_to_design_plan(plan: Mapping[str, Any], profile_id: str):
             role: Literal["heading", "subheading"] = (
                 "heading" if level <= 1 else "subheading"
             )
-            blocks.append(_Block(type="paragraph", role=role, text=str(raw.get("text") or "")))
+            emit(_Block(type="paragraph", role=role, text=str(raw.get("text") or "")))
         elif block_type == "paragraph":
-            blocks.append(_Block(type="paragraph", role="body", text=str(raw.get("text") or "")))
+            emit(_Block(type="paragraph", role="body", text=str(raw.get("text") or "")))
         elif block_type == "bullets":
             for item in raw.get("items") or []:
-                blocks.append(_Block(type="paragraph", role="body", text=str(item)))
+                emit(_Block(type="paragraph", role="body", text=str(item)))
         elif block_type == "table":
-            raw_cols = list(raw.get("columns") or raw.get("header") or [])
-            if raw_cols and isinstance(raw_cols[0], Mapping):
-                # document_plan schema: columns=[{key,label}], rows=[{key: value}]
-                keys = [str(c.get("key") or c.get("label") or "") for c in raw_cols]
-                columns = [str(c.get("label") or c.get("key") or "") for c in raw_cols]
-                rows = []
-                for row in raw.get("rows") or []:
-                    if isinstance(row, Mapping):
-                        rows.append([str(row.get(k, "")) for k in keys])
-                    elif isinstance(row, (list, tuple)):
-                        rows.append([str(c) for c in row])
-            else:
-                columns = [str(c) for c in raw_cols]
-                rows = [[str(c) for c in row] for row in (raw.get("rows") or [])]
-            blocks.append(_Block(type="table", role="info", columns=columns, rows=rows))
-        # page_break / memo: no design role -> skipped
+            emit(_bridge_table_block(raw, _Block))
+        elif block_type == "page_break":
+            pending_break = True
+        elif block_type == "memo":
+            text = str(raw.get("text") or "")
+            emit(_Block(type="paragraph", role="body", text=text))
+            memos.append((text, str(raw.get("memo") or "")))
+        else:
+            raise ValueError(
+                f"profile {profile_id!r} cannot place blocks[{index}] of type "
+                f"{block_type!r}; remove metadata.document_type to use the general layout"
+            )
+    for line in _gyeolmun_lines(plan):
+        emit(_Block(type="paragraph", role="body", text=line))
+    if pending_break:
+        # A trailing page break still opens a new (empty) page, as in the general layout.
+        emit(_Block(type="paragraph", role="body", text=""))
+    design_plan = _DesignPlan(profile=profile_id, title=str(plan.get("title") or ""), blocks=blocks)
+    return design_plan, memos
+
+
+def _gyeolmun_lines(plan: Mapping[str, Any]) -> list[str]:
     gyeolmun = plan.get("gyeolmun")
-    if isinstance(gyeolmun, Mapping):
-        for key, label in _GYEOLMUN_FIELDS:
-            value = gyeolmun.get(key)
-            if value:
-                blocks.append(_Block(type="paragraph", role="body", text=f"{label}  {value}"))
-    return _DesignPlan(profile=profile_id, title=str(plan.get("title") or ""), blocks=blocks)
+    if not isinstance(gyeolmun, Mapping):
+        return []
+    return [
+        f"{label}  {gyeolmun[key]}" for key, label in _GYEOLMUN_FIELDS if gyeolmun.get(key)
+    ]
+
+
+def _bridge_table_block(raw: Mapping[str, Any], block_type: Any) -> Any:
+    raw_cols = list(raw.get("columns") or raw.get("header") or [])
+    if raw_cols and isinstance(raw_cols[0], Mapping):
+        # document_plan schema: columns=[{key,label}], rows=[{key: value}]
+        keys = [str(c.get("key") or c.get("label") or "") for c in raw_cols]
+        columns = [str(c.get("label") or c.get("key") or "") for c in raw_cols]
+        rows = []
+        for row in raw.get("rows") or []:
+            if isinstance(row, Mapping):
+                rows.append([str(row.get(k, "")) for k in keys])
+            elif isinstance(row, (list, tuple)):
+                rows.append([str(c) for c in row])
+    else:
+        columns = [str(c) for c in raw_cols]
+        rows = [[str(c) for c in row] for row in (raw.get("rows") or [])]
+    return block_type(type="table", role="info", columns=columns, rows=rows)
+
+
+def _attach_profile_memos(document: HwpxDocument, memos: Sequence[tuple[str, str]]) -> None:
+    """Attach each plan memo to the composed paragraph that holds its text.
+
+    Paragraphs are matched in document order, so two memo blocks with the same
+    text anchor to two different paragraphs. A memo whose paragraph cannot be
+    found fails the creation: a plan block must not vanish silently.
+    """
+
+    if not memos:
+        return
+    paragraphs = list(document.paragraphs)
+    cursor = 0
+    for anchor_text, memo_text in memos:
+        wanted = "".join(anchor_text.split())
+        found = next(
+            (
+                position
+                for position in range(cursor, len(paragraphs))
+                if "".join((paragraphs[position].text or "").split()) == wanted
+            ),
+            None,
+        )
+        if found is None:
+            raise ValueError(
+                "profile compose could not place a memo block: no paragraph holds "
+                f"its text {anchor_text[:40]!r}"
+            )
+        document.notes.add_memo(memo_text, anchor=paragraphs[found])
+        cursor = found + 1
+
+
+def _plan_carry_gaps(
+    normalized_plan: "DocumentPlan | None", document: HwpxDocument, *, page_break_count: int
+) -> list[str]:
+    """Plan blocks that left no trace in the document, as quality gaps.
+
+    The response of ``create_document_from_plan`` reports these in
+    ``quality.gaps`` so a page break or memo that a layout path failed to carry
+    can never again read as ``pass: true`` (audit ENG-18).
+    """
+
+    if normalized_plan is None:
+        return []
+    counts = _block_counts(normalized_plan)
+    gaps: list[str] = []
+    expected_breaks = int(counts.get("page_break", 0) or 0)
+    if page_break_count < expected_breaks:
+        gaps.append(
+            f"plan blocks not carried: page_break (plan {expected_breaks}, document {page_break_count})"
+        )
+    expected_memos = int(counts.get("memo", 0) or 0)
+    if expected_memos:
+        actual_memos = len(list(document.notes.memos))
+        if actual_memos < expected_memos:
+            gaps.append(
+                f"plan blocks not carried: memo (plan {expected_memos}, document {actual_memos})"
+            )
+    return gaps
 
 
 def _korean_proofing_status(plan: Any, normalized_plan: "DocumentPlan | None") -> str:
@@ -1162,13 +1265,19 @@ def create_document_from_plan(
         if profile_id is not None:
             from .design import compose_bytes
 
-            design_plan = _bridge_to_design_plan(plan, profile_id)
+            design_plan, memos = _bridge_to_design_plan(plan, profile_id)
             data, result = compose_bytes(design_plan, production=True)
             if not result.ok:
                 raise ValueError(
                     f"profile compose failed for {profile_id!r}: {result.errors}"
                 )
-            return HwpxDocument.open(data)
+            document = HwpxDocument.open(data)
+            try:
+                _attach_profile_memos(document, memos)
+            except Exception:
+                document.close()
+                raise
+            return document
 
     normalized = normalize_document_plan(plan)
     if normalized.builder_document is not None:
@@ -1347,6 +1456,9 @@ def inspect_document_authoring_quality(
         ]
         if plan_validation is not None and not plan_validation["ok"]:
             gaps.append("document plan validation failed")
+        gaps.extend(
+            _plan_carry_gaps(normalized_plan, document, page_break_count=page_break_count)
+        )
         style_usage = _style_usage(document)
         package_issues = _report_issue_dicts(package_report, kind="package")
         document_issues = _report_issue_dicts(document_report, kind="schema")
@@ -1523,6 +1635,15 @@ def _validate_block(raw_block: Any, *, index: int) -> list[PlanValidationIssue]:
         column_keys, column_issues = _validate_table_columns(raw_block.get("columns"), path=path)
         issues.extend(column_issues)
         issues.extend(_validate_table_rows(raw_block.get("rows"), column_keys, path=path))
+        raw_rows = raw_block.get("rows")
+        issues.extend(
+            _validate_table_cell_styles(
+                raw_block.get("cellStyles"),
+                column_keys,
+                len(raw_rows) if isinstance(raw_rows, list) else 0,
+                path=path,
+            )
+        )
         issues.extend(_computed_field_issues(raw_block.get("caption"), path=f"{path}.caption"))
         issues.extend(_computed_field_issues(raw_block.get("unit"), path=f"{path}.unit"))
         table_profile = str(raw_block.get("tableProfile") or "").strip()
@@ -1827,6 +1948,90 @@ def _validate_table_rows(
     return issues
 
 
+def _validate_table_cell_styles(
+    value: Any,
+    column_keys: list[str],
+    row_count: int,
+    *,
+    path: str,
+) -> list[PlanValidationIssue]:
+    """Check ``cellStyles``: per-cell fill and text colours of body rows."""
+
+    if value is None:
+        return []
+    styles_path = f"{path}.cellStyles"
+    if not isinstance(value, list):
+        return [
+            _plan_issue(
+                "invalid_cell_styles",
+                styles_path,
+                f"{styles_path} must be a list",
+                suggestion='Use [{"row": 0, "column": "<key>", "fillColor": "#RRGGBB"}].',
+            )
+        ]
+    issues: list[PlanValidationIssue] = []
+    for style_index, raw_style in enumerate(value):
+        style_path = f"{styles_path}[{style_index}]"
+        if not isinstance(raw_style, Mapping):
+            issues.append(
+                _plan_issue(
+                    "invalid_cell_style",
+                    style_path,
+                    f"{style_path} must be a mapping",
+                    suggestion="Give row, column and fillColor and/or textColor.",
+                )
+            )
+            continue
+        row = raw_style.get("row")
+        if isinstance(row, bool) or not isinstance(row, int) or not 0 <= row < row_count:
+            issues.append(
+                _plan_issue(
+                    "invalid_cell_style_row",
+                    f"{style_path}.row",
+                    f"{style_path}.row must be a row index from 0 to {row_count - 1}",
+                    suggestion="Count rows from 0 in the rows array; the header row is not counted.",
+                )
+            )
+        column = str(raw_style.get("column") or "")
+        if column_keys and column not in column_keys:
+            issues.append(
+                _plan_issue(
+                    "invalid_cell_style_column",
+                    f"{style_path}.column",
+                    f"{style_path}.column is not a column key: {column!r}",
+                    suggestion="Use one of: " + ", ".join(repr(key) for key in column_keys) + ".",
+                )
+            )
+        colors = [key for key in ("fillColor", "textColor") if raw_style.get(key) is not None]
+        if not colors:
+            issues.append(
+                _plan_issue(
+                    "missing_cell_style_color",
+                    style_path,
+                    f"{style_path} must set fillColor or textColor",
+                    suggestion="Add fillColor and/or textColor as #RRGGBB.",
+                )
+            )
+        for key in colors:
+            if _plan_hex_color(raw_style.get(key)) is None:
+                issues.append(
+                    _plan_issue(
+                        "invalid_cell_style_color",
+                        f"{style_path}.{key}",
+                        f"{style_path}.{key} must be a #RRGGBB colour",
+                        suggestion="Use six hex digits, with or without a leading #.",
+                    )
+                )
+    return issues
+
+
+def _plan_hex_color(value: Any) -> str | None:
+    """Return ``#RRGGBB`` (upper case) for a six-digit hex colour, else None."""
+
+    match = _PLAN_HEX_COLOR_RE.fullmatch(str(value or "").strip())
+    return f"#{match.group(1).upper()}" if match else None
+
+
 def _validate_quality_gates(gates: Mapping[str, Any]) -> list[PlanValidationIssue]:
     issues: list[PlanValidationIssue] = []
     for key, value in gates.items():
@@ -1939,7 +2144,7 @@ def _normalize_block(raw_block: Any, *, index: int) -> DocumentBlock:
             table_data["unit"] = unit
         if table_profile:
             table_data["tableProfile"] = table_profile
-        return DocumentBlock("table", table_data)
+        return DocumentBlock("table", {**table_data, **_plan_table_cell_style_extras(raw_block)})
 
     if block_type == "memo":
         return DocumentBlock(
@@ -2279,6 +2484,23 @@ def _lower_plan_to_builder_document(plan: DocumentPlan) -> BuilderDocument:
     return BuilderDocument(sections=(BuilderSection(children=tuple(children)),))
 
 
+@dataclass(frozen=True)
+class _PlanCellStyle:
+    """Fill and text colour of one body cell (``row`` counts from the first body row)."""
+
+    row: int
+    col: int
+    fill_color: str | None = None
+    text_color: str | None = None
+
+
+@dataclass(frozen=True)
+class _PlanTable(BuilderTable):
+    """A v1 plan table: the public builder table plus the plan's ``cellStyles``."""
+
+    cell_styles: tuple[_PlanCellStyle, ...] = ()
+
+
 def _block_to_builder_nodes(block: DocumentBlock) -> tuple[Any, ...]:
     if block.type == "heading":
         return (
@@ -2313,8 +2535,9 @@ def _block_to_builder_nodes(block: DocumentBlock) -> tuple[Any, ...]:
         if caption:
             nodes.append(BuilderParagraph(text=caption, style="heading"))
         show_header = block.data.get("showHeader") is not False
+        column_index = {str(column["key"]): index for index, column in enumerate(columns)}
         nodes.append(
-            BuilderTable(
+            _PlanTable(
                 header=(
                     tuple(str(column["label"]) for column in columns)
                     if show_header
@@ -2325,6 +2548,15 @@ def _block_to_builder_nodes(block: DocumentBlock) -> tuple[Any, ...]:
                     for row in rows
                 ),
                 column_widths=tuple(_plan_table_column_widths(columns)),
+                cell_styles=tuple(
+                    _PlanCellStyle(
+                        row=int(style["row"]),
+                        col=column_index[str(style["column"])],
+                        fill_color=style.get("fillColor"),
+                        text_color=style.get("textColor"),
+                    )
+                    for style in block.data.get("cellStyles") or ()
+                ),
             ),
         )
         unit = str(block.data.get("unit") or "").strip()
@@ -2365,6 +2597,20 @@ def _plan_table_header_extras(raw_block: Mapping[str, Any]) -> dict[str, Any]:
     if raw_block.get("showHeader") is False:
         return {"showHeader": False}
     return {}
+
+
+def _plan_table_cell_style_extras(raw_block: Mapping[str, Any]) -> dict[str, Any]:
+    """Carry validated ``cellStyles`` with ``#RRGGBB`` colours, dropping unset ones."""
+
+    styles: list[dict[str, Any]] = []
+    for raw_style in raw_block.get("cellStyles") or ():
+        style: dict[str, Any] = {"row": int(raw_style["row"]), "column": str(raw_style["column"])}
+        for key in ("fillColor", "textColor"):
+            color = _plan_hex_color(raw_style.get(key))
+            if color is not None:
+                style[key] = color
+        styles.append(style)
+    return {"cellStyles": styles} if styles else {}
 
 
 def _normalize_columns(value: Any, *, index: int) -> list[dict[str, Any]]:
@@ -2677,7 +2923,45 @@ def _add_builder_table(
         header_fill=table_node.header_shading or _TABLE_HEADER_FILL,
         header_rows=1 if table_node.header else 0,
     )
+    if isinstance(table_node, _PlanTable) and table_node.cell_styles:
+        _apply_plan_cell_styles(
+            document,
+            table,
+            table_node.cell_styles,
+            row_offset=row_offset,
+            base_char_pr_id=tokens["table_cell"],
+        )
     _flow_oversized_authored_table(table)
+
+
+def _apply_plan_cell_styles(
+    document: HwpxDocument,
+    table: Any,
+    cell_styles: tuple[_PlanCellStyle, ...],
+    *,
+    row_offset: int,
+    base_char_pr_id: str,
+) -> None:
+    """Paint the plan's per-cell colours over the table's default styling."""
+
+    for style in cell_styles:
+        cell = table.cell(row_offset + style.row, style.col)
+        if style.fill_color is not None:
+            cell.element.set(
+                "borderFillIDRef",
+                document.styles.ensure_border_fill(
+                    border_color=_TABLE_BORDER_COLOR,
+                    fill_color=style.fill_color,
+                ),
+            )
+        if style.text_color is not None:
+            char_pr_id = document.styles.ensure_run(
+                color=style.text_color,
+                base_char_pr_id=base_char_pr_id,
+            )
+            for paragraph in cell.paragraphs:
+                paragraph.char_pr_id_ref = char_pr_id
+    table.mark_dirty()
 
 
 def _flow_oversized_authored_table(table: Any) -> None:

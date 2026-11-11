@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import re as _re
 from copy import deepcopy
-from typing import Iterable, Mapping, Optional, TypeVar
+from typing import Callable, Iterable, Mapping, Optional, TypeVar
 from uuid import uuid4
 import xml.etree.ElementTree as ET
 
@@ -26,7 +26,7 @@ from .namespaces import (
     tag_namespace,
 )
 from .color import normalize_color
-from .utils import hancom_text_length, line_seg_past_text, tab_elements_in, tabs_as_elements, without_markup_nodes
+from .utils import hancom_text_length, holding_paragraphs, line_seg_past_text, tab_elements_in, tabs_as_elements, without_markup_nodes
 
 register_owpml_namespaces(ET.register_namespace)
 
@@ -266,12 +266,12 @@ _LAYOUT_CACHE_ELEMENT_NAMES = {"linesegarray"}
 
 
 def _clear_paragraph_layout_cache(paragraph: ET.Element) -> int:
-    """Remove cached layout metadata such as ``<hp:lineSegArray>``."""
+    """Remove cached layout metadata such as ``<hp:lineSegArray>``, also of the paragraphs holding its cell or caption."""
 
     removed = 0
-    for child in list(paragraph):
-        if _element_local_name(child).lower() in _LAYOUT_CACHE_ELEMENT_NAMES:
-            paragraph.remove(child)
+    for target in (paragraph, *holding_paragraphs(paragraph)):  # their line is as tall as the table it grows
+        for child in [c for c in target if _element_local_name(c).lower() in _LAYOUT_CACHE_ELEMENT_NAMES]:
+            target.remove(child)
             removed += 1
     return removed
 
@@ -449,75 +449,63 @@ def _is_tab_control_element(node: ET.Element) -> bool:
     return tag_local_name(node.tag) == "ctrl" and (node.get("id") or "").lower() == "tab"
 
 
-def _append_text_with_tabs(run: ET.Element, value: str) -> None:
-    """Insert *value* as one ``hp:t`` with each tab as an ``hp:tab`` inside it.
+#: U+00A0 (NO-BREAK SPACE) -> hp:nbSpace, U+3000 (IDEOGRAPHIC SPACE) -> hp:fwSpace,
+#: written only when asked for (``add_run(expand_special_characters=True)``).
+#: Real corpus (error__20230818__test.hwpx, error__20251107__test.hwpx,
+#: error__20250808__...hwpx) confirms both sit nested inside a single hp:t via
+#: mixed content (<hp:t>before<hp:nbSpace/>after</hp:t>), the same shape
+#: _fill_text_element gives hp:tab and hp:lineBreak.
+_RUN_CHOICE_ATOM_MARKERS: dict[str, str] = {
+    "\u00a0": "nbSpace",
+    "\u3000": "fwSpace",
+}
 
-    That is how Hancom writes a tab (``<hp:t>이름<hp:tab/>홍길동</hp:t>``). An
-    ``hp:tab`` beside ``hp:t`` in the run is dropped when Hancom opens the
-    document, so the tab and the tab stops it would use are lost.
+#: A tab, or a line break typed as "\n", "\r\n" or "\r": written as the element Hancom writes for it.
+_TEXT_MARK_SPLIT_RE = _re.compile(r"(\t|\r\n|\r|\n)")
+#: The same, plus the special spaces of :data:`_RUN_CHOICE_ATOM_MARKERS`.
+_TEXT_MARK_AND_SPACE_SPLIT_RE = _re.compile(r"(\t|\r\n|\r|\n|[" + "".join(_RUN_CHOICE_ATOM_MARKERS) + "])")
+
+
+def _fill_text_element(text_element: ET.Element, value: str, *, special_spaces: bool = False) -> None:
+    """Make *value* the text of the ``hp:t`` *text_element*, each tab as an ``hp:tab`` and each line break
+    (``"\\n"``, ``"\\r\\n"`` or ``"\\r"``) as an ``hp:lineBreak`` inside it.
+
+    That is how Hancom writes them (``<hp:t>이름<hp:tab/>홍길동<hp:lineBreak/>주소</hp:t>``). An ``hp:tab``
+    beside ``hp:t`` in the run is dropped when Hancom opens the document, with the tab stops it would use.
+    *special_spaces* also writes each no-break space as ``hp:nbSpace`` and each full-width space as
+    ``hp:fwSpace`` (:data:`_RUN_CHOICE_ATOM_MARKERS`); without it they stay characters of the text.
     """
 
-    text_tag = _child_tag_like(run, "t", _HP_NS)
-    tab_tag = _child_tag_like(run, "tab", _HP_NS)
-    segments = value.split("\t")
-    text_element = run.makeelement(text_tag, {})
-    text_element.text = _sanitize_text(segments[0])
+    tab_tag = _child_tag_like(text_element, "tab", _HP_NS)
+    break_tag = _child_tag_like(text_element, "lineBreak", _HP_NS)
+    parts = (_TEXT_MARK_AND_SPACE_SPLIT_RE if special_spaces else _TEXT_MARK_SPLIT_RE).split(value)
+    text_element.text = _sanitize_text(parts[0])
+    for mark, segment in zip(parts[1::2], parts[2::2]):
+        marker_name = _RUN_CHOICE_ATOM_MARKERS.get(mark)
+        if marker_name is not None:
+            tag = _child_tag_like(text_element, marker_name, _HP_NS)
+        else:
+            tag = tab_tag if mark == "\t" else break_tag
+        element = text_element.makeelement(tag, {})
+        element.tail = _sanitize_text(segment)
+        text_element.append(element)
+
+
+def _append_text_with_tabs(run: ET.Element, value: str, *, special_spaces: bool = False) -> None:
+    """Insert *value* as one ``hp:t``, each tab and line break (and, with *special_spaces*, each special
+    space) as the element inside it Hancom writes for it (see :func:`_fill_text_element`)."""
+
+    text_element = run.makeelement(_child_tag_like(run, "t", _HP_NS), {})
     run.append(text_element)
-    for segment in segments[1:]:
-        tab_element = text_element.makeelement(tab_tag, {})
-        tab_element.tail = _sanitize_text(segment)
-        text_element.append(tab_element)
-
-
-#: "\n" -> hp:lineBreak, " " (NO-BREAK SPACE) -> hp:nbSpace, "　"
-#: (IDEOGRAPHIC SPACE) -> hp:fwSpace. Real corpus (error__20230818__test.hwpx,
-#: error__20251107__test.hwpx, error__20250808__...hwpx) confirms all three
-#: sit nested inside a single hp:t via mixed content
-#: (<hp:t>before<hp:lineBreak/>after</hp:t>), the same shape
-#: _append_text_with_tabs above gives hp:tab.
-_RUN_CHOICE_ATOM_MARKERS: dict[str, str] = {
-    "\n": "lineBreak",
-    " ": "nbSpace",
-    "　": "fwSpace",
-}
-_RUN_CHOICE_ATOM_SPLIT_RE = _re.compile(
-    "([" + "".join(_RUN_CHOICE_ATOM_MARKERS) + "])"
-)
+    _fill_text_element(text_element, value, special_spaces=special_spaces)
 
 
 def _append_text_with_run_choice_atoms(run: ET.Element, value: str) -> None:
-    """Insert *value* as a single ``hp:t``, expanding embedded markers to
-    the real-corpus ``hp:lineBreak``/``hp:nbSpace``/``hp:fwSpace`` element
-    form (see :data:`_RUN_CHOICE_ATOM_MARKERS`) instead of leaving them as
-    literal characters in the text node."""
+    """Insert *value* as a single ``hp:t``: tabs and line breaks as :func:`_append_text_with_tabs` writes
+    them, and also each no-break or full-width space as its ``hp:nbSpace``/``hp:fwSpace`` element
+    (:data:`_RUN_CHOICE_ATOM_MARKERS`) instead of a literal character in the text node."""
 
-    text_tag = _child_tag_like(run, "t", _HP_NS)
-    text_element = run.makeelement(text_tag, {})
-    run.append(text_element)
-
-    parts = _RUN_CHOICE_ATOM_SPLIT_RE.split(_sanitize_text(value))
-    last_element: ET.Element | None = None
-    pending: list[str] = []
-
-    def _flush() -> None:
-        joined = "".join(pending) or None
-        if last_element is None:
-            text_element.text = joined
-        else:
-            last_element.tail = joined
-        pending.clear()
-
-    for part in parts:
-        marker_name = _RUN_CHOICE_ATOM_MARKERS.get(part)
-        if marker_name is None:
-            pending.append(part)
-            continue
-        _flush()
-        marker_tag = _child_tag_like(run, marker_name, _HP_NS)
-        marker_element = text_element.makeelement(marker_tag, {})
-        text_element.append(marker_element)
-        last_element = marker_element
-    _flush()
+    _append_text_with_tabs(run, value, special_spaces=True)
 
 
 def _normalize_length(value: str | None) -> str:
@@ -1495,22 +1483,31 @@ def _elements_structurally_equal(
     paraPr's shape is too varied for a hand-enumerated field list).
     """
 
-    a_tag = a.tag if isinstance(a.tag, str) else None
-    b_tag = b.tag if isinstance(b.tag, str) else None
-    if a_tag != b_tag:
-        return False
-    a_attrib = {k: v for k, v in a.attrib.items() if k not in ignore_attrs}
-    b_attrib = {k: v for k, v in b.attrib.items() if k not in ignore_attrs}
-    if a_attrib != b_attrib:
-        return False
-    a_children = list(a)
-    b_children = list(b)
-    if len(a_children) != len(b_children):
-        return False
-    return all(
-        _elements_structurally_equal(ac, bc, ignore_attrs=ignore_attrs)
-        for ac, bc in zip(a_children, b_children)
-    )
+    return _compile_element_matcher(b, ignore_attrs=ignore_attrs)(a)
+
+
+def _compile_element_matcher(
+    built: ET.Element, *, ignore_attrs: frozenset[str] = frozenset()
+) -> Callable[[ET.Element], bool]:
+    """Prepare the unchanged side of a structural comparison once for this lookup.
+
+    Attribute names/values, child order and ignored names have the same meaning as
+    ``_elements_structurally_equal``. No state survives the ensure call.
+    """
+
+    tag = built.tag if isinstance(built.tag, str) else None
+    attributes = {key: value for key, value in built.attrib.items() if key not in ignore_attrs}
+    children = tuple(_compile_element_matcher(child, ignore_attrs=ignore_attrs) for child in built)
+
+    def matches(candidate: ET.Element) -> bool:
+        candidate_tag = candidate.tag if isinstance(candidate.tag, str) else None
+        if candidate_tag != tag:
+            return False
+        if {key: value for key, value in candidate.attrib.items() if key not in ignore_attrs} != attributes:
+            return False
+        return len(candidate) == len(children) and all(check(child) for child, check in zip(candidate, children))
+
+    return matches
 
 
 def _find_matching_para_pr(para_properties: ET.Element, built: ET.Element) -> str | None:
@@ -1519,11 +1516,12 @@ def _find_matching_para_pr(para_properties: ET.Element, built: ET.Element) -> st
     ``ensure_paragraph_format`` (kept as a separate function rather than
     inlined) purely to keep that function's own cyclomatic complexity
     under the C901 ratchet -- the loop itself has nothing paraPr-specific
-    beyond calling :func:`_elements_structurally_equal`.
+    beyond applying the per-call prepared structural matcher.
     """
 
+    matches = _compile_element_matcher(built, ignore_attrs=frozenset({"id"}))
     for candidate in para_properties.findall(f"{_HH}paraPr"):
-        if _elements_structurally_equal(candidate, built, ignore_attrs=frozenset({"id"})):
+        if matches(candidate):
             existing_id = candidate.get("id")
             if existing_id:
                 return existing_id

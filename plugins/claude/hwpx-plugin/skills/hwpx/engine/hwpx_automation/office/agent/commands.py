@@ -438,6 +438,32 @@ def _insert_direct_child(
         container.insert(list(container).index(siblings[index]), element)
 
 
+def _drop_layout_cache(paragraph_element: Any | None) -> None:
+    """Remove a paragraph's line layout cache (``hp:linesegarray``) after its content changed.
+
+    The cache records where each line starts in the paragraph's content. Once an object or a run has left or
+    joined the paragraph, the cache no longer matches: Hancom reports a document whose cached lines point past
+    the remaining content as damaged, while without the cache it lays the paragraph out again. Only the
+    paragraph that changed is touched; every other paragraph keeps the cache Hancom wrote. ``None`` (an
+    element no paragraph holds) changes nothing.
+    """
+
+    if paragraph_element is None:
+        return
+    for child in list(paragraph_element):
+        if _local_name(child).lower() == "linesegarray":
+            paragraph_element.remove(child)
+
+
+def _paragraph_element_of(element: Any) -> Any | None:
+    """The nearest ``hp:p`` holding *element*, or ``None`` when it is detached."""
+
+    current = element
+    while current is not None and _local_name(current) != "p":
+        current = current.getparent() if hasattr(current, "getparent") else None
+    return current
+
+
 def _insert_inline(
     view: HwpxAgentDocument,
     parent: NodeRecord,
@@ -468,6 +494,7 @@ def _insert_inline(
         if _local_name(anchor_run) == "ctrl":
             anchor_run = anchor_run.getparent()
         paragraph.element.insert(list(paragraph.element).index(anchor_run), run)
+    _drop_layout_cache(paragraph.element)
     paragraph.section.mark_dirty()
     return run
 
@@ -482,6 +509,7 @@ def _remove_inline_element(element: Any, paragraph: Any) -> None:
         run.remove(control)
     if not list(run) and run in list(paragraph.element):
         paragraph.element.remove(run)
+    _drop_layout_cache(paragraph.element)
     paragraph.section.mark_dirty()
 
 
@@ -493,69 +521,39 @@ def _set_shape_comment(element: Any, value: str) -> None:
     comment.text = value
 
 
-def _next_numeric_identity(document: HwpxDocument) -> str:
-    maximum = 0
-    for section in document.sections:
-        for node in section.element.iter():
-            for name in ("id", "instid", "instId"):
-                value = node.get(name)
-                if value and value.isdigit():
-                    maximum = max(maximum, int(value))
-    return str(maximum + 1)
-
-
 def _table_caption(table: Any, value: str) -> None:
-    element = table.element
-    caption = next((child for child in element if _local_name(child) == "caption"), None)
+    """Set a table's caption text through python-hwpx's own text setters.
+
+    A missing caption is created by ``table.set_caption``. An existing one keeps
+    its paragraph, run and controls (the ``표 1`` auto number): the first run
+    that holds text takes the value through ``HwpxOxmlRun.text`` and every other
+    text run is emptied. Those setters write a line break as ``hp:lineBreak``
+    and a tab as ``hp:tab``, strip characters XML cannot carry, and drop the
+    caption paragraph's line layout cache (audit ENG-08) -- a cache measured
+    for the old caption makes Hancom squeeze the new text into the old lines.
+    """
+
+    caption = table.caption
     if caption is None:
-        caption = element.makeelement(
-            _tag_like(element, "caption"),
-            {"side": "TOP", "fullSz": "0", "width": "0", "gap": "850", "lastWidth": "0"},
-        )
-        sublist = caption.makeelement(
-            _tag_like(caption, "subList"),
-            {
-                "id": "",
-                "textDirection": "HORIZONTAL",
-                "lineWrap": "BREAK",
-                "vertAlign": "TOP",
-                "linkListIDRef": "0",
-                "linkListNextIDRef": "0",
-                "textWidth": "0",
-                "textHeight": "0",
-                "hasTextRef": "0",
-                "hasNumRef": "0",
-            },
-        )
-        paragraph = sublist.makeelement(
-            _tag_like(sublist, "p"),
-            {
-                "id": _next_numeric_identity(table.paragraph.section.document),
-                "paraPrIDRef": "0",
-                "styleIDRef": "0",
-                "pageBreak": "0",
-                "columnBreak": "0",
-                "merged": "0",
-            },
-        )
-        run = paragraph.makeelement(_tag_like(paragraph, "run"), {"charPrIDRef": "0"})
-        text = run.makeelement(_tag_like(run, "t"), {})
-        run.append(text)
-        paragraph.append(run)
-        sublist.append(paragraph)
-        caption.append(sublist)
-        children = list(element)
-        position_index = next(
-            (index + 1 for index, child in enumerate(children) if _local_name(child) == "pos"),
-            min(2, len(children)),
-        )
-        element.insert(position_index, caption)
-    text_nodes = [node for node in caption.iter() if _local_name(node) == "t"]
-    if not text_nodes:
+        table.set_caption(value)
+        table.mark_dirty()
+        return
+    text_runs = [
+        run
+        for paragraph in caption.paragraphs
+        for run in paragraph.runs
+        if any(_local_name(child) == "t" for child in run.element)
+    ]
+    if not text_runs:
         raise AgentContractError("unsupported_content", "table caption has no editable text node")
-    text_nodes[0].text = value
-    for node in text_nodes[1:]:
-        node.text = ""
+    text_runs[0].text = value
+    for run in text_runs[1:]:
+        if run.text:
+            run.text = ""
+    for paragraph in caption.paragraphs:
+        # The setters clear the cache only when the text changed; a caption is
+        # rewritten here on request, so never leave a cache behind it.
+        _drop_layout_cache(paragraph.element)
     table.mark_dirty()
 
 
@@ -623,10 +621,77 @@ def _apply_header_story_set(
     }
 
 
+_LINE_BREAKS = re.compile("\r\n|\r|\n")
+# Private-use stand-ins that carry a tab and a line break through
+# ``set_text_preserving_runs``; the first pair absent from both texts is used.
+_MARK_STAND_INS = tuple((chr(0xF8F0 + 2 * n), chr(0xF8F1 + 2 * n)) for n in range(8))
+
+
+def _expand_text_marks(text_element: Any, tab_mark: str, break_mark: str) -> None:
+    """Turn the stand-in characters inside one ``hp:t`` into ``hp:tab`` / ``hp:lineBreak``."""
+
+    splitter = re.compile("([" + re.escape(tab_mark) + re.escape(break_mark) + "])")
+
+    def expand(value: str | None, insert_at: int) -> tuple[str, int]:
+        parts = splitter.split(value or "")
+        for mark, segment in zip(parts[1::2], parts[2::2]):
+            name = "tab" if mark == tab_mark else "lineBreak"
+            child = text_element.makeelement(_tag_like(text_element, name), {})
+            child.tail = segment or None
+            text_element.insert(insert_at, child)
+            insert_at += 1
+        return parts[0], insert_at
+
+    originals = list(text_element)
+    text_element.text, _ = expand(text_element.text, 0)
+    for original in originals:
+        position = list(text_element).index(original) + 1
+        original.tail = expand(original.tail, position)[0] or None
+
+
+def _set_paragraph_text(native: Any, value: str) -> None:
+    """Replace a paragraph's text, keeping its runs, with tabs and line breaks as elements.
+
+    ``set_text_preserving_runs`` keeps each run's style but deletes a tab and
+    leaves ``"\n"`` as a raw LF in ``hp:t`` (python-hwpx 6.11). Hancom reads a
+    tab only as ``hp:tab`` and a line break only as ``hp:lineBreak`` inside
+    ``hp:t``, so both travel through that call as private-use stand-ins and are
+    turned into the elements afterwards (audit ENG-19).
+    """
+
+    value = _LINE_BREAKS.sub("\n", value)
+    if "\t" not in value and "\n" not in value:
+        native.set_text_preserving_runs(value)
+        return
+    existing = native.text or ""
+    pair = next(
+        (
+            (tab_mark, break_mark)
+            for tab_mark, break_mark in _MARK_STAND_INS
+            if not {tab_mark, break_mark} & set(value + existing)
+        ),
+        None,
+    )
+    if pair is None:
+        raise AgentContractError(
+            "unsupported_content",
+            "paragraph text mixes tabs or line breaks with reserved private-use characters",
+            target="paragraph.text",
+        )
+    tab_mark, break_mark = pair
+    native.set_text_preserving_runs(value.replace("\t", tab_mark).replace("\n", break_mark))
+    for run in native.runs:
+        for child in list(run.element):
+            if _local_name(child) == "t":
+                _expand_text_marks(child, tab_mark, break_mark)
+    _drop_layout_cache(native.element)
+    native.section.mark_dirty()
+
+
 def _apply_set_paragraph(document: HwpxDocument, native: Any, properties: Mapping[str, Any]) -> None:
     if "text" in properties:
         try:
-            native.set_text_preserving_runs(properties["text"])
+            _set_paragraph_text(native, properties["text"])
         except ValueError as exc:
             raise AgentContractError(
                 "unsupported_content", str(exc), target="paragraph.text"
@@ -648,6 +713,18 @@ def _apply_set_paragraph(document: HwpxDocument, native: Any, properties: Mappin
         )
 
 
+_FONT_LANGS = ("HANGUL", "LATIN", "HANJA", "JAPANESE", "OTHER", "SYMBOL", "USER")
+
+
+def _font_is_declared(document: HwpxDocument, face: str) -> bool:
+    """Whether any language block of the document declares *face*."""
+
+    target = str(face).strip()
+    return bool(target) and any(
+        font.face == target for lang in _FONT_LANGS for font in document.styles.fonts(lang).values()
+    )
+
+
 def _apply_set_run(document: HwpxDocument, native: Any, properties: Mapping[str, Any]) -> None:
     if "text" in properties:
         native.text = properties["text"]
@@ -663,10 +740,7 @@ def _apply_set_run(document: HwpxDocument, native: Any, properties: Mapping[str,
             flags[name] = properties[name]
     if set(properties) - {"text"}:
         requested_font = properties.get("fontName")
-        if requested_font is not None and not any(
-            header.font_ref_for_face(requested_font) is not None
-            for header in document._root.headers  # type: ignore[attr-defined]
-        ):
+        if requested_font is not None and not _font_is_declared(document, requested_font):
             raise AgentContractError(
                 "not_found", f"font is not declared by the document: {requested_font!r}", target="run.fontName"
             )
@@ -834,7 +908,8 @@ def _add(
         if position["mode"] != "append":
             parent.native.element.remove(created.element)
             _insert_direct_child(view, parent, kind, created.element, position)
-            parent.native.section.mark_dirty()
+        _drop_layout_cache(parent.native.element)
+        parent.native.section.mark_dirty()
         return created
     if kind == "table":
         created = parent.native.add_table(
@@ -896,7 +971,9 @@ def _remove(document: HwpxDocument, record: NodeRecord) -> None:
     if record.kind == "paragraph":
         native.remove()
     elif record.kind == "run":
+        paragraph_element = native.paragraph.element
         native.remove()
+        _drop_layout_cache(paragraph_element)
     elif record.kind == "table":
         _remove_inline_element(native.element, native.paragraph)
     elif record.kind == "row":
@@ -914,6 +991,7 @@ def _remove(document: HwpxDocument, record: NodeRecord) -> None:
         if parent is None:
             raise AgentContractError("not_found", "picture is detached", target=record.path)
         parent.remove(_element(record.native))
+        _drop_layout_cache(_paragraph_element_of(parent))
         _mark_containing_section(document, parent)
     elif record.kind == "shape":
         _remove_inline_element(native.element, native.paragraph)
@@ -934,6 +1012,7 @@ def _detach(view: HwpxAgentDocument, record: NodeRecord) -> Any:
         record.native.section.mark_dirty()
     elif record.kind == "run":
         record.native.paragraph.element.remove(element)
+        _drop_layout_cache(record.native.paragraph.element)
         record.native.paragraph.section.mark_dirty()
     elif record.kind in _INLINE_KINDS:
         paragraph = record.native.paragraph if hasattr(record.native, "paragraph") else None
@@ -1000,8 +1079,12 @@ def _move(
         else:
             container.insert(list(container).index(siblings[anchor_index]), detached)
         if source.kind == "paragraph":
+            # The paragraph may now sit in a column or cell of another width;
+            # its cached lines were measured where it came from.
+            _drop_layout_cache(detached)
             parent.native.mark_dirty()
         elif source.kind == "run":
+            _drop_layout_cache(parent.native.element)
             parent.native.section.mark_dirty()
         else:
             _refresh_table_rows(source.native.table)
@@ -1155,8 +1238,10 @@ def _copy_node(
     if source.kind in {"paragraph", "run", "row"}:
         _insert_direct_child(view, parent, source.kind, clone, position)
         if source.kind == "paragraph":
+            _drop_layout_cache(clone)  # a copy never carries the source's cached lines
             parent.native.mark_dirty()
         elif source.kind == "run":
+            _drop_layout_cache(parent.native.element)
             parent.native.section.mark_dirty()
         else:
             _refresh_table_rows(parent.native)
@@ -1284,6 +1369,28 @@ def _finalize_command_result(
     return result_path, result_parent, result_stable_id
 
 
+def _text_only_batch_keeps_projection(text_scope: TextScope) -> bool:
+    """Whether one projection can serve every command of the batch.
+
+    Re-projecting the whole document after each command made a 50-cell form
+    fill project the document 51 times (audit EFF-17). The projection is only
+    reused for the narrow case that is provably unaffected by the commands
+    themselves: every command is a text-only ``set`` on an existing paragraph,
+    run or cell, and :class:`TextScope` has already refused targets that
+    contain one another. Such an edit changes text inside its own target; the
+    paths, identities and native bindings of every *other* target stay exactly
+    as projected, and a repeated target keeps its element. Form fields and
+    header stories (which add mirror controls) and every structural command
+    still re-project after each command. ``TextScope.verify`` afterwards
+    compares the whole candidate against the input outside those targets.
+    """
+
+    targets = text_scope.targets
+    return targets is not None and all(
+        target.kind in {"paragraph", "run", "cell"} for target in targets
+    )
+
+
 def apply_document_commands(
     batch: Mapping[str, Any],
     *,
@@ -1338,6 +1445,7 @@ def apply_document_commands(
         with HwpxDocument.open(input_data) as document:
             view = HwpxAgentDocument.from_document(document, revision=input_revision)
             text_scope = TextScope.bind(view, normalized["commands"])
+            keep_view = _text_only_batch_keeps_projection(text_scope)
             for index, command in enumerate(normalized["commands"]):
                 _call_fault(fault_injector, "before_command", index)
                 command_id = command["commandId"]
@@ -1348,7 +1456,8 @@ def apply_document_commands(
                 identity_changes.extend(generated)
 
                 _call_fault(fault_injector, "after_command", index)
-                view = HwpxAgentDocument.from_document(document, revision=input_revision)
+                if not keep_view:
+                    view = HwpxAgentDocument.from_document(document, revision=input_revision)
                 result_path, result_parent, result_stable_id = _finalize_command_result(
                     view,
                     command,

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Sequence
 import warnings
 import xml.etree.ElementTree as ET
@@ -25,7 +24,11 @@ from ._document_primitives import (
     _paragraph_id,
 )
 from .shape_position import (
-    _shape_set_position, build_at_original_size, resize_group, validate_draw_text_vert_align,
+    PictureGlow, PictureReflection, PictureShadow, append_picture_effects, validate_picture_effects,
+    _shape_set_position, build_at_original_size, resize_group, validate_draw_text_vert_align, validate_picture_align,
+    validate_caption_gap, validate_caption_side, validate_picture_border, validate_picture_crop, validate_picture_image,
+    validate_rect_ratio,
+    validate_shape_size,
 )
 
 if TYPE_CHECKING:
@@ -178,8 +181,7 @@ def _build_shape_common_children(
     AbstractShapeObjectType children (last, via ``_build_shape_base_children``):
         sz, pos, outMargin
     """
-    w = str(width)
-    h = str(height)
+    w, h = map(str, validate_shape_size(width, height))  # Hancom reads a negative size as 0
     the_id = inst_id or _object_id()
 
     parent.set("id", the_id)
@@ -344,7 +346,7 @@ def _create_rectangle_element(
     treat_as_char: bool = True,
 ) -> ET.Element:
     """Build a complete ``<hp:rect>`` element matching real HWPX output."""
-    el = ET.Element(f"{_HP}rect", {"ratio": str(ratio)})
+    el = ET.Element(f"{_HP}rect", {"ratio": str(validate_rect_ratio(ratio))})
     _build_shape_common_children(el, width, height, treat_as_char=treat_as_char)
     _build_drawing_object_children(
         el, line_color=line_color, line_width=line_width,
@@ -511,187 +513,6 @@ def _closed_points(points: Sequence[tuple[int, int]]) -> list[tuple[int, int]]:
     return closed
 
 
-@dataclass(frozen=True)
-class ContainerMember:
-    """One shape inside a group (``<hp:container>``), placed at (*x*, *y*)
-    in the group's own top-left-anchored local coordinate space (HWPUNIT —
-    the same convention :func:`_create_polygon_element` uses for its own
-    vertices). Construct via :meth:`rect`, :meth:`ellipse`, or
-    :meth:`polygon` — not the bare constructor, which expects an
-    already-built element.
-
-    Real corpus (``reader_writer__SimpleContainer.hwpx``, 3 members, plus
-    71 more containers across two other real documents): a group member is
-    a complete, standalone shape element — the exact same
-    ``offset``/``orgSz``/``curSz``/``flip``/``rotationInfo``/
-    ``renderingInfo`` envelope plus type geometry a freestanding shape
-    would have — except it drops the ``AbstractShapeObjectType`` tail
-    (``sz``/``pos``/``outMargin``/``shapeComment``; the *group* carries
-    that, not the member) and its ``groupLevel`` is ``"1"`` instead of
-    ``"0"``. :func:`_create_container_element` applies both adjustments
-    when it assembles the members passed here into the group.
-    """
-
-    element: ET.Element
-    x: int
-    y: int
-
-    @classmethod
-    def rect(
-        cls,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
-        *,
-        ratio: int = 0,
-        line_color: str = "#000000",
-        line_width: str = "33",
-        fill_color: str | None = None,
-    ) -> "ContainerMember":
-        """A rectangle member — see :func:`_create_rectangle_element`."""
-
-        element = _create_rectangle_element(
-            width, height, ratio=ratio, line_color=line_color,
-            line_width=line_width, fill_color=fill_color,
-        )
-        return cls(element, x, y)
-
-    @classmethod
-    def ellipse(
-        cls,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
-        *,
-        line_color: str = "#000000",
-        line_width: str = "33",
-        fill_color: str | None = None,
-    ) -> "ContainerMember":
-        """An ellipse member — see :func:`_create_ellipse_element`."""
-
-        element = _create_ellipse_element(
-            width, height, line_color=line_color, line_width=line_width,
-            fill_color=fill_color,
-        )
-        return cls(element, x, y)
-
-    @classmethod
-    def polygon(
-        cls,
-        x: int,
-        y: int,
-        points: Sequence[tuple[int, int]],
-        *,
-        line_color: str = "#000000",
-        line_width: str = "33",
-        fill_color: str | None = None,
-        closed: bool = True,
-    ) -> "ContainerMember":
-        """A polygon member — see :func:`_create_polygon_element`. It is
-        closed (the first vertex repeated at the end) unless *closed* is
-        false."""
-
-        element = _create_polygon_element(
-            _closed_points(points) if closed else points,
-            line_color=line_color, line_width=line_width, fill_color=fill_color,
-        )
-        return cls(element, x, y)
-
-
-def _member_size(member: "ContainerMember") -> tuple[int, int]:
-    org_sz = member.element.find(f"{_HP}orgSz")
-    if org_sz is None:  # pragma: no cover - defensive, every builder sets this
-        return 0, 0
-    return int(org_sz.get("width", "0")), int(org_sz.get("height", "0"))
-
-
-def _create_container_element(
-    members: Sequence["ContainerMember"],
-    *,
-    treat_as_char: bool = True,
-) -> ET.Element:
-    """Build a complete ``<hp:container>`` grouping *members*.
-
-    Real corpus (74 containers total across 3 vendored files —
-    ``reader_writer__SimpleContainer.hwpx`` plus two "error__" regression
-    fixtures): the container itself is structured exactly like any other
-    drawing object — ``numberingType="PICTURE"`` uniformly observed, own
-    ``offset``/``orgSz``/``curSz``/``flip``/``rotationInfo``/
-    ``renderingInfo`` + ``sz``/``pos``/``outMargin``/``shapeComment`` tail —
-    except its payload is complete member shapes instead of geometry.
-    ``orgSz`` is the union bounding box of every member's own (*x*, *y*,
-    ``orgSz``) in the group's local space, so members never need to be
-    pre-translated by the caller.
-    """
-    if not members:
-        from ..errors import HwpxValueError
-
-        raise HwpxValueError(
-            "add_container requires at least one member",
-            code="shape-container-no-members",
-            context={},
-            suggestion="Pass one or more ContainerMember instances "
-            "(ContainerMember.rect/.ellipse/.polygon).",
-        )
-
-    min_x = min(m.x for m in members)
-    min_y = min(m.y for m in members)
-    max_x = max(m.x + _member_size(m)[0] for m in members)
-    max_y = max(m.y + _member_size(m)[1] for m in members)
-    width = max_x - min_x
-    height = max_y - min_y
-
-    el = ET.Element(f"{_HP}container")
-    _build_shape_common_children(el, width, height, treat_as_char=treat_as_char)
-    el.set("numberingType", "PICTURE")
-
-    for member in members:
-        member_el = member.element
-        local_x = member.x - min_x
-        local_y = member.y - min_y
-
-        offset = member_el.find(f"{_HP}offset")
-        if offset is not None:
-            offset.set("x", str(local_x))
-            offset.set("y", str(local_y))
-        rendering_info = member_el.find(f"{_HP}renderingInfo")
-        if rendering_info is not None:
-            trans = rendering_info.find(f"{_HC}transMatrix")
-            if trans is not None:
-                # Real corpus (SimpleContainer.hwpx): a member's transMatrix
-                # translation component mirrors its own offset exactly.
-                trans.set("e3", str(local_x))
-                trans.set("e6", str(local_y))
-
-        # Real corpus: group members share a small, non-unique id — "0" in
-        # 71 of 74 observed instances (SimpleContainer.hwpx's 3 members all
-        # share "2" instead, so the value itself carries no meaning). The
-        # unique identifier is instid, kept as-is from the member's own
-        # creation.
-        member_el.set("id", "0")
-        member_el.set("groupLevel", "1")
-        # Real corpus: every group member is TOP_AND_BOTTOM; the group's own
-        # placement decides how text goes around it.
-        member_el.set("textWrap", "TOP_AND_BOTTOM")
-
-        # AbstractShapeObjectType tail (sz/pos/outMargin/shapeComment) is
-        # container-level only — every observed member carries none of it.
-        for tail_name in ("sz", "pos", "outMargin", "shapeComment"):
-            tail_el = member_el.find(f"{_HP}{tail_name}")
-            if tail_el is not None:
-                member_el.remove(tail_el)
-
-        el.append(member_el)
-
-    _build_shape_base_children(el, width, height)
-    # Real corpus: the container itself (not its members) closes with an
-    # empty shapeComment — the same tail hp:pic already appends.
-    _append_child(el, f"{_HP}shapeComment", {})
-    return el
-
-
 def _create_picture_element(
     binary_item_id_ref: str,
     width: int,
@@ -701,9 +522,38 @@ def _create_picture_element(
     treat_as_char: bool = True,
     pos_overrides: dict[str, str | int] | None = None,
     text_wrap: str | None = None,
+    brightness: int = 0,
+    contrast: int = 0,
+    effect: str = "REAL_PIC",
+    alpha: int = 0,
+    line_color: str | None = None,
+    line_width: int = 33,
+    crop: tuple[int, int, int, int] | None = None,
+    shadow: PictureShadow | None = None,
+    glow: PictureGlow | None = None,
+    soft_edge: int | None = None,
+    reflection: PictureReflection | None = None,
 ) -> ET.Element:
-    """Build a ``<hp:pic>`` element using the corpus-observed picture shape."""
+    """Build a ``<hp:pic>`` element using the corpus-observed picture shape: the image *width* x *height* with
+    *crop* (left, top, right, bottom, HWPUNIT) cut from its sides at the same scale, as Hancom crops a picture
+    (``hp:imgDim`` the whole picture, ``hp:imgClip`` the part kept in it, the picture drawn as large as that part),
+    adjusted by *brightness*,
+    *contrast*, *effect* and *alpha* (see :func:`~hwpx.oxml.shape_position.validate_picture_image`), and with a
+    solid border *line_width* wide when *line_color* is given (``hp:lineShape`` right before ``hp:imgRect``, where
+    the schema's PictureType has it and where it stands in Hancom's pictures whichever of their two child orders they
+    use; Hancom draws the border and saves it there wherever it is read)."""
 
+    brightness, contrast, effect, alpha = validate_picture_image(brightness, contrast, effect, alpha)
+    validate_picture_border(line_width)  # given or not: a bad width is not dropped quietly
+    validate_shape_size(width, height)
+    left, top, right, bottom = validate_picture_crop(crop, width, height)
+    validate_picture_effects(shadow, glow, soft_edge, reflection)
+    whole_width, whole_height = width, height
+    width, height = width - left - right, height - top - bottom  # as drawn
+    border = None
+    if line_color is not None:
+        border = dict(_DEFAULT_LINE_SHAPE_ATTRS, color=_normalize_color(line_color) or "#000000",
+                      width=str(line_width))
     el = ET.Element(f"{_HP}pic", {
         "textWrap": text_wrap or "SQUARE",
         "textFlow": "BOTH_SIDES",
@@ -712,16 +562,18 @@ def _create_picture_element(
     _build_shape_common_children(el, width, height, treat_as_char=treat_as_char)
     el.set("numberingType", "PICTURE")
 
+    if border is not None:
+        _append_child(el, f"{_HP}lineShape", border)
     rect = _append_child(el, f"{_HP}imgRect", {})
     _append_child(rect, f"{_HC}pt0", {"x": "0", "y": "0"})
     _append_child(rect, f"{_HC}pt1", {"x": str(width), "y": "0"})
     _append_child(rect, f"{_HC}pt2", {"x": str(width), "y": str(height)})
     _append_child(rect, f"{_HC}pt3", {"x": "0", "y": str(height)})
     _append_child(el, f"{_HP}imgClip", {
-        "left": "0",
-        "right": str(width),
-        "top": "0",
-        "bottom": str(height),
+        "left": str(left),
+        "right": str(whole_width - right),
+        "top": str(top),
+        "bottom": str(whole_height - bottom),
     })
     _append_child(el, f"{_HP}inMargin", {
         "left": "0",
@@ -730,23 +582,23 @@ def _create_picture_element(
         "bottom": "0",
     })
     _append_child(el, f"{_HP}imgDim", {
-        "dimwidth": str(width),
-        "dimheight": str(height),
+        "dimwidth": str(whole_width),
+        "dimheight": str(whole_height),
     })
     _append_child(el, f"{_HC}img", {
         "binaryItemIDRef": binary_item_id_ref,
-        "bright": "0",
-        "contrast": "0",
-        "effect": "REAL_PIC",
-        "alpha": "0",
+        "bright": str(brightness),
+        "contrast": str(contrast),
+        "effect": effect,
+        "alpha": str(alpha),
     })
-    _append_child(el, f"{_HP}effects", {})
+    append_picture_effects(_append_child(el, f"{_HP}effects", {}), shadow, glow, soft_edge, reflection)
     _build_shape_base_children(el, width, height)
 
     if align:
         pos = el.find(f"{_HP}pos")
         if pos is not None:
-            pos.set("horzAlign", align.upper())
+            pos.set("horzAlign", validate_picture_align(align) or "LEFT")
     if pos_overrides:
         pos = el.find(f"{_HP}pos")
         if pos is not None:
@@ -824,6 +676,89 @@ def _paragraph_insert_shape_element(
     run.append(element)
     self.section.mark_dirty()
     return HwpxOxmlShape(element, self)
+
+
+def _paragraph_add_picture(
+    self: "HwpxOxmlParagraph",
+    binary_item_id_ref: str,
+    *,
+    width: int = 14400,
+    height: int = 14400,
+    align: str | None = None,
+    treat_as_char: bool = True,
+    pos_overrides: dict[str, str | int] | None = None,
+    text_wrap: str | None = None,
+    brightness: int = 0,
+    contrast: int = 0,
+    effect: str = "REAL_PIC",
+    alpha: int = 0,
+    line_color: str | None = None,
+    line_width: int = 33,
+    crop: tuple[int, int, int, int] | None = None,
+    shadow: PictureShadow | None = None,
+    glow: PictureGlow | None = None,
+    soft_edge: int | None = None,
+    reflection: PictureReflection | None = None,
+    run_attributes: dict[str, str] | None = None,
+    char_pr_id_ref: str | int | None = None,
+) -> HwpxOxmlInlineObject:
+    """Insert a corpus-shaped ``<hp:pic>`` referencing embedded BinData.
+
+    With ``treat_as_char=False`` and ``pos_overrides`` the picture is placed as a
+    **floating** object: ``pos_overrides`` sets ``horz/vertRelTo`` (e.g. ``PAPER``),
+    ``horz/vertAlign`` and ``horz/vertOffset`` (HWPUNIT, non-negative) on the
+    ``<hp:pos>`` so the image lands at a fixed page position (used by 직인 placement).
+    ``text_wrap`` overrides the pic's ``textWrap`` (e.g. ``IN_FRONT_OF_TEXT`` so a
+    seal stamped over a line does not reflow the text it overlaps).
+
+    *brightness* and *contrast* (-100 to 100), *effect* (``REAL_PIC``, ``GRAY_SCALE`` or ``BLACK_WHITE``) and
+    *alpha* (transparency, 0 opaque to 255 not drawn) adjust the image as Hancom draws it; *line_color* (with
+    *line_width*, HWPUNIT) gives the picture a solid border. *crop* ``(left, top, right, bottom)`` cuts that much
+    (HWPUNIT) from the sides of the *width* x *height* picture at the same scale: the picture is drawn
+    ``width - left - right`` by ``height - top - bottom``. A value Hancom does not draw is refused
+    *shadow* (:class:`~hwpx.oxml.PictureShadow`) and *glow*
+    (:class:`~hwpx.oxml.PictureGlow`) draw a shadow and a glow, the picture taking as much more room; *soft_edge*
+    (HWPUNIT) fades its edge and *reflection* (:class:`~hwpx.oxml.PictureReflection`) reflects it below.
+    (``shape-picture-image-value``, ``shape-picture-border-value``, ``shape-picture-crop-value``,
+    ``shape-picture-effect-value``) before anything
+    is added.
+    """
+
+    if pos_overrides and treat_as_char:
+        raise ValueError(
+            "pos_overrides is for floating placement; pass treat_as_char=False "
+            "(a PAPER-relative <hp:pos> on an inline pic is contradictory)"
+        )
+
+    element = _create_picture_element(  # checked before its run is added
+        str(binary_item_id_ref),
+        width,
+        height,
+        align=align,
+        treat_as_char=treat_as_char,
+        pos_overrides=pos_overrides,
+        text_wrap=text_wrap,
+        brightness=brightness,
+        contrast=contrast,
+        effect=effect,
+        alpha=alpha,
+        line_color=line_color,
+        line_width=line_width,
+        crop=crop,
+        shadow=shadow,
+        glow=glow,
+        soft_edge=soft_edge,
+        reflection=reflection,
+    )
+    run = self._create_run_for_object(
+        run_attributes,
+        char_pr_id_ref=char_pr_id_ref,
+    )
+    if type(element) is not type(run):
+        element = LET.fromstring(ET.tostring(element, encoding="utf-8"))
+    run.append(element)
+    self.section.mark_dirty()
+    return HwpxOxmlInlineObject(element, self)
 
 
 def _paragraph_add_line(
@@ -994,9 +929,11 @@ def _paragraph_add_container(
     (member envelope, ``groupLevel``, shared ``id`` convention).
     """
     el = _create_container_element(members, treat_as_char=treat_as_char)
-    return self._insert_shape_element(
+    shape = self._insert_shape_element(
         el, run_attributes=run_attributes, char_pr_id_ref=char_pr_id_ref,
     )
+    _write_member_texts(members, shape.element, self.section)  # in the section now: paragraph ids unique there
+    return shape
 
 
 def _paragraph_shapes(self: "HwpxOxmlParagraph") -> list["HwpxOxmlShape"]:
@@ -1022,10 +959,6 @@ def _paragraph_shapes(self: "HwpxOxmlParagraph") -> list["HwpxOxmlShape"]:
 # table cells already use. ``Caption``/``DrawText`` below are thin live views
 # reused by ``HwpxOxmlTable`` (table.py), ``HwpxOxmlShape``, and
 # ``HwpxOxmlInlineObject`` (this module) rather than duplicated per host.
-
-#: ``hp:caption/@side`` 어휘(스키마 기본값은 LEFT). 실코퍼스 15건 전수는
-#: TOP 14 · BOTTOM 1 — LEFT/RIGHT 관측 0(테두리 옆 캡션은 실무에서 안 쓴다).
-_CAPTION_SIDES = frozenset({"LEFT", "RIGHT", "TOP", "BOTTOM"})
 
 #: 실코퍼스 15건 전수: fullSz="0"(전부) · width="8504"(전부, 호스트 크기와
 #: 무관한 고정값) · gap="850"(11) 또는 "566"(4, 스키마 기본은 850).
@@ -1227,16 +1160,8 @@ def _write_caption(
     gap: int,
     char_pr_id_ref: str | int | None,
 ) -> Caption:
-    normalized_side = side.strip().upper()
-    if normalized_side not in _CAPTION_SIDES:
-        from ..errors import HwpxValueError
-
-        raise HwpxValueError(
-            f"unsupported caption side {side!r}",
-            code="shape-caption-side-invalid",
-            context={"requested": side, "available": sorted(_CAPTION_SIDES)},
-            suggestion=f"side 는 {sorted(_CAPTION_SIDES)} 중 하나여야 합니다.",
-        )
+    normalized_side = validate_caption_side(side)
+    gap = validate_caption_gap(gap)  # before anything changes: Hancom keeps a signed 16-bit gap
 
     element = host.find(f"{_HP}caption")
     if element is None:
@@ -1383,6 +1308,7 @@ class HwpxOxmlShape:
         :class:`UserWarning` is raised, because the drawn shape cannot follow
         the requested size.
         """
+        validate_shape_size(width, height)
         if self.shape_type == "container" and resize_group(self, width, height):
             return  # a group is drawn at its sz: see shape_position.resize_group
         old_width, old_height = self._geometry_size()
@@ -1597,3 +1523,7 @@ class HwpxOxmlShape:
         return f"<HwpxOxmlShape type={self.shape_type!r} id={self.inst_id!r}>"
 
 __all__ = ["Caption", "ContainerMember", "DrawText", "HwpxOxmlInlineObject", "HwpxOxmlShape"]
+
+
+# Groups live in their own module (this owner file's 1,600-line cap); re-exported for existing imports.
+from .container import ContainerMember, _create_container_element, _write_member_texts  # noqa: E402

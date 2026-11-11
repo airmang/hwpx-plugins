@@ -32,10 +32,11 @@ from ._document_primitives import (
 from ._paragraph_text_edit import clear_text_element, sanitize_keeping_tabs, set_text_with_tabs
 from ._paragraph_text_edit import new_own_text_node, own_text_nodes
 from . import table_sizes as _table_sizes
+from .table_structure import TableStructureEdits
 
 from .body import Label, parse_label_element
 from .objects import Caption, _read_caption, _remove_caption, _write_caption
-from .table_merge import collapse_merged_grid
+from .table_merge import TableGridCache as _TableGridCache, collapse_merged_grid
 
 if TYPE_CHECKING:
     from hwpx.form_fit.policy import FitPolicy
@@ -200,6 +201,11 @@ def _is_blank_paragraph(paragraph: ET.Element) -> bool:
     return True
 
 
+def _holds_object(paragraph: ET.Element) -> bool:
+    """Whether a paragraph's runs hold anything besides ``hp:t`` (a table, a picture, a control ...)."""
+    return any(_element_local_name(child) != "t" for run in paragraph.findall(f"{_HP}run") for child in run)
+
+
 def _is_blank_cell(element: ET.Element) -> bool:
     """Whether a cell holds one empty paragraph and nothing else, like a new cell."""
     sublist = element.find(f"{_HP}subList")
@@ -287,6 +293,7 @@ class HwpxOxmlTableCell:
         span = self._span_element()
         span.set("rowSpan", str(max(row_span, 1)))
         span.set("colSpan", str(max(col_span, 1)))
+        self.table._invalidate_grid()
         self.table.mark_dirty()
 
     @property
@@ -305,6 +312,7 @@ class HwpxOxmlTableCell:
             size.set("width", str(max(width, 0)))
         if height is not None:
             size.set("height", str(max(height, 0)))
+        self.table._invalidate_grid()
         self.table.mark_dirty()
 
     margins = property(_table_sizes.cell_margins)
@@ -352,21 +360,39 @@ class HwpxOxmlTableCell:
 
     def _set_split_paragraph_text(self, value: str) -> None:
         sublist = self._ensure_sublist()
-        existing = self.paragraphs
         lines = (value or "").replace("\r\n", "\n").replace("\r", "\n").split("\n")
         if not lines:
             lines = [""]
 
-        for paragraph in list(sublist.findall(f"{_HP}p")):
-            sublist.remove(paragraph)
+        # A paragraph holding a table or an object keeps its place and what it
+        # holds; only its own text goes. The lines replace the cell's other
+        # paragraphs, where the first of them was, or go in front of the first
+        # holder when the cell has none.
+        existing = self.paragraphs
+        holders = [paragraph for paragraph in existing if _holds_object(paragraph.element)]
+        own = [paragraph for paragraph in existing if not _holds_object(paragraph.element)]
+        anchor = own[0].element if own else holders[0].element if holders else None
+        position = 0
+        for child in sublist:
+            if child is anchor:
+                break
+            if not any(child is paragraph.element for paragraph in own):
+                position += 1
+        for paragraph in own:
+            sublist.remove(paragraph.element)
+        for paragraph in holders:
+            for node in paragraph.element.findall(f"{_HP}run/{_HP}t"):
+                clear_text_element(node)
 
         for index, line in enumerate(lines):
-            source = existing[index] if index < len(existing) else existing[0] if existing else None
-            paragraph = _append_child(sublist, f"{_HP}p", self._paragraph_format_attrs(source))
+            source = own[index] if index < len(own) else own[0] if own else holders[0] if holders else None
+            line_paragraph = _append_child(sublist, f"{_HP}p", self._paragraph_format_attrs(source))
+            sublist.remove(line_paragraph)
+            sublist.insert(position + index, line_paragraph)
             run = _append_child(
-                paragraph,
+                line_paragraph,
                 f"{_HP}run",
-                {"charPrIDRef": self._run_char_pr_for_line(existing, index)},
+                {"charPrIDRef": self._run_char_pr_for_line(own, index)},
             )
             _append_text_with_tabs(run, line)
 
@@ -521,6 +547,7 @@ class HwpxOxmlTableCell:
         The table is created inside a new paragraph within the cell's
         ``<hp:subList>``.
         """
+        _table_sizes.new_table_width(width, cols)  # checked before a paragraph is added
         # Resolve border fill ID
         if border_fill_id_ref is None:
             document = self.table.paragraph.section.document
@@ -563,6 +590,7 @@ class HwpxTableGridPosition:
         return self.span[1]
 
 
+
 class HwpxOxmlTableRow:
     """Represents a table row."""
 
@@ -578,12 +606,13 @@ class HwpxOxmlTableRow:
         ]
 
 
-class HwpxOxmlTable:
+class HwpxOxmlTable(TableStructureEdits):
     """Representation of an ``<hp:tbl>`` inline object."""
 
     def __init__(self, element: ET.Element, paragraph: "HwpxOxmlParagraph"):
         self.element = element
         self.paragraph = paragraph
+        self._grid_cache: _TableGridCache | None = None
 
     def __repr__(self) -> str:
         """Return a compact and safe summary of table geometry."""
@@ -662,7 +691,7 @@ class HwpxOxmlTable:
     def label(self) -> "Label | None":
         """This table's ``hp:label`` (Avery-style label-sheet/nameplate
         print layout), or ``None`` if it doesn't have one. Table-exclusive
-        (DEV-023, ``docs/owpml-deviations.md`` — reverse-engineered from
+        (DEV-023, ``docs/owpml-deviations.md`` — inferred from
         75 real private documents, structure matches the vendored schema
         exactly, no deviation to register beyond the element's existence)."""
 
@@ -691,7 +720,7 @@ class HwpxOxmlTable:
         Always placed as the table's *last* child -- every real occurrence
         (436/436, DEV-023) sits after all ``hp:tr`` rows, matching
         ``ParaList XML schema.xml``'s own sequence order. Values are not
-        restricted to the two combinations the reverse-engineering sample
+        restricted to the two combinations the format inference sample
         observed (a 2x9 small-label sheet and a 1x2 large-square nameplate
         layout) -- there is no real-corpus evidence for what other
         combinations Hancom accepts or rejects, so this does not guess at
@@ -751,7 +780,7 @@ class HwpxOxmlTable:
         if rows <= 0 or cols <= 0:
             raise ValueError("rows and cols must be positive integers")
 
-        table_width = width if width is not None else cols * _DEFAULT_CELL_WIDTH
+        table_width = _table_sizes.new_table_width(width if width is not None else cols * _DEFAULT_CELL_WIDTH, cols)
         table_height = height if height is not None else rows * _DEFAULT_CELL_HEIGHT
         if border_fill_id_ref is None:
             raise ValueError("border_fill_id_ref must be provided")
@@ -858,6 +887,24 @@ class HwpxOxmlTable:
     def rows(self) -> list[HwpxOxmlTableRow]:
         return [HwpxOxmlTableRow(row, self) for row in self.element.findall(f"{_HP}tr")]
 
+    def _invalidate_grid(self) -> None:
+        """Forget the built grid.  Every edit that moves, adds, removes, merges or resizes cells calls this."""
+
+        self._grid_cache = None
+
+    def _cell_grid(self) -> dict[tuple[int, int], HwpxTableGridPosition]:
+        """The grid of the table as it is now: the kept one when no row, cell, address, span or size
+        changed since it was built (checked against the XML, so an edit made outside this object is
+        seen too), else a new one.  Callers must not change the returned mapping."""
+
+        cache = getattr(self, "_grid_cache", None)
+        if cache is not None and cache.still_valid(self.element):
+            return cache.mapping
+        self._grid_cache = None
+        mapping = self._build_cell_grid()
+        self._grid_cache = _TableGridCache(mapping, self.element)
+        return mapping
+
     def _build_cell_grid(self) -> dict[tuple[int, int], HwpxTableGridPosition]:
         mapping: dict[tuple[int, int], HwpxTableGridPosition] = {}
 
@@ -936,7 +983,16 @@ class HwpxOxmlTable:
                 % (row_index, col_index, row_count, col_count)
             )
 
-        entry = self._build_cell_grid().get((row_index, col_index))
+        entry = None
+        cache = getattr(self, "_grid_cache", None)
+        if cache is not None and cache.fast and cache.same_shape(self.element):
+            # The kept grid answers when the table has the same rows and cells and the cell found still
+            # has the address, span and size it was built with; anything else goes through the full check.
+            entry = cache.mapping.get((row_index, col_index))
+            if entry is not None and not cache.cell_unchanged(entry.cell.element):
+                entry = None
+        if entry is None:
+            entry = self._cell_grid().get((row_index, col_index))
         if entry is None:
             raise IndexError(
                 "cell coordinates (%d, %d) are covered by a merged cell"
@@ -948,7 +1004,7 @@ class HwpxOxmlTable:
     def iter_grid(self) -> Iterator[HwpxTableGridPosition]:
         """Yield grid-aware mappings for every logical table position."""
 
-        mapping = self._build_cell_grid()
+        mapping = self._cell_grid()
         row_count = self.row_count
         col_count = self.column_count
         for row_index in range(row_count):
@@ -1424,6 +1480,7 @@ class HwpxOxmlTable:
                     row_offset, col_offset, logical_row, logical_col, row_height, col_width,
                 )
 
+        self._invalidate_grid()
         self.mark_dirty()
         return self.cell(row_index, col_index)
 
@@ -1483,7 +1540,7 @@ class HwpxOxmlTable:
         total_height = 0
         in_order: list[ET.Element] = []
         seen: set[ET.Element] = set()
-        grid = self._build_cell_grid()
+        grid = self._cell_grid()
 
         for row_index in range(start_row, end_row + 1):
             for col_index in range(start_col, end_col + 1):
@@ -1587,6 +1644,7 @@ class HwpxOxmlTable:
         # line caches no longer describe it
         target._clear_own_layout_caches()
         collapse_merged_grid(self.element)
+        self._invalidate_grid()
         self.mark_dirty()
         return target
 

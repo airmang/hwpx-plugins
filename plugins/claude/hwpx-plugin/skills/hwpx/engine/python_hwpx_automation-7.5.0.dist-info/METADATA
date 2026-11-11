@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: python-hwpx-automation
-Version: 7.3.4
+Version: 7.5.0
 Summary: Task-oriented HWPX document automation for Python, with an optional MCP adapter.
 Author: Kohkyuhyun
 License-Expression: Apache-2.0
@@ -20,13 +20,13 @@ Requires-Python: >=3.10
 Description-Content-Type: text/markdown
 License-File: LICENSE
 License-File: NOTICE
-Requires-Dist: python-hwpx<7,>=6.5.0
+Requires-Dist: python-hwpx<7,>=6.10.0
 Requires-Dist: pydantic<3,>=2.11
 Requires-Dist: cryptography>=42.0
 Requires-Dist: anyio>=4.0
 Requires-Dist: tomli>=2.0; python_version < "3.11"
 Provides-Extra: mcp
-Requires-Dist: mcp==1.28.1; extra == "mcp"
+Requires-Dist: mcp==1.30.0; extra == "mcp"
 Provides-Extra: hwp
 Requires-Dist: olefile>=0.47; extra == "hwp"
 Provides-Extra: http
@@ -72,9 +72,11 @@ Dynamic: license-file
   </p>
 </p>
 
+> Source update: analyzer delegation and the dependent public-style refactors require `python-hwpx >= 6.10.0`; the 2026-11 audit fixes changed `get_table_map` and seven `mutates` flags (source contract `71622c28a07913d1`, delta in `docs/tool-contract-delta-source-audit-2026-11.json`). This source change does not publish or promote a release. The publication status and last observed coherent stack below remain historical release context.
+
 <!-- release-state: release-approved -->
 > [!NOTE]
-> 발행이 승인된 7.3.4 후보 (release-approved; 원격 발행 대기): `python-hwpx 6.6.0 → python-hwpx-automation 7.3.4 → hwpx-plugin 2.4.0` (`5e5c23651f92785a`).
+> 발행이 승인된 7.5.0 후보 (release-approved; 원격 발행 대기): `python-hwpx 6.12.0 → python-hwpx-automation 7.5.0 → hwpx-plugin 2.4.0` (`71622c28a07913d1`). 이 좌표는 `src/hwpx_automation/identity.json`의 `releaseState.candidate`와 같아야 합니다(`tests/test_audit_identity_docs.py`).
 > 공개 트레인: `python-hwpx 6.6.0 → python-hwpx-automation 7.3.1 → hwpx-plugin 2.4.0`.
 > 공개 좌표는 core·automation PyPI와 plugin GitHub
 > Release·marketplace·실제 marketplace 설치 관찰 후에만 승격합니다.
@@ -155,6 +157,16 @@ Gemini CLI는 `~/.gemini/settings.json`, Cursor·Windsurf는 각 에디터의 MC
 기존 `hwpx-mcp-server` 배포·import·콘솔·설정 키도 그대로 동작합니다 —
 전체 목록과 유지 규칙: [호환 표면](docs/compatibility-6x.md)
 
+### 작은 로컬 모델용 프로필
+
+Ollama·Open WebUI의 27B급 모델처럼 도구가 많으면 길을 잃는 환경에서는
+`hwpx-automation-mcp --profile minimal`(또는 `HWPX_AUTOMATION_PROFILE=minimal`)로
+굵은 도구 여섯 개만 띄웁니다: `read_outline`(id 붙은 짧은 목록) →
+`apply_text_changes`(`{id: 새 글}`, 서식 유지·칸 넘침 알림), `replace_text`,
+`stage_text` → `create_from_markdown`, `validate_document`. 긴 본문은 도구 인수에
+한 번에 싣지 않고 `stage_text`로 1,000자 안팎씩 나눠 보낸 뒤 `draft_id`로 넘깁니다.
+결과에는 문서 본문을 싣지 않고, 수정본은 기본으로 `<이름>.edited.hwpx`에 저장합니다.
+
 ## 한컴으로 PDF 렌더하기
 
 한컴(macOS 한컴오피스 한글 또는 Windows 한글 COM)이 있는 컴퓨터에서 문서 하나를
@@ -162,7 +174,7 @@ PDF와 쪽 PNG로 렌더합니다. 별도 환경에서 실행하므로 호출하
 고정 버전을 건드리지 않습니다.
 
 ```bash
-uvx --from "python-hwpx-automation[oracle]==7.3.4" \
+uvx --from "python-hwpx-automation[oracle]==7.5.0" \
   hwpx render-pdf in.hwpx out.pdf --png out/page --json
 ```
 
@@ -201,7 +213,9 @@ handshake는 core/automation/plugin 버전+해시 skew를 fail-closed로 차단�
 
 > **위치 계약** — `paragraph_index`는 본문 직속 문단의 0-based 인덱스입니다. 표 안 문단은 여기 섞지 않고
 > `{"kind":"table_cell_paragraph","table_index":0,"row":0,"col":1,"cell_paragraph_index":0}` 같은 `location`
-> 객체로 지정하며, `get_table_map`/`find_text`가 반환한 값을 그대로 넘길 수 있습니다.
+> 객체로 지정하며, `find_text`가 반환한 값을 그대로 넘길 수 있습니다. `get_table_map`은 기본(`detail="compact"`)으로
+> 실제 칸만 한 번씩 싣고(병합은 `row_span`/`col_span`) 위치는 응답의 `cell_paragraph_location` 틀에 `table_index`·`row`·`col`을
+> 넣어 만듭니다. 칸마다 `location`이 든 이전 형태는 `detail="full"`로 받습니다.
 
 ## 환경 변수
 
@@ -211,6 +225,7 @@ handshake는 core/automation/plugin 버전+해시 skew를 fail-closed로 차단�
 | `HWPX_AUTOMATION_MAX_CHARS` | 텍스트 반환 도구 기본 최대 길이 | `10000` |
 | `HWPX_AUTOMATION_AUTOBACKUP` | `1`이면 저장 전 `.bak` 백업 생성 | `1` |
 | `HWPX_AUTOMATION_ADVANCED` | `1`이면 고급 도구 활성화 | `0` |
+| `HWPX_AUTOMATION_PROFILE` | `minimal`이면 작은 로컬 모델용 도구 6개만 제공(`--profile`과 같음) | `full` |
 | `HWPX_AUTOMATION_FETCH_TIMEOUT_SECONDS` | URL 기반 HWPX fetch timeout | `20.0` |
 | `HWPX_AUTOMATION_ALLOW_PRIVATE_NETWORK` | `1`이면 신뢰된 사설/루프백 HTTPS 대상 허용. 링크로컬·metadata·예약 주소는 계속 차단 | `0` |
 | `HWPX_AUTOMATION_QUALITY` | 전역 기본 저장 게이트 정책(`transparent`/`strict`). 도구별 `quality`가 우선 | `transparent` |

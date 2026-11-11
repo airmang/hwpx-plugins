@@ -582,6 +582,14 @@ class Picture:
         value.extra = c.rest()
         return value
 
+    @property
+    def transparency(self) -> int:
+        """The alpha Hancom reads: the byte after the image's own size, 0 when
+        the record has none. Hancom does not read ``alpha`` (the byte after the
+        binary item id) and writes it as 0."""
+
+        return self.extra[0] if self.dim is not None and self.extra else 0
+
     def encode(self) -> bytes:
         b = Builder().u32(self.line_color).i32(self.line_width).u32(self.line_props)
         _points(b, self.corners)
@@ -709,9 +717,10 @@ def shadow_margins(
     out to the left or the right by a share of the shape's height: a top
     one stands behind the shape (a shear one over its lower half), a bottom
     one lies below it, half (shear) or all (perspective) of its height
-    deep. An enlarged shadow reaches a quarter of the shape and 600 past
-    the left and the top and ends 600 short of the right and the bottom; a
-    narrowed one reaches only 600 past the left and the top."""
+    deep. An enlarged shadow reaches a quarter of the shape (rounded half
+    up) and 600 past the left and the top and ends 600 short of the right
+    and the bottom; a narrowed one reaches only 600 past the left and the
+    top."""
 
     distance = PARALLEL_SHADOW_DISTANCE
     signs = _PARALLEL_SHADOW_SIGNS.get(kind)
@@ -728,8 +737,8 @@ def shadow_margins(
     elif kind == SHADOW_SCALE_NARROW:
         return (max(distance - offset_x, 0), 0, max(distance - offset_y, 0), 0)
     elif kind == SHADOW_SCALE_ENLARGE:
-        x0, x1 = -(width // 4 + distance), width - distance
-        y0, y1 = -(height // 4 + distance), height - distance
+        x0, x1 = -((width + 2) // 4 + distance), width - distance
+        y0, y1 = -((height + 2) // 4 + distance), height - distance
     else:
         return (0, 0, 0, 0)
     return (
@@ -741,17 +750,14 @@ def shadow_margins(
 
 
 def without_shadow(margins: tuple[int, ...], extra: tuple[int, ...]) -> tuple[int, ...]:
-    """The package's outer margins: the HWP ones less what the shadow adds,
-    kept to 16 bits as HWP keeps them. A margin that grew past 16 bits with
-    its shadow was saved wrapped, as Hancom saves it, and opens as it was
-    before; one smaller than its shadow's reach keeps what is left of it,
-    below 0, as Hancom reads it."""
+    """The package's outer margins: the HWP ones less what the shadow adds, as
+    Hancom Office 2024 reads them. HWP keeps a margin with its shadow's reach
+    in a signed 16-bit number, wrapped when the sum grows past it. Hancom reads
+    a stored margin below 0 as 0, then takes out the reach, kept to 16 bits
+    too: a margin that wrapped does not open as it was, and one smaller than
+    its shadow's reach keeps what is left of it, below 0."""
 
-    out = []
-    for margin, add in zip(margins, extra):
-        value = (margin - add) & 0xFFFF
-        out.append(value - 0x10000 if value >= 0x8000 else value)
-    return tuple(out)
+    return tuple(max(margin, 0) - (((add & 0xFFFF) ^ 0x8000) - 0x8000) for margin, add in zip(margins, extra))
 
 
 #: A video plays a file (a BinData item) or a web page's tag.

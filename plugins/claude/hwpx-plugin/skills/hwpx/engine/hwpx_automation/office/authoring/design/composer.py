@@ -22,6 +22,7 @@ from hwpx.document import HwpxDocument
 from hwpx.quality import QualityPolicy
 
 import hwpx_automation.office.authoring.design._support as S
+from .marked import OBJECT_TAGS, fill_placeholders, fragment_paragraphs, is_marked_profile
 from .plan import Block, DocumentPlan
 from .profile import Profile, load_profile
 from .validator import StyleCoverage, style_coverage
@@ -82,11 +83,18 @@ def compose(
         secpr = deepcopy(secpr)
 
         new_paragraphs: list[etree._Element] = []
+        marked = is_marked_profile(prof.manifest)
         for block in plan.iter_blocks():
-            frag = _fragment_for(prof, block, production, warnings)
-            if frag is None:
-                continue
-            new_paragraphs.append(frag)
+            if marked:
+                fragments = _marked_fragment_for(prof, block, production, warnings)
+            else:
+                frag = _fragment_for(prof, block, production, warnings)
+                fragments = [] if frag is None else [frag]
+            if block.page_break_before and fragments and new_paragraphs:
+                # Hancom's own shape for a page break: the paragraph that
+                # starts the new page carries pageBreak="1".
+                fragments[0].set("pageBreak", "1")
+            new_paragraphs.extend(fragments)
 
         if not new_paragraphs:
             raise ProfileRequiredError(
@@ -96,6 +104,7 @@ def compose(
         S.move_secpr_into(new_paragraphs[0], secpr)
         S.replace_section_body(section.element, new_paragraphs)
         _reassign_paragraph_ids(new_paragraphs)
+        _reassign_object_ids(new_paragraphs)
         section.mark_dirty()
 
         coverage = style_coverage(doc, new_paragraphs)
@@ -188,6 +197,46 @@ def _fragment_for(
     return frag
 
 
+def _marked_fragment_for(
+    prof: Profile, block: Block, production: bool, warnings: list[str]
+) -> list[etree._Element]:
+    """Clone the author-named role and fill its slots (marked-template profiles)."""
+
+    if not prof.has_role(block.role):
+        _forbid_fallback(
+            production, f"marked profile {prof.id!r} has no role {block.role!r}", warnings
+        )
+        return []
+    values = dict(block.values)
+    slots = prof.manifest.get("slots", {}).get(block.role, [])
+    # Plain ``text`` fills the unnamed slot, or the only slot a role has.
+    if block.text and "" in slots and "" not in values:
+        values[""] = block.text
+    elif block.text and len(slots) == 1 and slots[0] not in values:
+        values[slots[0]] = block.text
+    elif block.text:
+        values.setdefault("", block.text)  # nowhere to go: reported just below
+    unknown = [slot for slot in values if slot not in slots]
+    if unknown:
+        # The template has no placeholder for these; dropping them loses content.
+        _forbid_fallback(
+            production,
+            f"MARKED_VALUE_UNKNOWN: role {block.role!r} has slots {slots}, "
+            f"plan gave {unknown}",
+            warnings,
+        )
+    paragraphs = fragment_paragraphs(prof.fragment(block.role))
+    unfilled = fill_placeholders(paragraphs, block.role, values)
+    if not values:
+        # A block with no text and no values asks for the role as is (a page
+        # break line, a separator) -- blank slots are what it wants.
+        return paragraphs
+    for slot in unfilled:
+        name = f"{block.role}.{slot}" if slot else block.role
+        warnings.append(f"MARKED_SLOT_EMPTY: no value for {{{{{name}}}}}; left blank")
+    return paragraphs
+
+
 def _forbid_fallback(production: bool, message: str, warnings: list[str]) -> None:
     if production:
         raise ProfileRequiredError("PROFILE_REQUIRED: " + message)
@@ -277,6 +326,52 @@ def _reassign_paragraph_ids(paragraphs: list[etree._Element]) -> None:
         for para in root.iter():
             if S.ln(para.tag) == "p" and para.get("id") is not None:
                 para.set("id", str(uuid4().int % (2**31)))
+
+
+# Composed bodies are made only of clones, so object ids restart from a fixed
+# base — deterministic output, and no clone shares the id of another.
+_OBJECT_ID_BASE = 1_000_000_000
+
+
+# Drawing objects number their instance in "instid"; footnotes/endnotes spell it
+# "instId". A connector names the shape it joins by that value (subjectIDRef).
+_INSTANCE_ID_ATTRS = ("instid", "instId")
+
+
+def _reassign_object_ids(paragraphs: list[etree._Element]) -> None:
+    """Give every table/drawing object and click-here field a unique id.
+
+    Fragments may repeat, so each clone's ids are renumbered, and the local
+    references inside that clone follow: a ``fieldEnd@beginIDRef`` its own
+    ``fieldBegin@id``, a connector's ``subjectIDRef`` its shape's ``instid``.
+    ``fieldid`` names the field type (Hancom gives every click-here the same
+    one), so it stays.
+    """
+
+    next_id = _OBJECT_ID_BASE
+    for root in paragraphs:
+        object_map: dict[str, str] = {}
+        instance_map: dict[str, str] = {}
+        for element in root.iter():
+            name = S.ln(element.tag)
+            old = element.get("id")
+            if (name in OBJECT_TAGS or name == "fieldBegin") and old is not None:
+                object_map[old] = str(next_id)
+                element.set("id", object_map[old])
+                next_id += 1
+            for attr in _INSTANCE_ID_ATTRS:
+                old_instance = element.get(attr)
+                if old_instance:
+                    instance_map[old_instance] = str(next_id)
+                    element.set(attr, instance_map[old_instance])
+                    next_id += 1
+        for element in root.iter():
+            begin = element.get("beginIDRef")
+            if begin in object_map:
+                element.set("beginIDRef", object_map[begin])
+            subject = element.get("subjectIDRef")
+            if subject in instance_map:
+                element.set("subjectIDRef", instance_map[subject])
 
 
 __all__ = ["compose", "compose_bytes", "ComposeResult", "ProfileRequiredError"]

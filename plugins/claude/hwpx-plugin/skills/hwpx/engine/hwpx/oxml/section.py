@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, Optional, Sequence
+import hashlib as _hashlib
+import re as _re
 import xml.etree.ElementTree as ET
+
+from lxml import etree as LET  # type: ignore[reportAttributeAccessIssue]  # lxml has no complete bundled typing
 
 from ._document_primitives import (
     _DEFAULT_PARAGRAPH_ATTRS,
@@ -36,6 +40,13 @@ if TYPE_CHECKING:
 _CLEAR_BODY_MODES = ("raise", "keep", "strip")
 _CLEAR_BODY_KEPT_TAGS = frozenset({f"{_HP}secPr", f"{_HP}ctrl"})
 _SECTION_STORY_TAGS = frozenset({f"{_HP}header", f"{_HP}footer"})
+# breakSetting flags that belong to the paragraph they were set on, not to the
+# paragraphs appended after it, with their ``ensure_paragraph_format`` keys.
+_PAGE_FLOW_BREAK_FLAGS = {
+    "pageBreakBefore": "page_break_before",
+    "keepWithNext": "keep_with_next",
+    "keepLines": "keep_lines",
+}
 # Reference attributes an apply element may carry (compared case-insensitively),
 # the same set ``HwpxOxmlSectionProperties`` reads.
 _APPLY_REFERENCE_ATTRIBUTES = frozenset(
@@ -66,6 +77,10 @@ class HwpxOxmlSection:
         self._document = document
         # the header/footer copies that agree when opened, for the save to tell which copy an edit changed
         self._story_marks = story_marks(element)
+        # the part as it was read, for the save to tell a line cache that outlived its paragraph's content
+        self._source_xml: bytes | None = None
+        self._source_caches: list[Any] | None = None
+        self._tracked_caches: list[tuple[Any, bytes, bytes]] | None = None
 
     def __repr__(self) -> str:
         """Return a compact and safe summary of section structure."""
@@ -350,24 +365,51 @@ class HwpxOxmlSection:
         every following paragraph turning into a list item without this guard.
         """
 
-        existing = self.paragraphs
-        if not existing:
+        # Only the last paragraph is read: wrapping every paragraph of the section for each append
+        # made a long run of appends quadratic.
+        last_element = next(
+            (child for child in reversed(self._element) if tag_local_name(child.tag) == "p"), None
+        )
+        if last_element is None:
             return None, None, None
-        last = existing[-1]
+        last = HwpxOxmlParagraph(last_element, self)
         prev_para_ref = last.para_pr_id_ref
         prev_style_ref = last.style_id_ref
         prev_char_ref = last.char_pr_id_ref
         if prev_para_ref is not None and self._para_pr_is_list(prev_para_ref):
             prev_para_ref = None
             prev_style_ref = None
+        if prev_para_ref is not None:
+            prev_para_ref = self._without_page_flow_breaks(prev_para_ref)
         return prev_para_ref, prev_style_ref, prev_char_ref
 
-    def _para_pr_is_list(self, para_pr_id_ref: str | int) -> bool:
-        """True when the paraPr carries a bullet/numbered heading."""
+    def _squeezed_paragraph_shapes(self) -> frozenset[str]:
+        """The paragraph shapes Hancom presses onto one line: a cache of one line holds all of their text."""
+
+        from ..tools.package_validator import squeezed_paragraph_shapes
+
+        document = self.document
+        return frozenset().union(*(
+            squeezed_paragraph_shapes(getattr(header, "element", None)) for header in getattr(document, "_headers", [])
+        )) if document is not None else frozenset()
+
+    def _narrowed_char_shapes(self) -> dict[str, float]:
+        """The character shapes whose glyphs Hancom lays out narrower than their size (상대 크기, 장평), by id."""
+
+        from ..tools.package_validator import narrowed_char_shapes
+
+        document = self.document
+        shares: dict[str, float] = {}
+        for header in getattr(document, "_headers", []) if document is not None else []:
+            shares.update(narrowed_char_shapes(getattr(header, "element", None)))
+        return shares
+
+    def _para_pr_element(self, para_pr_id_ref: str | int) -> tuple[Any, ET.Element] | None:
+        """The header holding the paraPr *para_pr_id_ref*, and the paraPr."""
 
         document = self.document
         if document is None:
-            return False
+            return None
         wanted = str(para_pr_id_ref)
         for header in getattr(document, "_headers", []):
             para_properties = getattr(header, "_para_properties_element", None)
@@ -377,16 +419,50 @@ class HwpxOxmlSection:
             if container is None:
                 continue
             for para_pr in container:
-                if para_pr.get("id") != wanted:
-                    continue
-                for child in para_pr:
-                    if tag_local_name(child.tag) == "heading":
-                        return str(child.get("type", "")).upper() in {
-                            "BULLET",
-                            "NUMBER",
-                        }
-                return False
+                if para_pr.get("id") == wanted:
+                    return header, para_pr
+        return None
+
+    def _para_pr_is_list(self, para_pr_id_ref: str | int) -> bool:
+        """True when the paraPr carries a bullet/numbered heading."""
+
+        found = self._para_pr_element(para_pr_id_ref)
+        if found is None:
+            return False
+        for child in found[1]:
+            if tag_local_name(child.tag) == "heading":
+                return str(child.get("type", "")).upper() in {
+                    "BULLET",
+                    "NUMBER",
+                }
         return False
+
+    def _without_page_flow_breaks(self, para_pr_id_ref: str) -> str:
+        """*para_pr_id_ref*, or the same paragraph shape without its page-flow
+        settings when it has any.
+
+        A page break before, keep with next and keep lines belong to the
+        paragraph they were set on. Inherited, one ``page_break_before`` would
+        start every following paragraph on a page of its own.
+        """
+
+        found = self._para_pr_element(para_pr_id_ref)
+        if found is None:
+            return para_pr_id_ref
+        header, para_pr = found
+        flags = {
+            attr: key
+            for child in para_pr
+            if tag_local_name(child.tag) == "breakSetting"
+            for attr, key in _PAGE_FLOW_BREAK_FLAGS.items()
+            if str(child.get(attr, "0")).lower() in {"1", "true"}
+        }
+        if not flags:
+            return para_pr_id_ref
+        return header.ensure_paragraph_format(
+            base_para_pr_id=para_pr_id_ref,
+            break_setting={key: False for key in flags.values()},
+        )
 
     def add_paragraph(
         self,
@@ -499,19 +575,63 @@ class HwpxOxmlSection:
         (the cache lacks lines, so Hancom would draw the tail over itself). The
         save path runs this on every section, so a document whose own caches
         look like that still saves; Hancom lays those paragraphs out again.
+
+        In a section that was edited, a cache the part was read with goes as
+        well when its paragraph no longer has the content it came with,
+        whatever its lines look like: the edit that changed the paragraph left
+        it behind, and Hancom would press the new text into the old line
+        count. A cache on unchanged content, and one written since the part
+        was read, stays.
         """
 
-        removed = 0
+        removed = self._remove_outlived_layout_caches()
+        squeezed = self._squeezed_paragraph_shapes()
+        narrowed = self._narrowed_char_shapes()
         for paragraph in self._element.iter():
             if _element_local_name(paragraph) != "p":
                 continue
-            if _remove_stale_paragraph_layout_cache(paragraph) or _remove_short_paragraph_layout_cache(
-                paragraph
+            if _remove_stale_paragraph_layout_cache(paragraph) or (
+                paragraph.get("paraPrIDRef") not in squeezed
+                and _remove_short_paragraph_layout_cache(paragraph, narrowed)
             ):
                 removed += 1
         if removed:
             self.mark_dirty()
         return removed
+
+    def _remove_outlived_layout_caches(self) -> int:
+        """Drop the caches an edit left on a paragraph whose content it changed."""
+
+        if not self._dirty:
+            return 0
+        tracked = self._tracked_caches
+        if tracked is None:
+            if self._source_xml is None or self._source_caches is None:
+                return 0
+            from ..opc.xml_utils import parse_xml
+
+            try:
+                tracked = _track_caches(self._source_caches, parse_xml(self._source_xml))
+            except Exception:  # the part was read once already; without it nothing is judged
+                tracked = None
+            self._source_xml = self._source_caches = None
+            if tracked is None:
+                return 0
+        removed, self._tracked_caches = _remove_outlived_caches(self._element, tracked)
+        return removed
+
+    def _remember_source(self, source_xml: bytes) -> None:
+        """Note the part's bytes and its line caches as read, before anything edits the tree.
+
+        The save uses them to tell a cache that an edit left on a paragraph whose
+        content it changed (see ``_remove_outlived_caches`` below).
+        """
+
+        if not hasattr(self._element, "getparent"):  # lxml trees only
+            return
+        self._source_xml = source_xml
+        self._source_caches = _cache_elements(self._element)
+        self._tracked_caches = None
 
     def remove_layout_caches(self) -> int:
         """Drop all paragraph layout caches from this section.
@@ -631,7 +751,7 @@ def _apply_reference(apply: ET.Element) -> str | None:
     return None
 
 
-def _remove_short_paragraph_layout_cache(paragraph: ET.Element) -> bool:
+def _remove_short_paragraph_layout_cache(paragraph: ET.Element, narrowed: Mapping[str, float] | None = None) -> bool:
     """Clear a plain paragraph's cache whose lines cannot hold its text.
 
     Uses the editor-open-safety rule itself
@@ -643,6 +763,7 @@ def _remove_short_paragraph_layout_cache(paragraph: ET.Element) -> bool:
         PackageValidationIssue,
         _check_line_seg_tail_coverage,
         _simple_paragraph_text,
+        paragraph_narrowest,
     )
 
     text = _simple_paragraph_text(paragraph)
@@ -653,11 +774,97 @@ def _remove_short_paragraph_layout_cache(paragraph: ET.Element) -> bool:
             continue
         line_segs = [seg for seg in child if _element_local_name(seg).lower() == "lineseg"]
         findings: list[PackageValidationIssue] = []
-        _check_line_seg_tail_coverage(findings, "", 0, text, line_segs)
+        _check_line_seg_tail_coverage(findings, "", 0, text, line_segs, paragraph_narrowest(paragraph, narrowed or {}))
         if findings:
             _clear_paragraph_layout_cache(paragraph)
             return True
     return False
+
+
+# -- line caches that outlived their paragraph's content ------------------------
+#
+# Tell a line cache that outlived the paragraph content it was computed for.
+#
+# Hancom trusts the line count of a cached ``hp:linesegarray`` and presses the
+# text into it, so a cache left on a paragraph whose content changed is worse
+# than no cache. The editing APIs clear the cache of the paragraph they change;
+# this is the net under them, for an API that forgets to. It needs no estimate
+# of text widths: a cache is kept only on the content it came with.
+#
+# A section keeps hold of the cache elements its part was read with. At the
+# save of an edited section each of them that is still in the tree is compared
+# with the part as it was read: when the content of its paragraph differs, the
+# cache goes. A cache made or rewritten since (a cleared one written again on
+# purpose, a copied paragraph's) is not what the part was read with and is left
+# alone.
+
+_CACHE_BYTES_RE = _re.compile(
+    rb"<(?P<ns>(?:[A-Za-z_][\w.-]*:)?)linesegarray\b(?:[^>]*?/>|[^>]*>.*?</(?P=ns)linesegarray>)",
+    _re.DOTALL | _re.IGNORECASE,
+)
+
+#: A cache element, the digest of the content its paragraph had with it, and the cache as it was.
+_TrackedCaches = list[tuple[Any, bytes, bytes]]
+
+
+def _cache_guard_local(node: Any) -> str:
+    tag = node.tag
+    return tag.rpartition("}")[2] if isinstance(tag, str) else ""
+
+
+def _cache_elements(root: Any) -> list[Any]:
+    """The line caches under *root* that sit directly in a paragraph, in document order."""
+
+    found = []
+    for node in root.iter():
+        if _cache_guard_local(node).lower() == "linesegarray":
+            parent = node.getparent()
+            if parent is not None and _cache_guard_local(parent) == "p":
+                found.append(node)
+    return found
+
+
+def _content_digest(paragraph: Any) -> bytes:
+    """A digest of everything in *paragraph* but line caches (its own and those of paragraphs inside it)."""
+
+    content = _CACHE_BYTES_RE.sub(b"", LET.tostring(paragraph, with_tail=False))
+    return _hashlib.blake2b(content, digest_size=16).digest()
+
+
+def _track_caches(caches: list[Any], source_root: Any) -> _TrackedCaches | None:
+    """Pair the cache elements a part was read with (*caches*) with the content each came with,
+    read from a fresh parse of the same part (*source_root*). ``None`` when the two do not line up."""
+
+    originals = _cache_elements(source_root)
+    if len(originals) != len(caches):
+        return None
+    return [
+        (cache, _content_digest(original.getparent()), LET.tostring(original, with_tail=False))
+        for cache, original in zip(caches, originals)
+    ]
+
+
+def _remove_outlived_caches(root: Any, tracked: _TrackedCaches) -> tuple[int, _TrackedCaches]:
+    """Drop from *root* each tracked cache whose paragraph no longer has the content it came with.
+
+    Returns how many were dropped, and what to track until the next save: every
+    cache now in the tree, with its paragraph's content as it is now.
+    """
+
+    known = {id(cache): (digest, was) for cache, digest, was in tracked}
+    removed = 0
+    following: _TrackedCaches = []
+    for cache in _cache_elements(root):
+        paragraph = cache.getparent()
+        digest = _content_digest(paragraph)
+        now = LET.tostring(cache, with_tail=False)
+        expected = known.get(id(cache))
+        if expected is not None and expected[0] != digest and expected[1] == now:
+            paragraph.remove(cache)  # the content changed under the cache it was read with
+            removed += 1
+        else:
+            following.append((cache, digest, now))
+    return removed, following
 
 
 __all__ = ["HwpxOxmlSection", "HwpxOxmlSectionHeaderFooter", "HwpxOxmlSectionProperties"]

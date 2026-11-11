@@ -38,7 +38,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import NamedTuple
 
-from .eqedit import MAX_GROUP_DEPTH, MAX_SOURCE_LENGTH, _tokenize
+from .eqedit import _ATOM_END, _FONT_SWITCHES, MAX_GROUP_DEPTH, MAX_SOURCE_LENGTH, _tokenize
 from .tokens import (
     ACCENTS,
     BIG_OPERATORS,
@@ -133,7 +133,6 @@ _KEYWORD_GLYPHS = {
 #: Keyword names whose case picks the glyph: ``LINE``/``vert`` draw |, ``VERT`` draws a double bar.
 _CASED_KEYWORD_GLYPHS = {"LINE": _BAR, "vert": _BAR, "VERT": _DOUBLE_BAR}
 _LIMIT_WORDS = frozenset({"lim", "limsup", "liminf", "max", "min"})
-_FONT_WORDS = frozenset({"rm", "it", "bold"})
 _RELATIONS = frozenset({"=", "<", ">", "+", "-", "×", "÷"}) | frozenset(SYMBOL_OPERATORS)
 #: Hancom symbol names (any case) drawn with operator spacing.
 _SYMBOL_RELATIONS = frozenset({
@@ -273,7 +272,7 @@ def _token_width(token: str, upright: bool = False, sign: bool = False) -> float
 
 def _follows_operand(token: str, operand: bool) -> bool:
     """Whether a sign after *token* has an operand before it (*operand*: before *token*)."""
-    if token.lower() in _FONT_WORDS:
+    if token in _FONT_SWITCHES:
         return operand
     return not (_is_operator(token) or token in ("(", "[", ","))
 
@@ -340,7 +339,14 @@ class _Measurer:
         return True
 
     def _atom(self, depth: int) -> _Box:
+        # A font switch is not the atom: ``x^rmA`` scripts the ``A`` as the converter
+        # reads it, so the switch applies and the next token is measured instead.
         token = self._next()
+        while token in _FONT_SWITCHES:
+            self._symbol(token)
+            if self._peek() is None or self._peek() in _ATOM_END:
+                return _Box(0.0, 0.0, 0.0)
+            token = self._next()
         return _Box(0.0, 0.0, 0.0) if token is None else self._dispatch(token, depth)
 
     def _group(self, depth: int) -> _Box:
@@ -399,7 +405,7 @@ class _Measurer:
     def _symbol(self, token: str, sign: bool = False) -> _Box:
         if token in FUNCTIONS or token.lower() in _LIMIT_WORDS:
             return _Box(_upright_word(token) + _FUNCTION_PAD, _ASCENT, _DESCENT)
-        if token.lower() in _FONT_WORDS or token in ("of", "&"):
+        if token in _FONT_SWITCHES or token in ("of", "&"):
             if token.lower() in ("rm", "it"):
                 self._upright = token.lower() == "rm"
             return _Box(0.0, 0.0, 0.0)

@@ -6,7 +6,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Sequence, TypeVar, cast
 import xml.etree.ElementTree as ET
 
 from hwpx.opc.relationships import resolve_part_name
@@ -416,7 +416,12 @@ class HwpxOxmlDocument:
         manifest_path: str = "Contents/content.hpf",
     ):
         self._manifest_path = manifest_path
-        self._manifest = manifest
+        self._manifest_element = manifest
+        # Set by from_package: the package's manifest_tree. The package drops
+        # its cached tree whenever content.hpf is written (add_image persists an
+        # item), so a tree kept here would fall behind and overwrite those items
+        # on save.
+        self._manifest_source: Callable[[], ET.Element] | None = None
         self._sections = list(sections)
         self._headers = list(headers)
         self._master_pages = list(master_pages or [])
@@ -483,7 +488,9 @@ class HwpxOxmlDocument:
         sections: list[HwpxOxmlSection] = []
         for section_index, path in enumerate(section_paths):
             try:
-                sections.append(HwpxOxmlSection(path, package.get_xml(path)))
+                section = HwpxOxmlSection(path, package.get_xml(path))
+                section._remember_source(package.read(path))
+                sections.append(section)
             except Exception:
                 logger.exception(
                     "section 파싱 실패: section_index=%d, part_path=%s",
@@ -528,7 +535,7 @@ class HwpxOxmlDocument:
         settings = cls._load_optional_simple_part(
             package, settings_path, HwpxOxmlSettings, label="settings"
         )
-        return cls(
+        document = cls(
             manifest,
             sections,
             headers,
@@ -538,6 +545,14 @@ class HwpxOxmlDocument:
             settings=settings,
             manifest_path=package.main_content.full_path,
         )
+        document._manifest_source = package.manifest_tree
+        return document
+
+    @property
+    def _manifest(self) -> ET.Element:
+        if self._manifest_source is not None:
+            return self._manifest_source()
+        return self._manifest_element
 
     @property
     def manifest(self) -> ET.Element:
@@ -664,6 +679,7 @@ class HwpxOxmlDocument:
         emboss: bool | None = None,
         engrave: bool | None = None,
         base_char_pr_id: str | int | None = None,
+        font_by_lang: Mapping[str, str] | None = None,
     ) -> str:
         """Return the id of a ``hh:charPr`` that is the base with the requested changes.
 
@@ -684,6 +700,11 @@ class HwpxOxmlDocument:
         ``hh:supscript``/``hh:subscript`` element alone, as Hancom does -- the
         element already shrinks and shifts the glyphs (see
         ``_run_style_apply_script_extension``).
+
+        *font_by_lang* maps a language (``HANGUL``/``LATIN``/``HANJA``/
+        ``JAPANESE``/``OTHER``/``SYMBOL``/``USER``) to the face its glyphs use;
+        it wins over *font* for the languages it names (see
+        :func:`~.header_fonts.run_style_font_ref`).
         """
 
         if not self._headers:
@@ -699,6 +720,16 @@ class HwpxOxmlDocument:
         )
         if normalized_strike_shape is not None:
             strike = True
+        if size is not None and (isinstance(size, bool) or not isinstance(size, (int, float))
+                                 or not 0 <= round(float(size) * 100) < 2**31):
+            from ..errors import HwpxValueError
+
+            raise HwpxValueError(  # it was written as 0 when negative
+                f"size must be a number of points from 0, below 21474836.48; got {size!r}",
+                code="style-run-size-value",
+                context={"requested": repr(size)},
+                suggestion="Pass the character size in points, e.g. 10.",
+            )
         # Hancom keeps a width ratio in one byte: 256 and up come out as ratio - 256.
         if ratio is not None and not 10 <= int(ratio) <= 255:
             raise ValueError("ratio must be a percentage between 10 and 255")
@@ -719,12 +750,10 @@ class HwpxOxmlDocument:
                 )
             normalized_outline = candidate
 
+        from .header_fonts import run_style_font_ref  # off the `import hwpx` path
+
         header = self._headers[0]
-        font_ref = header.font_ref_for_face(font) if font is not None else None
-        if font is not None and font_ref is None and font.strip():
-            # Hancom declares a font it is asked to apply; so does ensure_font by default
-            self.ensure_font(font)
-            font_ref = header.font_ref_for_face(font)
+        font_ref = run_style_font_ref(header, font, font_by_lang)
         base = _run_style_base(header, base_char_pr_id)
         spec = _RunStyleSpec(
             flags=_run_style_flags((bold, italic, underline), base, base_char_pr_id is not None),
@@ -916,7 +945,13 @@ class HwpxOxmlDocument:
     def paragraph_property(
         self, para_pr_id_ref: int | str | None
     ) -> ParagraphProperty | None:
-        return HwpxOxmlHeader._lookup_by_id(self.paragraph_properties, para_pr_id_ref)
+        # Each header parses only the shape asked for, and a later header's shape wins, as in
+        # paragraph_properties; merging every header's whole list cost seconds a lookup.
+        for header in reversed(self._headers):
+            found = header.paragraph_property(para_pr_id_ref)
+            if found is not None:
+                return found
+        return None
 
     @property
     def tab_properties(self) -> dict[str, TabDefinition]:
@@ -1277,7 +1312,11 @@ class HwpxOxmlDocument:
 
         # Build a renderable empty section.  ``secPr`` and ``colPr`` must
         # precede body text in the first paragraph's first run.
-        section_element = section_properties.makeelement(f"{_HS}sec", {})
+        # with the namespace prefixes Hancom writes (hs, hp, hc, ...): structure edits read the hp prefix
+        from .namespaces import HWPML_COMPAT_ROOT_NAMESPACES
+
+        section_element = cast(Any, section_properties).makeelement(
+            f"{_HS}sec", {}, nsmap=HWPML_COMPAT_ROOT_NAMESPACES)
         para_attrs = {"id": _paragraph_id(), **_DEFAULT_PARAGRAPH_ATTRS}
         para = _append_child(section_element, f"{_HP}p", para_attrs)
         run = _append_child(para, f"{_HP}run", {"charPrIDRef": "0"})

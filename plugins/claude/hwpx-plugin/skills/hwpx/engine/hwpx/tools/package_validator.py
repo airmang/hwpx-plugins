@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from collections.abc import Iterator
-from typing import Any, BinaryIO, Iterable, Literal, Sequence
+from typing import Any, BinaryIO, Iterable, Literal, Mapping, Sequence
 from zipfile import ZIP_STORED, BadZipFile, ZipFile, ZipInfo
 
 from lxml import etree as LET  # type: ignore[reportMissingImports]
@@ -317,6 +317,10 @@ def _check_hwpml_compat_root(
 
 def _local_name(element: ET.Element) -> str:
     tag = element.tag
+    if not isinstance(tag, str):
+        # A comment or processing instruction: its ``tag`` is a function, not
+        # a name. ``""`` matches no element, so every check passes over it.
+        return ""
     if "}" in tag:
         return tag.rsplit("}", 1)[1]
     return tag
@@ -389,6 +393,7 @@ def _check_line_seg_tail_coverage(
     paragraph_index: int,
     text: str,
     line_segs: list[ET.Element],
+    narrowest: float = 1.0,
 ) -> None:
     """Catch caches that lack lines for text grown past the last cached line.
 
@@ -399,7 +404,9 @@ def _check_line_seg_tail_coverage(
     Provable-with-margin: the tail after the last cached line start must not
     measure wider than that line's extent × ``_STALE_TAIL_WIDTH_FACTOR``,
     with width estimated by the same conservative metrics the overflow lint
-    uses.
+    uses, scaled by *narrowest*: the smallest share of their size the
+    paragraph's characters are laid out at (상대 크기 times 장평, see
+    :func:`narrowed_char_shapes`), so a valid cache of small glyphs is kept.
     """
 
     last: tuple[int, int, int] | None = None
@@ -422,7 +429,7 @@ def _check_line_seg_tail_coverage(
         return
     from hwpx.form_fit.measure import estimate_text_width
 
-    tail_width = estimate_text_width(tail, textheight / 100.0)
+    tail_width = estimate_text_width(tail, textheight / 100.0) * narrowest
     if tail_width > horzsize * _STALE_TAIL_WIDTH_FACTOR:
         _error(
             issues,
@@ -434,10 +441,59 @@ def _check_line_seg_tail_coverage(
         )
 
 
+def squeezed_paragraph_shapes(header_root: ET.Element | None) -> frozenset[str]:
+    """The ids of the paragraph shapes that press a paragraph onto one line (``hh:breakSetting@lineWrap``
+    SQUEEZE, 한 줄로 입력): Hancom caches one line for all of such a paragraph's text, however long."""
+
+    if header_root is None:
+        return frozenset()
+    return frozenset(
+        shape.get("id") or ""
+        for shape in header_root.iter()
+        if _local_name(shape) == "paraPr"
+        and any(_local_name(node) == "breakSetting" and node.get("lineWrap") == "SQUEEZE" for node in shape.iter())
+    )
+
+
+def narrowed_char_shapes(header_root: ET.Element | None) -> dict[str, float]:
+    """The character shapes whose glyphs Hancom lays out narrower than their size, by id: the smallest share
+    of the size over their scripts, 상대 크기 (``hh:relSz``) times 장평 (``hh:ratio``); shapes at full width
+    or wider are left out."""
+
+    if header_root is None:
+        return {}
+    shares: dict[str, float] = {}
+    for shape in header_root.iter():
+        if _local_name(shape) != "charPr":
+            continue
+        sizes = next((node for node in shape if _local_name(node) == "relSz"), None)
+        ratios = next((node for node in shape if _local_name(node) == "ratio"), None)
+        share = 1.0
+        for script in ("hangul", "latin", "hanja", "japanese", "other", "symbol", "user"):
+            try:
+                size = int(sizes.get(script, 100)) if sizes is not None else 100
+                ratio = int(ratios.get(script, 100)) if ratios is not None else 100
+            except ValueError:
+                continue
+            share = min(share, size * ratio / 10000)
+        if share < 1.0:
+            shares[shape.get("id") or ""] = max(share, 0.01)
+    return shares
+
+
+def paragraph_narrowest(paragraph: ET.Element, narrowed: Mapping[str, float]) -> float:
+    """The smallest share of their size *paragraph*'s runs lay glyphs out at (see :func:`narrowed_char_shapes`)."""
+
+    return min((narrowed.get(run.get("charPrIDRef") or "", 1.0) for run in paragraph
+                if _local_name(run) == "run"), default=1.0)
+
+
 def _check_line_seg_text_positions(
     issues: list[PackageValidationIssue],
     part_name: str,
     root: ET.Element,
+    squeezed: frozenset[str] = frozenset(),
+    narrowed: Mapping[str, float] | None = None,
 ) -> None:
     if not is_section_part_name(part_name):
         return
@@ -477,9 +533,11 @@ def _check_line_seg_text_positions(
                         f"{paragraph_index} has stale lineseg textpos={textpos} "
                         f"beyond text length {text_length}",
                     )
-            _check_line_seg_tail_coverage(
-                issues, part_name, paragraph_index, text, line_segs
-            )
+            if paragraph.get("paraPrIDRef") not in squeezed:
+                _check_line_seg_tail_coverage(
+                    issues, part_name, paragraph_index, text, line_segs,
+                    paragraph_narrowest(paragraph, narrowed or {}),
+                )
 
 
 def _check_table_editor_acceptance(
@@ -520,11 +578,17 @@ def _check_table_editor_acceptance(
 #: 의도적으로 이 5종이 없다(DEV-016 — AbstractShapeObjectType 꼬리는
 #: 그룹 자신만 갖는다) -- 422개 최상위 도형 전량 0건 결여, 179개
 #: 컨테이너-내부 부재 179건 "결여"(정상, 결여가 계약)로 실측 확인했다.
-#: pic/equation/ole/chart/video/audio/textart는 이 5종 계약을 공유하지
+#: pic/equation/chart/audio는 이 5종 계약을 공유하지
 #: 않거나(별도 필수요소 계약) 전용 저작 경로가 이미 완전한 구조를 쓰므로
 #: 범위 밖이다.
+#:
+#: 글맵시·OLE·동영상(2026-11 점검 ENG-23): 탈출구(``add_raw``)로 만든 빈
+#: ``hp:textart``·``hp:ole``·``hp:video``를 한/글 2024가 열다가 경고 없이
+#: 죽는다(종료 코드 0xC0000005). 한/글이 저장한 것은 모두 위 5종과
+#: ``renderingInfo``를 갖추고 있다(tests 자료의 글맵시 1·OLE 5·동영상 1개).
+#: 빈 ``hp:equation``은 한/글이 정상으로 열므로 넣지 않는다.
 _SHAPE_OPEN_SAFETY_TAGS = frozenset(
-    {"line", "rect", "ellipse", "arc", "polygon", "curve", "connectLine", "container"}
+    {"line", "rect", "ellipse", "arc", "polygon", "curve", "connectLine", "container", "textart", "ole", "video"}
 )
 
 
@@ -1015,6 +1079,16 @@ def _parse_all_xml(
     zf: ZipFile, names: list[str], issues: list[PackageValidationIssue]
 ) -> dict[str, ET.Element]:
     xml_roots: dict[str, ET.Element] = {}
+    squeezed: frozenset[str] = frozenset()
+    narrowed: dict[str, float] = {}
+    if HEADER_PATH in names:
+        header_payload = _safe_read(zf, HEADER_PATH)
+        try:
+            header_root = _parse_xml(header_payload) if header_payload else None
+            squeezed = squeezed_paragraph_shapes(header_root)
+            narrowed = narrowed_char_shapes(header_root)
+        except ValueError:
+            pass  # reported when the header is parsed below
     for name in names:
         if not (name.endswith(".xml") or name.endswith(".hpf")):
             continue
@@ -1026,7 +1100,7 @@ def _parse_all_xml(
             root = _parse_xml(payload)
             xml_roots[name] = root
             _check_hwpml_compat_root(issues, name, payload, root)
-            _check_line_seg_text_positions(issues, name, root)
+            _check_line_seg_text_positions(issues, name, root, squeezed, narrowed)
             _check_table_editor_acceptance(issues, name, root)
             _check_shape_open_safety_risks(issues, name, root)
             _check_section_properties_location(issues, name, root)

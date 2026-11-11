@@ -49,15 +49,17 @@ from ._paragraph_text_edit import (
     paragraph_container,
     plain_text_nodes_for_edit,
     remove_paragraph_element,
+    set_text_with_tabs,
+    text_marks_as_elements_in,
 )
 from .objects import (
     HwpxOxmlInlineObject,
-    _create_picture_element,
     _missing_shape_children,
     _paragraph_add_arc,
     _paragraph_add_container,
     _paragraph_add_ellipse,
     _paragraph_add_line,
+    _paragraph_add_picture,
     _paragraph_add_polygon,
     _paragraph_add_rectangle,
     _paragraph_insert_shape_element,
@@ -65,11 +67,25 @@ from .objects import (
 )
 from .curves import _paragraph_add_connector, _paragraph_add_curve
 from .run import HwpxOxmlRun
+from .section_format import column_shares, validate_column_gap, validate_new_number
+from .shape_position import validate_equation_base_unit, validate_shape_size
 from .table import HwpxOxmlTable
-from .table_sizes import cell_margins_of
+from .table_sizes import NEW_TABLE_COLUMN_FLOOR, cell_margins_of, new_table_width
 
 if TYPE_CHECKING:
     from .section import HwpxOxmlSection
+
+
+def _content_and_cache(node: "LET._Element") -> tuple[bytes, bytes]:
+    """A serialized paragraph split into its content and its own line cache."""
+
+    copy = LET.fromstring(LET.tostring(node))
+    cache = b""
+    for child in list(copy):
+        if isinstance(child.tag, str) and tag_local_name(child.tag).lower() == "linesegarray":
+            cache += LET.tostring(child, with_tail=False)
+            copy.remove(child)
+    return LET.tostring(copy), cache
 
 
 @dataclass
@@ -101,8 +117,20 @@ class HwpxOxmlParagraph:
         return self.to_model()
 
     def apply_model(self, model: "body.Paragraph") -> None:
+        """Write *model* back over this paragraph.
+
+        When the model changes the paragraph (its text, its runs, what sits in
+        them) and leaves the line cache as it was, the cache is dropped: Hancom
+        would lay the new content into the old lines. A model that changes
+        only the cache, or nothing, is written as given.
+        """
+
         new_node = body.serialize_paragraph(model)
         xml_bytes = LET.tostring(new_node)
+        # Compare through the same serializer, so only what the caller changed differs.
+        before = _content_and_cache(body.serialize_paragraph(self.to_model()))
+        after = _content_and_cache(new_node)
+        content_changed, cache_changed = before[0] != after[0], before[1] != after[1]
         parent = paragraph_container(self.element, self.section.element)
         if parent is None:
             parent = self.section.element
@@ -110,11 +138,16 @@ class HwpxOxmlParagraph:
             replacement = LET.fromstring(xml_bytes)
         else:
             replacement = ET.fromstring(xml_bytes)
+        text_marks_as_elements_in(replacement)  # "\n" set on a model span, as hp:lineBreak
         paragraph_children = list(parent)
         index = paragraph_children.index(self.element)
         parent.remove(self.element)
         parent.insert(index, replacement)
         self.element = replacement
+        if content_changed and not cache_changed:
+            # The model changed the paragraph and brought its old line cache back
+            # unchanged: those lines are the old content's.
+            _clear_paragraph_layout_cache(replacement)
         self.section.mark_dirty()
 
     def _run_elements(self) -> list[ET.Element]:
@@ -385,7 +418,8 @@ class HwpxOxmlParagraph:
             )
         node, offset = candidates[0]
         current = node.text or ""
-        node.text = _sanitize_text(current[:prefix - offset] + replacement + current[end - offset:])
+        # A tab goes in as hp:tab and a line break as hp:lineBreak, as the other text setters write them.
+        set_text_with_tabs(node, current[:prefix - offset] + replacement + current[end - offset:])
         _clear_paragraph_layout_cache(self.element)
         self.section.mark_dirty()
 
@@ -435,6 +469,7 @@ class HwpxOxmlParagraph:
                 attrs["charPrIDRef"] = str(default_char)
         run = self.element.makeelement(f"{_HP}run", attrs)
         self.element.append(run)
+        _clear_paragraph_layout_cache(self.element)  # its lines change: Hancom lays the paragraph out again
         return run
 
     def add_run(
@@ -455,20 +490,14 @@ class HwpxOxmlParagraph:
     ) -> HwpxOxmlRun:
         """Append a new run to the paragraph and return its wrapper.
 
-        *expand_special_characters* (default ``False`` — opt-in, no change
-        to any existing caller's output) converts three characters embedded
-        in *text* to their real-corpus OWPML element form instead of
-        leaving them as literal bytes inside ``hp:t``: ``"\\n"`` ->
-        ``hp:lineBreak``, ``"\\u00a0"`` (no-break space) -> ``hp:nbSpace``,
-        ``"\\u3000"`` (CJK full-width space) -> ``hp:fwSpace``. Real corpus
-        (``error__20230818__test.hwpx``, ``error__20251107__test.hwpx``,
-        ``error__20250808__...hwpx``) confirms Hancom always emits these as
-        elements nested inside a single ``hp:t`` — never as literal
-        characters, and never (for these three specifically) as a sibling
-        of ``hp:t`` the way ``hp:tab`` is. Off by default because the plain
-        ``text=`` path here never processed these characters before, and
-        other call sites in this codebase (table cell multiline splitting,
-        for one) already give ``"\\n"`` a different meaning of their own.
+        A tab in *text* becomes an ``hp:tab`` and a line break (``"\\n"``,
+        ``"\\r\\n"`` or ``"\\r"``) an ``hp:lineBreak`` inside the run's
+        ``hp:t``, as Hancom writes them. *expand_special_characters* (default
+        ``False``) also writes a no-break space (``"\\u00a0"``) as
+        ``hp:nbSpace`` and a full-width space (``"\\u3000"``) as
+        ``hp:fwSpace``; real corpus (``error__20230818__test.hwpx``,
+        ``error__20251107__test.hwpx``, ``error__20250808__...hwpx``) has
+        Hancom emit all of these as elements nested inside a single ``hp:t``.
         """
 
         run_attrs = dict(attributes or {})
@@ -496,11 +525,11 @@ class HwpxOxmlParagraph:
                         run_attrs["charPrIDRef"] = str(default_char)
 
         run_element = _append_child(self.element, f"{_HP}run", run_attrs)
+        _clear_paragraph_layout_cache(self.element)  # its lines change: Hancom lays the paragraph out again
         if expand_special_characters:
             _append_text_with_run_choice_atoms(run_element, text)
         else:
-            text_element = _append_child(run_element, f"{_HP}t", {})
-            text_element.text = text
+            _append_text_with_tabs(run_element, text)
         self.section.mark_dirty()
         return HwpxOxmlRun(run_element, self)
 
@@ -577,8 +606,10 @@ class HwpxOxmlParagraph:
         run_attributes: dict[str, str] | None = None,
         char_pr_id_ref: str | int | None = None,
     ) -> HwpxOxmlTable:
-        if width is None:
-            width = self._context_table_width()
+        if width is not None:
+            width = new_table_width(width, cols)  # checked, and floored as Hancom draws it, before its run is added
+        elif (context := self._context_table_width()) is not None:  # a narrow cell's may be below the floor
+            width = max(context, cols * NEW_TABLE_COLUMN_FLOOR)
         if border_fill_id_ref is None:
             document = self.section.document
             if document is not None:
@@ -647,53 +678,8 @@ class HwpxOxmlParagraph:
         self.section.mark_dirty()
         return HwpxOxmlInlineObject(element, self)
 
-    def add_picture(
-        self,
-        binary_item_id_ref: str,
-        *,
-        width: int = 14400,
-        height: int = 14400,
-        align: str | None = None,
-        treat_as_char: bool = True,
-        pos_overrides: dict[str, str | int] | None = None,
-        text_wrap: str | None = None,
-        run_attributes: dict[str, str] | None = None,
-        char_pr_id_ref: str | int | None = None,
-    ) -> HwpxOxmlInlineObject:
-        """Insert a corpus-shaped ``<hp:pic>`` referencing embedded BinData.
-
-        With ``treat_as_char=False`` and ``pos_overrides`` the picture is placed as a
-        **floating** object: ``pos_overrides`` sets ``horz/vertRelTo`` (e.g. ``PAPER``),
-        ``horz/vertAlign`` and ``horz/vertOffset`` (HWPUNIT, non-negative) on the
-        ``<hp:pos>`` so the image lands at a fixed page position (used by 직인 placement).
-        ``text_wrap`` overrides the pic's ``textWrap`` (e.g. ``IN_FRONT_OF_TEXT`` so a
-        seal stamped over a line does not reflow the text it overlaps).
-        """
-
-        if pos_overrides and treat_as_char:
-            raise ValueError(
-                "pos_overrides is for floating placement; pass treat_as_char=False "
-                "(a PAPER-relative <hp:pos> on an inline pic is contradictory)"
-            )
-
-        run = self._create_run_for_object(
-            run_attributes,
-            char_pr_id_ref=char_pr_id_ref,
-        )
-        element = _create_picture_element(
-            str(binary_item_id_ref),
-            int(width),
-            int(height),
-            align=align,
-            treat_as_char=treat_as_char,
-            pos_overrides=pos_overrides,
-            text_wrap=text_wrap,
-        )
-        if type(element) is not type(run):
-            element = LET.fromstring(ET.tostring(element, encoding="utf-8"))
-        run.append(element)
-        self.section.mark_dirty()
-        return HwpxOxmlInlineObject(element, self)
+    # Lives in ``oxml/objects.py`` with the other object helpers (this owner file is at its line cap).
+    add_picture = _paragraph_add_picture
 
     # ------------------------------------------------------------------
     # Spec-compliant drawing shape helpers
@@ -794,18 +780,37 @@ class HwpxOxmlParagraph:
             layout: ``LEFT``, ``RIGHT``, or ``MIRROR``.
             same_size: If ``True`` all columns have equal width.
             same_gap: Gap between columns when *same_size* is ``True`` (HWPUNIT).
-            column_widths: When *same_size* is ``False``, a sequence of
-                ``(width, gap)`` tuples – one per column.
+            column_widths: When *same_size* is ``False``, a ``(width, gap)``
+                pair per column, in HWP units adding up to the text width or
+                in plain proportions: they are written as the shares of 32768
+                Hancom keeps (see :func:`~hwpx.oxml.section_format.column_shares`).
             separator_type: Line type for the column separator (e.g. ``SOLID``).
             separator_width: Line width (e.g. ``0.12 mm``).
             separator_color: Line colour (e.g. ``#000000``).
         """
         if not 1 <= col_count <= 255:
             raise ValueError("col_count must be between 1 and 255")
+        if same_size:
+            validate_column_gap(same_gap)  # before its run is added
+        sizes = column_shares(column_widths) if column_widths and not same_size else []
+        # A section's first paragraph: Hancom does not open one with a second definition beside its settings' own,
+        # so that one is rewritten (the section's).
+        if self.element.find(f"{_HP}run/{_HP}secPr") is not None and (ctrl := self.section.properties.set_columns(
+            col_count, col_type=col_type, layout=layout, same_size=same_size, same_gap=same_gap,
+            column_widths=column_widths, separator_type=separator_type,
+            separator_width=separator_width, separator_color=separator_color,
+        )) is not None:
+            return HwpxOxmlInlineObject(ctrl, self)
 
         run = self._create_run_for_object(
             run_attributes, char_pr_id_ref=char_pr_id_ref,
         )
+        # Hancom starts the new columns only from a definition ahead of the paragraph's text (its own
+        # documents give it the first run, after a section's settings): one behind the text is not applied.
+        ahead = [r for r in self.element.findall(f"{_HP}run") if r is not run and r.find(f"{_HP}secPr") is None]
+        if ahead:
+            self.element.remove(run)
+            self.element.insert(list(self.element).index(ahead[0]), run)
         ctrl = _append_child(run, f"{_HP}ctrl", {})
         col_pr_attrs: dict[str, str] = {
             "id": "",
@@ -828,12 +833,11 @@ class HwpxOxmlParagraph:
                 line_attrs["color"] = separator_color
             _append_child(col_pr, f"{_HP}colLine", line_attrs)
 
-        # Individual column sizes when same_size=False
-        if not same_size and column_widths:
-            for w, g in column_widths:
-                _append_child(col_pr, f"{_HP}colSz", {
-                    "width": str(w), "gap": str(g),
-                })
+        # Individual column sizes when same_size=False, as shares of 32768
+        for w, g in sizes:
+            _append_child(col_pr, f"{_HP}colSz", {
+                "width": str(w), "gap": str(g),
+            })
 
         self.section.mark_dirty()
         return HwpxOxmlInlineObject(ctrl, self)
@@ -956,6 +960,7 @@ class HwpxOxmlParagraph:
         mark.tail = text_element.text
         text_element.text = None
         text_element.insert(0, mark)
+        _clear_paragraph_layout_cache(self.element)  # the mark takes text positions the cached lines do not count
         self.section.mark_dirty()
         return HwpxOxmlInlineObject(mark, self)
 
@@ -1014,6 +1019,7 @@ class HwpxOxmlParagraph:
             second_key = _append_child(mark, _child_tag_like(target_run, "secondKey", _HP_NS), {})
             second_key.text = _sanitize_text(second)
         target_run.insert(list(target_run).index(text_element), ctrl)
+        _clear_paragraph_layout_cache(self.element)  # a control in front of the text moves every cached line start
         self.section.mark_dirty()
         return HwpxOxmlInlineObject(ctrl, self)
 
@@ -1036,10 +1042,11 @@ class HwpxOxmlParagraph:
         """
 
         normalized_kind = _normalize_enum_attr(kind or "PAGE", NEW_NUM_KINDS, label="kind")
+        number = validate_new_number(number)  # before its run is added
         run = self._create_run_for_object(run_attributes, char_pr_id_ref=char_pr_id_ref)
         ctrl = _append_child(run, f"{_HP}ctrl", {})
         _append_child(
-            ctrl, f"{_HP}newNum", {"num": str(int(number)), "numType": normalized_kind},
+            ctrl, f"{_HP}newNum", {"num": str(number), "numType": normalized_kind},
         )
         self.section.mark_dirty()
         return HwpxOxmlInlineObject(ctrl, self)
@@ -1094,7 +1101,7 @@ class HwpxOxmlParagraph:
     ) -> HwpxOxmlInlineObject:
         """Insert a native ``<hp:chart>`` anchor referencing a chartML part.
 
-        Emits the real-Hancom chart anchor (contract reverse-engineered in
+        Emits the real-Hancom chart anchor (contract inferred in
         specs/055-chart-authoring/evidence/p0/chart-contract.md): the chart
         content lives in an ECMA-376 chartML part addressed directly by
         ``chartIDRef`` (real Hancom registers the part in no manifest), and
@@ -1168,7 +1175,7 @@ class HwpxOxmlParagraph:
     ) -> HwpxOxmlInlineObject:
         """Insert an inline ``<hp:equation>`` carrying an EqEdit *script*.
 
-        Emits the real-Hancom equation shape (contract reverse-engineered in
+        Emits the real-Hancom equation shape (contract inferred in
         specs/054-equation-authoring/evidence/p0/equation-contract.md): the
         EqEdit source lives in the ``<hp:script>`` child, no lineseg cache is
         written (Hancom re-lays-out on open), and the shape is inline
@@ -1184,12 +1191,12 @@ class HwpxOxmlParagraph:
         text = script.strip()
         if not text:
             raise ValueError("equation script must be a non-empty string")
-        if base_unit <= 0:
-            raise ValueError("base_unit must be positive")
+        validate_equation_base_unit(base_unit)
         from ..equation.measure import measure_equation
 
         measured = measure_equation(text, base_unit=base_unit)
         width, height = size if size is not None else (measured.width, measured.height)
+        validate_shape_size(width, height)
         run = self._create_run_for_object(
             run_attributes, char_pr_id_ref=char_pr_id_ref
         )
@@ -1253,7 +1260,7 @@ class HwpxOxmlParagraph:
     ) -> HwpxOxmlInlineObject:
         """Insert a click-here (누름틀) form field at the end of this paragraph.
 
-        Emits the real-Hancom CLICKHERE shape (reverse-engineered from Hancom
+        Emits the real-Hancom CLICKHERE shape (inferred from Hancom
         Office 12.0.0.3288 gold documents):
         a ``fieldBegin`` ctrl run carrying the ``Prop``/``Command``/``Direction``/
         ``HelpState`` parameters, an optional prompt run showing *prompt* (the
@@ -1427,12 +1434,25 @@ class HwpxOxmlParagraph:
 
     @property
     def bookmarks(self) -> list[str]:
-        """Return the names of all bookmarks in this paragraph."""
+        """Return the names of all bookmarks that start in this paragraph.
+
+        Both forms Hancom saves a bookmark in count, in document order:
+        ``<hp:ctrl><hp:bookmark name=".."/></hp:ctrl>`` and
+        ``<hp:fieldBegin type="BOOKMARK" name="..">`` (paired with a fieldEnd).
+        """
         names: list[str] = []
         for run in self._run_elements():
             for ctrl in run.findall(f"{_HP}ctrl"):
-                for bm in ctrl.findall(f"{_HP}bookmark"):
-                    name = bm.get("name", "")
+                for mark in ctrl:
+                    if mark.tag == f"{_HP}bookmark":
+                        name = mark.get("name", "")
+                    elif (
+                        mark.tag == f"{_HP}fieldBegin"
+                        and (mark.get("type") or "").strip().upper() == "BOOKMARK"
+                    ):
+                        name = (mark.get("name") or "").strip()
+                    else:
+                        continue
                     if name:
                         names.append(name)
         return names

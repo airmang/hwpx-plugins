@@ -8,13 +8,15 @@
 (and the chart part a Hancom chart keeps in its storage to ``Chart/``),
 and writes the package files (``mimetype``, ``version.xml``, the
 ``META-INF`` container, ``Contents/content.hpf``, ``settings.xml`` and the
-text preview) around them. :func:`to_hwpx_bytes` zips the parts so the
+text preview) around them, with the memo replies (``Contents/memoExtended.xml``)
+and the bibliography (``Custom/bibliography.xml``) a document keeps. :func:`to_hwpx_bytes` zips the parts so the
 ordinary HWPX reader can open them.
 """
 
 from __future__ import annotations
 
 import io
+import struct
 import zipfile
 from dataclasses import dataclass
 
@@ -24,6 +26,7 @@ from . import controls as ct
 from . import docinfo as di
 from . import records as rec
 from . import shapes as sh
+from .errors import Hwp5Error, damaged, limit_exceeded
 from .header_xml import build_header, track_changes
 from .owpml import NS, XML_DECLARATION, root, serialize, sub, xml_text
 from .reader import Hwp5File, read_hwp5
@@ -136,9 +139,13 @@ def _content_hpf(
     master_pages: list[int],
     bins: list[tuple[str, str, bytes, str, bool]],
     scripts: bool = False,
+    memo_replies: bool = False,
+    bibliography: bool = False,
 ) -> bytes:
     """The package manifest and spine; *master_pages* holds the number of
-    master pages of each section, whose items go just before the section's."""
+    master pages of each section, whose items go just before the section's.
+    The memo replies part follows the header, and the bibliography comes
+    last in both, as Hancom lists them."""
 
     sections = len(master_pages)
     package = root("opf:package")
@@ -172,6 +179,12 @@ def _content_hpf(
         attrs.append(("isEmbeded", 1 if embedded else 0))
         sub(manifest, "opf:item", attrs)
     sub(manifest, "opf:item", (("id", "header"), ("href", "Contents/header.xml"), ("media-type", "application/xml")))
+    if memo_replies:
+        sub(
+            manifest,
+            "opf:item",
+            (("id", "memoextended"), ("href", "Contents/memoExtended.xml"), ("media-type", "application/xml")),
+        )
     first = 0
     for index, count in enumerate(master_pages):
         for number in range(first, first + count):
@@ -189,12 +202,16 @@ def _content_hpf(
     for item_id, href in _SCRIPT_PARTS if scripts else ():
         sub(manifest, "opf:item", (("id", item_id), ("href", href), ("media-type", _SCRIPT_MEDIA)))
     sub(manifest, "opf:item", (("id", "settings"), ("href", "settings.xml"), ("media-type", "application/xml")))
+    if bibliography:
+        sub(manifest, "opf:item", (("id", "bibliography"), ("href", "Custom/bibliography.xml"), ("media-type", "application/xml")))
     spine = sub(package, "opf:spine")
     sub(spine, "opf:itemref", (("idref", "header"), ("linear", "yes")))
     for index in range(sections):
         sub(spine, "opf:itemref", (("idref", f"section{index}"), ("linear", "yes")))
     for item_id, _ in _SCRIPT_PARTS if scripts else ():
         sub(spine, "opf:itemref", (("idref", item_id), ("linear", "yes")))
+    if bibliography:
+        sub(spine, "opf:itemref", (("idref", "bibliography"), ("linear", "yes")))
     return serialize(package)
 
 
@@ -247,6 +264,48 @@ def _settings(info: di.DocInfo, report: ConversionReport) -> bytes:
     return serialize(settings)
 
 
+_EXTENDED = "http://www.hancom.co.kr/hwpml/2021/extended"
+
+
+def _memo_replies(doc: Hwp5File, report: ConversionReport) -> bytes | None:
+    """``Contents/memoExtended.xml`` from the ``MemoExtended`` stream: its one
+    record holds a count, then each answering memo's id and the id of the memo
+    it answers. None when the document has no such stream."""
+
+    if not doc.compound.has_stream("MemoExtended"):
+        return None
+    try:
+        records = rec.parse_records(doc.stream("MemoExtended"), "MemoExtended").records
+    except Hwp5Error:  # a damaged optional stream drops only itself
+        records = []
+    payload = next((record.payload for record in records if record.tag == rec.MEMO_EXTENDED), b"")
+    count = struct.unpack_from("<I", payload)[0] if len(payload) >= 4 else -1
+    if count < 0 or len(payload) != 4 + 8 * count:
+        report.drop("memo-replies")
+        return None
+    memos = etree.Element(f"{{{_EXTENDED}}}memosEx", nsmap={"he": _EXTENDED})
+    for offset in range(4, len(payload), 8):
+        memo_id, parent_id = struct.unpack_from("<II", payload, offset)
+        etree.SubElement(memos, f"{{{_EXTENDED}}}memo", id=str(memo_id), parentId=str(parent_id))
+    return serialize(memos)
+
+
+def _bibliography(doc: Hwp5File, report: ConversionReport) -> bytes | None:
+    """``Custom/bibliography.xml``: the document's sources, which the
+    ``Bibliography`` stream keeps as its length and then the part itself."""
+
+    if not doc.compound.has_stream("Bibliography"):
+        return None
+    try:
+        data = doc.stream("Bibliography")
+    except Hwp5Error:
+        data = b""
+    if len(data) < 4 or struct.unpack_from("<I", data)[0] != len(data) - 4:
+        report.drop("bibliography")
+        return None
+    return data[4:]
+
+
 def _preview_text(doc: Hwp5File) -> bytes:
     if not doc.compound.has_stream("PrvText"):
         return b""
@@ -254,9 +313,38 @@ def _preview_text(doc: Hwp5File) -> bytes:
     return text.encode("utf-8")
 
 
-def convert(data: bytes) -> Converted:
-    """Convert the bytes of a ``.hwp`` file into HWPX package parts."""
+#: The largest ``.hwp`` file that is read (each stream inside is bounded
+#: separately by :data:`hwpx.hwp5.cfb.MAX_STREAM_BYTES`).
+MAX_FILE_BYTES = 512 * 1024 * 1024
 
+#: What decoding a damaged file can raise below the checks that raise
+#: :class:`Hwp5Error` themselves. Type and attribute errors are left alone:
+#: they are faults of this package, not of the input.
+_INPUT_FAULTS = (ValueError, ArithmeticError, LookupError, struct.error)
+
+
+def convert(data: bytes) -> Converted:
+    """Convert the bytes of a ``.hwp`` file into HWPX package parts.
+
+    Every failure caused by the input is an :class:`Hwp5Error`; when it wraps
+    another exception that one is its ``__cause__``.
+    """
+
+    if len(data) > MAX_FILE_BYTES:
+        raise limit_exceeded("the file is larger than the size limit", size=len(data), limit=MAX_FILE_BYTES)
+    try:
+        return _convert(data)
+    except Hwp5Error:
+        raise
+    except RecursionError as exc:
+        raise limit_exceeded("the file nests its content too deeply", reason=type(exc).__name__) from exc
+    except MemoryError as exc:
+        raise limit_exceeded("the file needs more memory than is available", reason=type(exc).__name__) from exc
+    except _INPUT_FAULTS as exc:
+        raise damaged("the file holds a value that cannot be read", reason=type(exc).__name__) from exc
+
+
+def _convert(data: bytes) -> Converted:
     doc = read_hwp5(data)
     info = di.decode_docinfo(doc.docinfo)
     report = ConversionReport()
@@ -308,7 +396,15 @@ def convert(data: bytes) -> Converted:
     if scripts is not None:
         for (_, href), text in zip(_SCRIPT_PARTS, scripts):
             files[href] = text.encode("utf-16-le", errors="surrogatepass")
-    files["Contents/content.hpf"] = _content_hpf(summary, counts, bins, scripts is not None)
+    replies = _memo_replies(doc, report)
+    if replies is not None:
+        files["Contents/memoExtended.xml"] = replies
+    sources = _bibliography(doc, report)
+    if sources is not None:
+        files["Custom/bibliography.xml"] = sources
+    files["Contents/content.hpf"] = _content_hpf(
+        summary, counts, bins, scripts is not None, replies is not None, sources is not None
+    )
     files["META-INF/container.xml"] = CONTAINER_XML
     files["META-INF/manifest.xml"] = MANIFEST_XML
     # The header leaves out tracked changes it cannot express.

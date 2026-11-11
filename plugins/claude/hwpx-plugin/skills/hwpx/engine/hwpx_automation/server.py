@@ -11,6 +11,14 @@ from .configuration import env_int, env_value
 from .handlers import _shared, authoring, quality_render, read_export, specialized
 from . import quality as _quality_contract
 from .hwpx_ops import HwpxOps
+from .minimal_profile import (
+    TRANSPORT_CHOICES,
+    add_http_guard_argument,
+    add_profile_argument,
+    checked_startup,
+    guarded_http_app,
+    served_for_profile,
+)
 from . import runtime as _runtime
 from .runtime_services import RUNTIME_SERVICES
 from .storage import LocalDocumentStorage
@@ -194,7 +202,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="hwpx-automation-mcp")
     parser.add_argument(
         "--transport",
-        choices=("stdio", "streamable-http", "http"),
+        choices=TRANSPORT_CHOICES,
         default=env_value("TRANSPORT", "stdio"),
         help="MCP transport to use",
     )
@@ -209,6 +217,8 @@ def main(argv: list[str] | None = None) -> None:
         default=max(1, env_int("PORT", 8000)),
         help="TCP port for streamable HTTP transport",
     )
+    add_profile_argument(parser)
+    add_http_guard_argument(parser)
     parser.add_argument(
         "--workspace-root",
         action="append",
@@ -219,6 +229,8 @@ def main(argv: list[str] | None = None) -> None:
         ),
     )
     args = parser.parse_args(argv)
+
+    http_token = checked_startup(parser, args)
 
     if args.workspace_root:
         os.environ[WORKSPACE_ROOTS_ENV] = json.dumps(args.workspace_root)
@@ -236,15 +248,15 @@ def main(argv: list[str] | None = None) -> None:
         )
     _replace_ops(HwpxOps(storage=storage))
 
+    served = served_for_profile(args.profile, mcp)
     selected_transport = args.transport
     if selected_transport == "http":
         selected_transport = "streamable-http"
 
     if selected_transport == "stdio":
-        mcp.run(transport="stdio")
+        served.run(transport="stdio")
         return
 
-    # TODO: add pluggable auth middleware/headers for production HTTP deployments.
     try:  # HTTP transport is an optional [http] extra
         import uvicorn
     except ImportError as exc:  # pragma: no cover - exercised only without the extra
@@ -255,7 +267,7 @@ def main(argv: list[str] | None = None) -> None:
             "The default stdio transport needs no extra."
         ) from exc
 
-    app = mcp.streamable_http_app()
+    app = guarded_http_app(served.streamable_http_app(), http_token)
     uvicorn.run(
         app,
         host=args.host,

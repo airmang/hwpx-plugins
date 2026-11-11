@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 from ..errors import HwpxValueError
 
-from ..oxml._document_primitives import _object_id
+from ..oxml._document_primitives import _clear_paragraph_layout_cache, _object_id
 from ..oxml.namespaces import HP
 
 if TYPE_CHECKING:
@@ -189,6 +189,7 @@ def attach_memo_field(
             "dirty": "0",
             "zorder": order,
             "fieldid": MEMO_FIELD_ID,
+            "metaTag": "",
         },
     )
 
@@ -247,6 +248,7 @@ def attach_memo_field(
 
     paragraph.element.insert(0, run_begin)
     paragraph.element.append(run_end)
+    _clear_paragraph_layout_cache(paragraph.element)  # the field's controls move its text: laid out again
     paragraph.section.mark_dirty()
 
     return memo

@@ -45,7 +45,7 @@ from hwpx.tools.package_validator import (
 from .report import LayoutFinding, LayoutLintReport
 from ..opc.security import guard_zip_file, read_member
 from ..oxml.header import parse_char_property, parse_paragraph_property
-from ..oxml.section_format import _drawn_page_size
+from ..oxml.section_format import _drawn_page_size, _page_margin
 from ..oxml.table_sizes import cell_margins_of
 
 if TYPE_CHECKING:
@@ -526,7 +526,7 @@ def _page_heights(root: ET.Element) -> tuple[int, int] | None:
             int(page.get("width", "")), int(page.get("height", "")), page.get("landscape")
         )
         top, bottom, header, footer = (
-            int(margin.get(key, "0")) for key in ("top", "bottom", "header", "footer")
+            _page_margin(margin.get(key, "0"), key) for key in ("top", "bottom", "header", "footer")
         )
     except ValueError:
         return None
@@ -559,7 +559,8 @@ def _row_min_heights(table: ET.Element, lines: "_LineHeights") -> list[int]:
         heights = [0]
         for cell in row:
             if _local_name(cell) == "tc" and _cell_int(cell, "cellSpan", "rowSpan", 1) == 1:
-                heights.append(max(_cell_int(cell, "cellSz", "height", 0), lines.cell_height(cell, table)))
+                stored = _cell_int(cell, "cellSz", "height", 0)  # a negative one is kept unsigned: none
+                heights.append(max(0 if stored >= 1 << 31 else stored, lines.cell_height(cell, table)))
         heights_by_row.append(max(heights))
     return heights_by_row
 

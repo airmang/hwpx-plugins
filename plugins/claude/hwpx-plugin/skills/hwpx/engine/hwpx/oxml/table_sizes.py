@@ -12,12 +12,13 @@ from __future__ import annotations
 
 from dataclasses import replace
 from math import lcm
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, Sequence, overload
 
 from ..objects.results import CellMargins
 from ._document_primitives import (
     _HP,
     _clear_paragraph_layout_cache,
+    _default_cell_inner_margin_attributes,
     _distribute_size,
     _element_local_name,
 )
@@ -34,11 +35,94 @@ __all__ = [
     "effective_cell_margin_source",
     "set_column_widths",
     "grid_widths_of",
+    "COLUMN_FLOOR_EXTRA",
+    "NEW_TABLE_COLUMN_FLOOR",
+    "new_table_width",
 ]
 
 _MARGIN_SIDES = ("left", "right", "top", "bottom")
 
+#: Hancom draws a table column at least its cells' left and right margins and this wide, the table as much
+#: wider (it keeps the narrower width written in the cells).
+COLUMN_FLOOR_EXTRA = 283
+#: The floor of a new table's column: its cells take the new table's margins (510 left and right).
+NEW_TABLE_COLUMN_FLOOR = sum(
+    int(_default_cell_inner_margin_attributes()[side]) for side in ("left", "right")
+) + COLUMN_FLOOR_EXTRA
 
+
+@overload
+def new_table_width(width: None, cols: int) -> None: ...
+@overload
+def new_table_width(width: int, cols: int) -> int: ...
+def new_table_width(width: object, cols: int) -> int | None:
+    """The width a new table of *cols* columns is written at for *width* (``None`` when not given): at least
+    :data:`NEW_TABLE_COLUMN_FLOOR` a column, as Hancom draws it. A width that is not an int in
+    ``0 < width < 2**31`` is refused."""
+
+    from ..errors import HwpxValueError
+
+    if width is None:
+        return None
+    if isinstance(width, bool) or not isinstance(width, int) or not 0 < width < 2**31:
+        raise HwpxValueError(
+            f"width must be an int in 0 < width < 2**31 (HWPUNIT); got {width!r}",
+            code="table-width-value",
+            context={"value": repr(width)},
+            suggestion="Pass the table's width in HWP units, or leave it out to fit the text width.",
+        )
+    return max(width, cols * NEW_TABLE_COLUMN_FLOOR)
+
+
+def _column_floors(table: "HwpxOxmlTable") -> list[int]:
+    """The narrowest Hancom draws each grid column: the widest left and right margins and
+    :data:`COLUMN_FLOOR_EXTRA` of its cells one column wide."""
+
+    floors = [0] * table.column_count
+    for entry in table.iter_grid():
+        if entry.is_anchor and entry.span[1] == 1:
+            margins = cell_margins_of(entry.cell.element, table.element)
+            sides = 0 if margins is None else margins.left + margins.right
+            floors[entry.column] = max(floors[entry.column], sides + COLUMN_FLOOR_EXTRA)
+    return floors
+
+
+def _keeping_nested_fit(edit: Any) -> Any:
+    """*edit* (a width edit of a table) refused, the table left as it was, when it leaves a cell
+    narrower than the table nested in it (its width plus the cell's side margins) unless the cell
+    was already that narrow -- as the byte edits refuse it (:func:`hwpx.table_patch._check_nested_fit`)."""
+
+    from copy import deepcopy
+    from functools import wraps
+
+    @wraps(edit)
+    def run(table: "HwpxOxmlTable", *args: Any) -> None:
+        from lxml import etree  # type: ignore[reportAttributeAccessIssue]  # lxml has no complete bundled typing
+
+        from ..table_patch import TableStructureError, _check_nested_fit
+
+        element = table.element
+        if element.find(f".//{_HP}tbl") is None:
+            return edit(table, *args)
+        saved = deepcopy(element)
+        before = etree.tostring(element, encoding="unicode", with_tail=False)
+        edit(table, *args)
+        try:
+            _check_nested_fit(before, etree.tostring(element, encoding="unicode", with_tail=False))
+        except TableStructureError:
+            for child in list(element):
+                element.remove(child)
+            element.attrib.clear()
+            element.attrib.update(saved.attrib)
+            element.text = saved.text
+            element.extend(list(saved))
+            raise
+        return None
+
+    return run
+
+
+@_keeping_nested_fit
 def set_column_widths(table: "HwpxOxmlTable", weights: Sequence[int | float]) -> None:
     if len(weights) != table.column_count:
         raise ValueError("column width weights must match table column count")
@@ -61,6 +145,10 @@ def set_column_widths(table: "HwpxOxmlTable", weights: Sequence[int | float]) ->
             width = round(total_width * weight / weight_total)
             allocated += width
         column_widths.append(width)
+    # A column narrower than its floor is drawn at the floor and the table that much wider: written so too.
+    column_widths = [max(width, floor) for width, floor in zip(column_widths, _column_floors(table))]
+    if sz is not None and sum(column_widths) > total_width:
+        sz.set("width", str(sum(column_widths)))
 
     updated_cells: set[int] = set()
     for entry in table.iter_grid():
@@ -204,6 +292,7 @@ def _zone_moves(
     return moves
 
 
+@_keeping_nested_fit
 def equalize_column_widths(table: "HwpxOxmlTable") -> None:
     grid = table._build_cell_grid()
     rows = _rows_of_cells(table.iter_grid(), table.row_count)

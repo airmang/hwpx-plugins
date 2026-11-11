@@ -18,10 +18,10 @@ Contract provenance: specs/054-equation-authoring/evidence/p0/equation-contract.
 from __future__ import annotations
 
 from .eqedit import (
-    _RESERVED_WORDS,
     MAX_GROUP_DEPTH,
     MAX_SOURCE_LENGTH,
     EquationConversionError,
+    _needs_literal_quotes,
 )
 from .tokens import (
     ACCENTS,
@@ -35,6 +35,8 @@ from .tokens import (
 
 class UnsupportedLatexError(EquationConversionError):
     """Raised when a LaTeX fragment uses commands outside the verified set."""
+
+    default_code = "equation-latex-unsupported"
 
 
 def _invert(*maps: dict[str, str]) -> dict[str, str]:
@@ -118,7 +120,7 @@ _ENV_TO_EQEDIT: dict[str, str] = {
     "cases": "cases",
 }
 
-# Bare identifier runs that would collide with EqEdit vocabulary (``_RESERVED_WORDS``)
+# Bare identifier runs that would collide with EqEdit vocabulary or font prefixes
 # must be quoted so Hancom keeps them literal (reserved-word protection).
 
 # ``~`` is a space in both: a LaTeX tie and EqEdit's normal space (``\,`` is the small one, `` ` ``).
@@ -278,6 +280,9 @@ class _LatexParser:
             # ``bold`` alone keeps the letters italic and ``rm`` goes on past its braces: upright bold, then
             # italic again for what follows.
             return f"{{rm {{bold {{{self._group_or_atom(depth)}}}}} it}}"
+        if token == "\\boldsymbol":
+            # ``bold`` thickens only the next atom and keeps the letters italic, as ``\boldsymbol`` does.
+            return f"{{bold {{{self._group_or_atom(depth)}}}}}"
         if token == "\\begin":
             return self._environment(depth)
         if token == "\\left":
@@ -311,7 +316,7 @@ class _LatexParser:
         raise UnsupportedLatexError(f"unsupported LaTeX escape: \\{char}")
 
     def _plain_token(self, token: str) -> str:
-        if token.isalpha() and token in _RESERVED_WORDS:
+        if _needs_literal_quotes(token):
             # Reserved-word protection: keep the identifier literal in Hancom.
             return f'"{token}"'
         return token

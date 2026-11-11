@@ -384,6 +384,38 @@ def _hyperlink_parameters(command: str) -> list[tuple[str, str, str]]:
     return params
 
 
+#: What a cross-reference points at and what of it it shows, by the codes in
+#: its command; Hancom writes an empty value for a code past these.
+_REF_TYPE = ("TARGET_TABLE", "TARGET_PICTURE", "TARGET_EQUATION", "TARGET_FOOTNOTE", "TARGET_ENDNOTE",
+             "TARGET_OUTLINE", "TARGET_BOOKMARK")
+_REF_CONTENT = ("OBJECT_TYPE_PAGE", "OBJECT_TYPE_NUMBER", "OBJECT_TYPE_CONTENTS", "OBJECT_TYPE_UPDOWNPOS")
+_REF_OPEN = ("HWPHYPERLINK_JUMP_CURRENTTAB", "HWPHYPERLINK_JUMP_NEWTAB", "HWPHYPERLINK_JUMP_NEWWINDOW")
+
+
+def _crossref_parameters(command: str) -> list[tuple[str, str, str]]:
+    """``RefPath``, ``RefType``, ``RefContentType``, ``RefHyperLink`` and
+    ``RefOpenType`` of a cross-reference command ``target;type;content;link;open;``."""
+
+    path, _, rest = command.partition(";")
+    codes = rest.split(";")
+
+    def name(table: tuple[str, ...], index: int) -> str:
+        code = codes[index] if len(codes) > index else ""
+        return table[int(code)] if code.isdigit() and int(code) < len(table) else ""
+
+    link = codes[2] if len(codes) > 2 else ""
+    return [
+        ("stringParam", "RefPath", f"{path};"),
+        ("stringParam", "RefType", name(_REF_TYPE, 0)),
+        ("stringParam", "RefContentType", name(_REF_CONTENT, 1)),
+        ("booleanParam", "RefHyperLink", "true" if link not in ("", "0") else "false"),
+        ("stringParam", "RefOpenType", name(_REF_OPEN, 3)),
+    ]
+
+
+#: The field property bit Hancom writes as the ``Fiexde`` parameter (its spelling).
+FIELD_FIXED = 0x2
+
 #: Hancom prints a memo's creation time in Korean time (UTC+9), marked ``Z``.
 MEMO_TIME_OFFSET = timedelta(hours=9)
 
@@ -420,13 +452,15 @@ def _memo_parameters(field: ct.FieldCtrl, shape: int | None) -> list[tuple[str, 
 
 
 def field_parameters(text_id: str, field: ct.FieldCtrl, memo_shape: int | None = None) -> list[tuple[str, str, str]]:
-    """``hp:parameters`` items for a field: ``Prop`` and ``Command``, then what
-    Hancom spells out of the command for the kinds that have it."""
+    """``hp:parameters`` items for a field: ``Fiexde`` when its property says
+    so, ``Prop`` and ``Command``, then what Hancom spells out of the command for
+    the kinds that have it."""
 
     # A control character in a command becomes a space, so its length
     # prefixes still count right.
     command = xml_spaced(field.command)
-    params = [("integerParam", "Prop", str(field.extra))]
+    params = [("booleanParam", "Fiexde", "1")] if field.props & FIELD_FIXED else []
+    params.append(("integerParam", "Prop", str(field.extra)))
     if field.command or text_id == "%%me":
         params.append(("stringParam", "Command", command))
     if text_id == "%clk":
@@ -441,6 +475,10 @@ def field_parameters(text_id: str, field: ct.FieldCtrl, memo_shape: int | None =
         params += _memo_parameters(field, memo_shape)
     elif text_id == "%pat":
         params.append(("stringParam", "Format", command))
+    elif text_id == "%xrf":
+        params += _crossref_parameters(command)
+    elif text_id == "%mmg":
+        params += [("stringParam", "FieldType", "USER_DEFINE"), ("stringParam", "FieldValue", command)]
     elif text_id == "%fmu" and "??" in command:
         # The formula ends where the first run of question marks leaves two:
         # a formula may end with a question mark of its own.
@@ -701,6 +739,17 @@ def _is_open(run: etree._Element, text: etree._Element | None) -> bool:
     return text is not None and len(run) > 0 and run[-1] is text
 
 
+def last_page_number_place(paragraph: etree._Element) -> None:
+    """Keep only the last page number place (``hp:pageNum``) of *paragraph*'s
+    runs: Hancom numbers the pages by the last one a paragraph holds and saves
+    that one alone."""
+
+    places = [ctrl for run in paragraph.iterchildren(q("hp:run")) for ctrl in run.iterchildren(q("hp:ctrl"))
+              if ctrl.find(q("hp:pageNum")) is not None]
+    for ctrl in places[:-1]:
+        ctrl.getparent().remove(ctrl)
+
+
 def _place_marks(parent: etree._Element, marks: list[Mark], pending: int, position: int) -> int:
     """Append the marks due at *position* to *parent*; return the next pending mark."""
 
@@ -754,6 +803,7 @@ class SectionWriter(ShapeReader):
             ),
         )
         self.runs(element, para, self.marks(record), char_styles(record))
+        last_page_number_place(element)
         # Lists hung on the paragraph itself: memo bodies after MEMO_LIST (the
         # memo fields take them, see memo_bodies), or (on a section's last
         # paragraph) its last-page and optional-page master pages.
@@ -1208,6 +1258,7 @@ class SectionWriter(ShapeReader):
                 ("dirty", flag(field_ctrl.props & 0x8000)),
                 ("zorder", field_ctrl.z_order if field_ctrl.z_order else -1),
                 ("fieldid", field_id),
+                ("metaTag", ""),
             ),
         )
         body = self.memo_bodies.pop(0) if text_id == "%%me" and self.memo_bodies else None
@@ -1336,7 +1387,7 @@ class SectionWriter(ShapeReader):
         for row_size in tp.row_sizes or [len(cells)]:
             tr = sub(table, "hp:tr")
             for header, paragraphs in cells[position : position + row_size]:
-                self.cell(tr, header, paragraphs)
+                self.cell(tr, header, paragraphs, tp.inner)
             position += row_size
         for data in (r for r in ctrl.children if r.tag == rec.CTRL_DATA):
             if data.payload.startswith(ct.NAME_SET_PREFIX):
@@ -1371,9 +1422,21 @@ class SectionWriter(ShapeReader):
         sub_list = sub(element, "hp:subList", list_attrs(cap.list_props))
         self.paragraphs(sub_list, paragraphs)
 
-    def cell(self, tr: etree._Element, header: rec.Record, paragraphs: list[rec.Record]) -> None:
+    def cell(
+        self,
+        tr: etree._Element,
+        header: rec.Record,
+        paragraphs: list[rec.Record],
+        table_inner: tuple[int, int, int, int] = (510, 510, 141, 141),
+    ) -> None:
         cell = ct.CellHeader.decode(header.payload)
         flags = cell.flags
+        height = cell.height
+        if height >= 1 << 31:
+            # A negative height, kept unsigned: Hancom gives the cell its top and bottom margins (its own, or
+            # the table's inner ones), which it then grows to fit the text.
+            _left, _right, top, bottom = cell.margins if flags & 0x1 else table_inner
+            height = top + bottom
         tc = sub(
             tr,
             "hp:tc",
@@ -1391,7 +1454,7 @@ class SectionWriter(ShapeReader):
         self.paragraphs(sub_list, paragraphs)
         sub(tc, "hp:cellAddr", (("colAddr", cell.col), ("rowAddr", cell.row)))
         sub(tc, "hp:cellSpan", (("colSpan", cell.col_span), ("rowSpan", cell.row_span)))
-        sub(tc, "hp:cellSz", (("width", cell.width), ("height", cell.height)))
+        sub(tc, "hp:cellSz", (("width", cell.width), ("height", height)))
         left, right, top, bottom = cell.margins
         sub(
             tc,

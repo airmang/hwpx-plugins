@@ -15,7 +15,7 @@
 id 별칭은 `field_id` 하나로, 위치 5키는 `location` 하나로 접혔다.
 
 `CheckBox.checked` 가 쓰기 가능한 속성이므로 `set_check_box` 는 사실상
-`doc.fields.check_box(...).checked = False` 로 대체된다. 5.x 이름은 shim 으로
+`doc.fields.check_boxes[i].checked = False` 로 대체된다. 5.x 이름은 shim 으로
 살아 있고, 이 네임스페이스에도 같은 이름을 남겨 이주 중 양쪽이 겹치게 했다.
 """
 
@@ -28,7 +28,7 @@ from ._base import _Namespace
 
 if TYPE_CHECKING:
     from ...form_fit.policy import FitPolicy
-    from ...objects import CellField, CheckBox, FieldFillResult, FormField, TextBoxField
+    from ...objects import CellField, CheckBox, FieldFillResult, FormField, FormulaField, TextBoxField
     from ...oxml import HwpxOxmlParagraph, HwpxOxmlSection
 
 __all__ = ["FieldsNamespace"]
@@ -141,6 +141,22 @@ class FieldsNamespace(_Namespace):
         from .. import fields as _fields
 
         return _fields.fill_cell_fields(self._doc, value, name=name, index=index)
+
+    # -- 계산식 필드 -------------------------------------------------------
+
+    @property
+    def formulas(self) -> "tuple[FormulaField, ...]":
+        """한/글이 저장한 표 계산식(``fieldBegin type="FORMULA"``)을 문서 순서로. 본문 표와 그 칸
+        안의 표를 본다.
+
+        값은 한/글이 적은 그대로다. 다시 계산하지 않는다: ``formula``는 한/글 표기(``=SUM(?1:?3)``의
+        ``?`` 같은)를 그대로 두고, ``last_result``는 한/글이 마지막으로 계산한 값, ``value``는
+        문서에 보이는 글이다. ``cell_address``는 계산식이 든 칸의 ``(행, 열)``이다.
+        """
+
+        from .. import fields as _fields
+
+        return _fields.list_formula_fields(self._doc)
 
     # -- 글상자 필드 -------------------------------------------------------
 

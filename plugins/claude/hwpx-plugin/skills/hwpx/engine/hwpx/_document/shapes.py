@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING, Any, Sequence, cast
 from ._units import _mm_to_hwp_units
 from ..errors import HwpxStateError, HwpxValueError
 from ..oxml.objects import _closed_points
-from ..oxml.shape_position import validate_original_size
+from ..oxml.shape_position import (
+    validate_equation_base_unit, validate_original_size, validate_rect_ratio, validate_shape_size,
+)
 
 if TYPE_CHECKING:
     from hwpx.document import HwpxDocument
@@ -265,6 +267,8 @@ def add_rectangle(
     Dimensions are in HWPUNIT.  *ratio* controls corner roundness
     (0 = sharp, 50 = semicircle).
     """
+    validate_shape_size(width, height)
+    validate_rect_ratio(ratio)
     validate_original_size(original_size)
     if paragraph is None:
         paragraph = doc.add_paragraph(
@@ -297,6 +301,7 @@ def add_ellipse(
 
     Dimensions are in HWPUNIT.
     """
+    validate_shape_size(width, height)
     validate_original_size(original_size)
     if paragraph is None:
         paragraph = doc.add_paragraph(
@@ -334,6 +339,7 @@ def add_arc(
     mechanism every other shape here already uses. *arc_type* is the
     schema's own ``NORMAL``/``PIE``/``CHORD`` passthrough.
     """
+    validate_shape_size(width, height)
     if paragraph is None:
         paragraph = doc.add_paragraph(
             "", section=section, section_index=section_index,
@@ -461,7 +467,8 @@ def add_container(
     """Insert a group (``<hp:container>``) wrapping *members*.
 
     Each member is built with :class:`hwpx.oxml.ContainerMember`'s
-    ``rect``/``ellipse``/``polygon`` classmethods, which take the member's
+    ``rect``/``ellipse``/``polygon``/``line``/``text_box``/``picture``/``group``
+    classmethods, which take the member's
     position in the group's own local coordinate space (HWPUNIT, top-left
     anchored) alongside its usual shape parameters::
 
@@ -522,15 +529,16 @@ def add_equation(
             context={"length": len(text), "limit": MAX_SOURCE_LENGTH},
             suggestion="Split the equation.",
         )
+    validate_equation_base_unit(base_unit)
+    width, height = size if size is not None else estimate_equation_size(text, base_unit=base_unit)
+    validate_shape_size(width, height)  # one measured at a huge base_unit too
     if paragraph is None:
         paragraph = doc.add_paragraph(
             "", section=section, section_index=section_index,
             include_run=False,
         )
-    if size is None:
-        size = estimate_equation_size(text, base_unit=base_unit)
     inline_object = paragraph.add_equation(
-        text, base_unit=base_unit, size=size, char_pr_id_ref=char_pr_id_ref,
+        text, base_unit=base_unit, size=(width, height), char_pr_id_ref=char_pr_id_ref,
     )
 
     created_id = inline_object.element.get("id", "")
@@ -756,10 +764,10 @@ def add_drop_cap(
     char_pr_id_ref: str | int | None = None,
     para_pr_id_ref: str | int | None = None,
 ) -> HwpxOxmlInlineObject:
-    """Insert a drop cap (문단 첫 글자 장식), reverse-engineered from the one
+    """Insert a drop cap (문단 첫 글자 장식), inferred from the one
     real-corpus example that carries a non-default ``dropcapstyle``
     (``error__20230809__test.hwpx`` -- see ``oxml.drop_cap``'s own
-    docstring for the full structural reverse engineering and why it
+    docstring for the full structural format inference and why it
     supports ``style="TripleLine"`` and ``"DoubleLine"`` only).
 
     Element construction (element-building validation included) happens in

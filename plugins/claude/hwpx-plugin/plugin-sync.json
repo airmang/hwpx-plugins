@@ -5,9 +5,16 @@
   "files": [
     {
       "source": "SKILL.md",
-      "sourceSha256": "edb122dd1866ef6db9b57d66d9ab585a9153a4410c109d5692d9d4bc708456de",
+      "sourceSha256": "3d2044860cbdd8eeb07068bad8aa37b025bb1727395ff31f17a8574b15857b6b",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
-      "destSha256": "edb122dd1866ef6db9b57d66d9ab585a9153a4410c109d5692d9d4bc708456de",
+      "destSha256": "1f648a745ffc939903b286404025918675d908c41afb33e4ce3820b039329f58",
+      "transformed": true
+    },
+    {
+      "source": "packaging/templates/claude-render-notice.md",
+      "sourceSha256": "e650c35552fdae6f05e8be8419ce70580f4f0ff9ef16bddbbf9e16ea0ceba97f",
+      "dest": "plugins/claude/hwpx-plugin/skills/hwpx/SKILL.md",
+      "destSha256": "1f648a745ffc939903b286404025918675d908c41afb33e4ce3820b039329f58",
       "transformed": true
     },
     {
@@ -19,9 +26,9 @@
     },
     {
       "source": "CHANGELOG.md",
-      "sourceSha256": "96482b71ba6acd9f06121479a777f83a7b727a9bd39a6d009789ec69b9d8997c",
+      "sourceSha256": "a30ef871c9555545129e5f4dd382708ebc9585a4539e0ccda8f82335f0fcbd47",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/CHANGELOG.md",
-      "destSha256": "96482b71ba6acd9f06121479a777f83a7b727a9bd39a6d009789ec69b9d8997c",
+      "destSha256": "a30ef871c9555545129e5f4dd382708ebc9585a4539e0ccda8f82335f0fcbd47",
       "transformed": false
     },
     {
@@ -40,9 +47,9 @@
     },
     {
       "source": "references/api.md",
-      "sourceSha256": "ed3fbc268806a0aabc006b27f8bc92c3b4f3f9f2ebb5b1f43336902525a6dd38",
+      "sourceSha256": "6f61006e3cd8aa1b14ad19140007bf7eb6f69bd6295d3cdfa679cd3ff34a99ca",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/references/api.md",
-      "destSha256": "ed3fbc268806a0aabc006b27f8bc92c3b4f3f9f2ebb5b1f43336902525a6dd38",
+      "destSha256": "6f61006e3cd8aa1b14ad19140007bf7eb6f69bd6295d3cdfa679cd3ff34a99ca",
       "transformed": false
     },
     {
@@ -397,23 +404,23 @@
     },
     {
       "source": "packaging/templates/claude-chat-engine.md",
-      "sourceSha256": "c384985da5af3cbad1c9c6e176f1cb6cda5d141e6eb210ac4197e867b33e0a56",
+      "sourceSha256": "1fced44d0d79ab34c6ce81b4602b7ffc6f139105dadf252f4f91269e538f0026",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
+      "destSha256": "d18a2f3ff44153512ffed3e599d7aaf844ccced6902346d5d3eddcea6ea19be6",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/web-workflows.md",
       "sourceSha256": "081e3f3e93443ef6c38cfdf220c9509ebf20f587d41259a3e365b14730e972fa",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
+      "destSha256": "d18a2f3ff44153512ffed3e599d7aaf844ccced6902346d5d3eddcea6ea19be6",
       "transformed": true
     },
     {
       "source": "packaging/chatgpt/skill/references/automation-python-api.md",
       "sourceSha256": "8f3d25553248f81826cf6113f64cd29b0418abafdd4228595d9f24c95b405840",
       "dest": "plugins/claude/hwpx-plugin/skills/hwpx/chat-engine.md",
-      "destSha256": "4823bbc5498e501c985d739a35cc495e9e274f100a069b09a41414a9cd8be9a5",
+      "destSha256": "d18a2f3ff44153512ffed3e599d7aaf844ccced6902346d5d3eddcea6ea19be6",
       "transformed": true
     },
     {
@@ -425,16 +432,16 @@
     },
     {
       "source": "packaging/templates/claude-runtime/pyproject.toml",
-      "sourceSha256": "e36af82b1dca84e3a7328141b92d44f2d5f923125a2afcce1560c036ef9a7fcf",
+      "sourceSha256": "64ebe1f5b7d5f94842c951d4eb18f39c01de6f8405419ad95e8178d5258aa959",
       "dest": "plugins/claude/hwpx-plugin/server/pyproject.toml",
-      "destSha256": "e36af82b1dca84e3a7328141b92d44f2d5f923125a2afcce1560c036ef9a7fcf",
+      "destSha256": "64ebe1f5b7d5f94842c951d4eb18f39c01de6f8405419ad95e8178d5258aa959",
       "transformed": false
     },
     {
       "source": "packaging/templates/claude-runtime/uv.lock",
-      "sourceSha256": "46af17a46c003e377bd4f1420740f756b1b41370ec2dc337efd81fc3090057af",
+      "sourceSha256": "a8f24cec9a36ac70310566f66f6e3cdef3ee59ee5379a06989c7b848329b501c",
       "dest": "plugins/claude/hwpx-plugin/server/uv.lock",
-      "destSha256": "46af17a46c003e377bd4f1420740f756b1b41370ec2dc337efd81fc3090057af",
+      "destSha256": "a8f24cec9a36ac70310566f66f6e3cdef3ee59ee5379a06989c7b848329b501c",
       "transformed": false
     },
     {

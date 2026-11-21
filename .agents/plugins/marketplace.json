@@ -6,10 +6,12 @@
   "plugins": [
     {
       "name": "hwpx-plugin",
-      "version": "2.4.0",
+      "version": "8.0.0",
       "source": {
-        "source": "local",
-        "path": "./plugins/codex/hwpx-plugin"
+        "source": "git-subdir",
+        "url": "https://github.com/airmang/python-hwpx-automation.git",
+        "path": "./codex/hwpx-plugin",
+        "ref": "plugins-dist"
       },
       "policy": {
         "installation": "AVAILABLE",

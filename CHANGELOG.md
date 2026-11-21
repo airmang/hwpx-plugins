@@ -1,6 +1,15 @@
 # Changelog
 
-## [Unreleased]
+## [8.0.0] - 2026-11-21
+
+- 플러그인 판이 python-hwpx-automation과 같은 번호를 씁니다(8.0.0). python-hwpx 7.0.0과 python-hwpx-automation 8.0.0 위에서
+  동작합니다. 7.0에서 바뀐 이름은 [python-hwpx 7.0 이주 가이드](https://github.com/airmang/python-hwpx/blob/main/docs/migration-7.0.md)에 있습니다.
+- 플러그인 소스가 [python-hwpx-automation](https://github.com/airmang/python-hwpx-automation)의 `plugins-src/`로 옮겨 갔습니다.
+  이 저장소는 설치 목록만 둡니다. 설치 이름과 주소(`hwpx-plugin@hwpx`, `airmang/hwpx-plugins`)는 그대로이고, 호스트 번들은
+  그 저장소의 `plugins-dist` 가지에서 받습니다. 이 저장소의 옛 소스와 2.x 릴리스는 커밋 역사와 릴리스 목록에 남아 있습니다.
+- 아래 `[Unreleased]`에 적혀 있던 2.4.0 이후의 변경은 8.0.0에 들어 있습니다.
+
+## [2.4.x 이후, 8.0.0에 포함]
 
 - `.hwp`를 입력 형식으로 안내합니다. 스킬과 참고 문서가 "결과는 원본과 같은 형식으로 저장"하라고 하던 것을, `.hwpx`
   사본을 만들어 고치고 결과를 `.hwpx`로 내도록 바꿨습니다. `.hwp`로 다시 쓰는 기능은 실험 단계로 적고, 원본 `.hwp`를

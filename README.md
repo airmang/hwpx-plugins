@@ -14,11 +14,12 @@
   </p>
 </p>
 
-<!-- release-state: release-approved -->
+<!-- release-state: released -->
 
 > [!NOTE]
-> 발행 승인 후보 (release-approved; 원격 발행 대기): `python-hwpx 7.0.0` · `python-hwpx-automation 8.0.0` · `hwpx-plugin 8.0.0`.
-> 현재 공개 트레인은 `python-hwpx 6.6.0` · `python-hwpx-automation 7.3.1` · `hwpx-plugin 2.4.0`입니다.
+> 현재 공개 트레인은 `python-hwpx 7.0.0` · `python-hwpx-automation 8.0.0` · `hwpx-plugin 8.0.0`입니다.
+> 2026-11-21에 공개 발행과 실제 Claude Code·Codex marketplace 설치(새 설치와 기존 설치의 갱신)를 관찰했습니다.
+> [설치 검증 영수증](https://github.com/airmang/python-hwpx-automation/blob/main/plugins-src/references/release-2026-11-21-engine-7-automation-8.md)
 
 HWPX를 잘 몰라도 됩니다. 스킬을 설치하면 Claude Code·Codex·Cursor 같은
 에이전트에게 자연어로 말하는 것만으로 한글 문서를 다룰 수 있습니다. 에이전트는
@@ -122,7 +123,7 @@ codex plugin marketplace upgrade
 - **도구 요청 꼴**: 문서 에이전트 명령(`apply_document_commands`)이 v2가 되어 문단 안의 글과 개체를 **글자 자리**
   (`paragraph.text`로 센 위치)로 가리킵니다. 7.x의 런 기준 요청처럼 뜻이 바뀐 옛 꼴은 조용히 다르게 처리하지 않고
   `contract_changed` 오류로 거절하며, `suggestion`에 새 꼴을 실어 줍니다. 자세한 내용은
-  [8.0 마이그레이션 가이드](references/migration-mcp-8.0.md).
+  [8.0 마이그레이션 가이드](https://github.com/airmang/python-hwpx-automation/blob/main/plugins-src/references/migration-mcp-8.0.md).
 - **`.hwp`는 읽기 전용**: `.hwp`(HWP 5.0)는 열어 읽고 고칠 수 있지만, 결과는 늘 `.hwpx`로 냅니다. 원본 `.hwp`는
   그대로 둡니다. `.hwp` 파일이 필요하면 결과를 한/글에서 열어 `.hwp`로 저장합니다.
 - **채팅 경로(ChatGPT·claude.ai)**: 거절되거나 실패한 요청은 원본을 그대로 두고 결과·중간 파일을 남기지 않습니다.
@@ -130,7 +131,7 @@ codex plugin marketplace upgrade
 
 ## 에이전트에게 말 걸기
 
-기존 문서 수정은 [조회·대상 확정·보존 저장·검증 안내](references/workflows-existing-edit.md)를 먼저 확인하세요. 새 문서는 document-plan, 에이전트 연결은 선택 MCP와 호스트 플러그인을 사용합니다.
+기존 문서 수정은 [조회·대상 확정·보존 저장·검증 안내](https://github.com/airmang/python-hwpx-automation/blob/main/plugins-src/references/workflows-existing-edit.md)를 먼저 확인하세요. 새 문서는 document-plan, 에이전트 연결은 선택 MCP와 호스트 플러그인을 사용합니다.
 
 설치 후 사용자가 직접 파이썬을 칠 일은 거의 없습니다. 에이전트에게 자연어로 말하면 스킬이 트리거됩니다.
 
@@ -152,19 +153,19 @@ codex plugin marketplace upgrade
 - **호스트별 번들** — Claude Code·Codex·OpenClaw·Hermes 진입점을 한 canonical 소스에서 빌드
 - **신뢰 루프** — package/schema/text 검증, 미리보기 HTML(`render_preview`), 시각 검토 기록. 페이지 PNG와 한컴 렌더 확인은 렌더 구성(Claude Code는 번들의 `render` 그룹)을 더했을 때
 
-자세한 내용: [SKILL.md](SKILL.md) · [references/](references/)
+자세한 내용: [SKILL.md](https://github.com/airmang/python-hwpx-automation/blob/main/plugins-src/SKILL.md) · [references/](https://github.com/airmang/python-hwpx-automation/tree/main/plugins-src/references/)
 
 ## 버전·호환성·성숙도
 
 | 구분 | 의미 | 현재 값 |
 |---|---|---|
-| 완전한 공개 트레인 | 현재 공개 릴리스 — 실제 설치까지 관찰한 조합 | `python-hwpx 6.6.0` · `python-hwpx-automation 7.3.1` · `hwpx-plugin 2.4.0` |
-| 최소 호환 버전 | 이 후보의 지원 플로어 | `python-hwpx >= 7.0.0` · `python-hwpx-automation >= 7.2.0` · skill `>= 2.0.0` |
-| 검증 좌표 | 이 플러그인 후보가 함께 검증할 정확 조합. `HWPX_STACK_CHANNEL=verified`를 주면 이 조합만 설치하고 갱신하지 않음 | `python-hwpx 7.0.0` · `python-hwpx-automation 8.0.0` |
+| 완전한 공개 트레인 | 현재 공개 릴리스 — 실제 설치까지 관찰한 조합 | `python-hwpx 7.0.0` · `python-hwpx-automation 8.0.0` · `hwpx-plugin 8.0.0` |
+| 최소 호환 버전 | 이 릴리스의 지원 플로어 | `python-hwpx >= 7.0.0` · `python-hwpx-automation >= 7.2.0` · skill `>= 2.0.0` |
+| 검증 좌표 | 이 플러그인 릴리스가 함께 검증한 정확 조합. `HWPX_STACK_CHANNEL=verified`를 주면 이 조합만 설치하고 갱신하지 않음 | `python-hwpx 7.0.0` · `python-hwpx-automation 8.0.0` |
 | 플러그인 설치 제약 | Codex 번들 런처가 설치하고 하루 1회 자동 갱신하는 창 — 같은 메이저 안의 최신. Claude Code는 이 창 안의 한 조합을 `uv.lock`으로 고정(검증 좌표와 다를 수 있음. 값은 번들 `server/pyproject.toml`) | `python-hwpx[preview]>=7.0.0,<8` · `python-hwpx-automation[mcp,oracle]>=8.0.0,<9` |
 
-- 코어 성숙도: 후보의 패키지 분류는 `Development Status :: 5 - Production/Stable`, 현재 공개 트레인은
-  `Development Status :: 3 - Alpha`입니다. Python 기준은 3.10 이상입니다.
+- 코어 성숙도: 현재 공개 코어의 패키지 분류는 `Development Status :: 5 - Production/Stable`, 이전 공개 트레인의
+  코어는 `Development Status :: 3 - Alpha`였습니다. Python 기준은 3.10 이상입니다.
 - MCP 서버·플러그인 성숙도: 미선언. 버전 숫자를 성숙도 주장으로 해석하지 않습니다.
 
 산출물이 실제 한컴오피스에서 열리는지는 코어가 동결 코퍼스 전수로 측정해 그대로
